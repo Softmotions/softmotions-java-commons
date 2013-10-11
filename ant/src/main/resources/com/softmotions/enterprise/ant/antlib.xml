@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<antlib>
+    <typedef name="file-conditions" classname="com.softmotions.enterprise.ant.dtypes.FileConditions"/>
+    <typedef name="filecount-condition" classname="com.softmotions.enterprise.ant.dtypes.FileCountCondition"/>
+    <typedef name="filespace-condition" classname="com.softmotions.enterprise.ant.dtypes.FileSpaceCondition"/>
+    <typedef name="property-condition" classname="com.softmotions.enterprise.ant.dtypes.PropertyCondition"/>
+    <typedef name="backtime-selector" classname="com.softmotions.enterprise.ant.dtypes.BacktimeFileSelector"/>
+    <taskdef name="openbrowser" classname="com.softmotions.enterprise.ant.misc.OpenURLInBrowserTask"/>
+    <taskdef name="smove" classname="com.softmotions.enterprise.ant.move.SimpleMoveTask"/>
+</antlib>
