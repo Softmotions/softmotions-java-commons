@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ant/ant.iml" filepath="$PROJECT_DIR$/ant/ant.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ant/softmotions-ant.iml" filepath="$PROJECT_DIR$/ant/softmotions-ant.iml" />
       <module fileurl="file://$PROJECT_DIR$/softmotions-java-commons.iml" filepath="$PROJECT_DIR$/softmotions-java-commons.iml" />
+      <module fileurl="file://$PROJECT_DIR$/utils/softmotions-utils.iml" filepath="$PROJECT_DIR$/utils/softmotions-utils.iml" />
     </modules>
   </component>
 </project>
