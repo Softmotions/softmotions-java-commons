@@ -68,6 +68,7 @@
     <modules>
         <module>ant</module>
         <module>utils</module>
+        <module>web</module>
     </modules>
 
 </project>

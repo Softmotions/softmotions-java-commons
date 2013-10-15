@@ -26,6 +26,7 @@
         <processorPath useClasspath="true" />
         <module name="softmotions-ant" />
         <module name="softmotions-utils" />
+        <module name="softmotions-web" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -33,6 +34,7 @@
       <module name="softmotions-ant" target="1.7" />
       <module name="softmotions-java-commons" target="1.7" />
       <module name="softmotions-utils" target="1.7" />
+      <module name="softmotions-web" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>
