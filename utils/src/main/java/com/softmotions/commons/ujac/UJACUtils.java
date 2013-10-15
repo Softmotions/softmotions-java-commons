@@ -1,8 +1,8 @@
-package com.softmotions.commons.web.ujac;
+package com.softmotions.commons.ujac;
 
 import bsh.EvalError;
 import bsh.Interpreter;
-import com.softmotions.commons.web.string.EscapeHelper;
+import com.softmotions.commons.string.EscapeHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

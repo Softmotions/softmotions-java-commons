@@ -1,4 +1,4 @@
-package com.softmotions.commons.web.string;
+package com.softmotions.commons.string;
 
 import org.apache.commons.lang.StringUtils;
 

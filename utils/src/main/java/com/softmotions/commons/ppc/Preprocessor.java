@@ -1,4 +1,4 @@
-package com.softmotions.commons.web.ppc;
+package com.softmotions.commons.ppc;
 
 import java.io.Reader;
 import java.io.StringReader;
