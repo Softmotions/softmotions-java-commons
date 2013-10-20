@@ -25,6 +25,8 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="softmotions-ant" />
+        <module name="softmotions-base-pom" />
+        <module name="softmotions-pom" />
         <module name="softmotions-utils" />
         <module name="softmotions-web" />
       </profile>
@@ -32,7 +34,9 @@
     <bytecodeTargetLevel>
       <module name="ant" target="1.7" />
       <module name="softmotions-ant" target="1.7" />
+      <module name="softmotions-base-pom" target="1.7" />
       <module name="softmotions-java-commons" target="1.7" />
+      <module name="softmotions-pom" target="1.7" />
       <module name="softmotions-utils" target="1.7" />
       <module name="softmotions-web" target="1.7" />
     </bytecodeTargetLevel>
