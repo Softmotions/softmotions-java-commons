@@ -3,21 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>softmotions</groupId>
-    <artifactId>softmotions-base-pom</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0.0</version>
 
-    <organization>
-        <name>Sofmotions Ltd.</name>
-        <url>http://softmotions.com</url>
-    </organization>
-
-    <licenses>
-        <license>
-            <name>Copyright (c) 2013 Softmotions All Rights Reserved.</name>
-        </license>
-    </licenses>
+    <parent>
+        <groupId>softmotions</groupId>
+        <artifactId>softmotions-base-pom</artifactId>
+        <version>1.0.0</version>
+    </parent>
 
     <repositories>
         <repository>
@@ -35,49 +26,9 @@
         </repository>
     </repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>central</id>
-            <name>Maven Plugin Repository</name>
-            <url>http://repo1.maven.org/maven2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>apache-snapshots</id>
-            <name>Apache Maven Snapshots</name>
-            <url>https://repository.apache.org/content/groups/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>jaxion_repository</id>
-            <url>http://jaxion.org/mvn/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <distributionManagement>
-        <repository>
-            <id>jaxion_repository</id>
-            <url>scp://nice.france.nsu.ru/home/uis/projects/jaxion/site/mvn</url>
-        </repository>
-    </distributionManagement>
+    <artifactId>softmotions-base-pom</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
 
     <build>
         <extensions>
