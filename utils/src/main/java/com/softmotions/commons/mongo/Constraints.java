@@ -338,7 +338,6 @@ public class Constraints implements Serializable {
     }
 
     public int getStartIndex() {
-        DB db;
         return startIndex;
     }
 
