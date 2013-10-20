@@ -18,6 +18,7 @@
     <orderEntry type="library" name="Maven: bouncycastle:bcmail-jdk14:138" level="project" />
     <orderEntry type="library" name="Maven: bouncycastle:bcprov-jdk14:138" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.5" level="project" />
+    <orderEntry type="library" name="Maven: org.mongodb:mongo-java-driver:2.11.3" level="project" />
   </component>
 </module>
 
