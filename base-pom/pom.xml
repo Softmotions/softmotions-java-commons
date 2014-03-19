@@ -75,7 +75,7 @@
     <distributionManagement>
         <repository>
             <id>jaxion_repository</id>
-            <url>scp://nice.france.nsu.ru/home/uis/projects/jaxion/site/mvn</url>
+            <url>sftp://nice.france.nsu.ru/home/uis/projects/jaxion/site/mvn</url>
         </repository>
     </distributionManagement>
 
@@ -84,12 +84,13 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>2.5</version>
+                <version>2.6</version>
             </extension>
         </extensions>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+		<version>3.1</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
