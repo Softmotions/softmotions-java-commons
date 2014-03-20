@@ -32,6 +32,9 @@
         <repository>
             <id>jaxion_repository</id>
             <url>http://jaxion.org/mvn/</url>
+	    <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
