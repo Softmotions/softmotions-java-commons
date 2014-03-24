@@ -5,7 +5,7 @@
     <parent>
         <artifactId>softmotions-java-commons</artifactId>
         <groupId>softmotions</groupId>
-        <version>1.0.0</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,7 +17,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0-beta-4</version>
+                <version>1.0-beta-5</version>
                 <executions>
                     <execution>
                         <id>upload-jars-on-jaxion</id>
@@ -27,7 +27,7 @@
                         </goals>
                         <configuration>
                             <serverId>jaxion_repository</serverId>
-                            <url>scp://nice.france.nsu.ru/home/uis/projects/jaxion/site/repository</url>
+                            <url>sftp://nice.france.nsu.ru/home/uis/projects/jaxion/site/repository</url>
                             <fromDir>${project.build.directory}</fromDir>
                             <includes>${project.build.finalName}.jar</includes>
                             <toDir>softmotions/jars</toDir>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.9.1</version>
+            <version>1.9.3</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

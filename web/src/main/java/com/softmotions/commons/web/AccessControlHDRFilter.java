@@ -1,6 +1,6 @@
 package com.softmotions.commons.web;
 
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

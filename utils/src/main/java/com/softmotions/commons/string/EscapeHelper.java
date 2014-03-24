@@ -1,6 +1,6 @@
 package com.softmotions.commons.string;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.StringWriter;
 import java.util.HashMap;

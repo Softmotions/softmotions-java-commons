@@ -9,7 +9,7 @@ package com.softmotions.commons.perf;
 
 import com.softmotions.commons.cont.Stack;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Утилитный класс позволяющий оценивать время выполнения
@@ -174,13 +175,13 @@ public final class TimePointLogger {
                 return true;
             }
             if (o instanceof TimePoint) {
-                return ObjectUtils.equals(((TimePoint) o).name, name);
+                return Objects.equals(((TimePoint) o).name, name);
             }
             return false;
         }
 
         public int hashCode() {
-            return ObjectUtils.hashCode(name);
+            return Objects.hashCode(name);
         }
     }
 }
