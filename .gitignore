@@ -1,2 +1,7 @@
 ant/target/
+utils/target/
+web/target/
+
 .idea/workspace.xml
+.idea/libraries/*
+
