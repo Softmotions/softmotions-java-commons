@@ -43,7 +43,7 @@ public class JdbcConnectionPool implements DataSource, ConnectionEventListener, 
 
     private boolean closed;
 
-    protected JdbcConnectionPool(ConnectionPoolDataSource dataSource) throws SQLException {
+    public JdbcConnectionPool(ConnectionPoolDataSource dataSource) throws SQLException {
         this.dataSource = dataSource;
     }
 
