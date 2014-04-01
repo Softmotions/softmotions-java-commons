@@ -61,6 +61,7 @@
         <module>ant</module>
         <module>utils</module>
         <module>web</module>
+        <module>weboot</module>
     </modules>
 
 </project>

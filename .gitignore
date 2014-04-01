@@ -1,6 +1,7 @@
 ant/target/
 utils/target/
 web/target/
+weboot/target/
 
 .idea/workspace.xml
 .idea/libraries/*
