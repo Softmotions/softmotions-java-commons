@@ -17,6 +17,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class CollectionUtils {
 
+    public static String join(String delim, Collection coll) {
+        StringBuilder sb = new StringBuilder();
+        String idelim = "";
+        for (final Object o : coll) {
+            sb.append(idelim).append(o);
+            idelim = delim;
+        }
+        return sb.toString();
+    }
 
     public static final Iterator EMPTY_ITERATOR = new Iterator() {
         public boolean hasNext() {
