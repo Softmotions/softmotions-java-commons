@@ -3,6 +3,8 @@ package com.softmotions.commons.weboot.mb;
 import com.softmotions.commons.cont.CollectionUtils;
 import com.softmotions.commons.cont.Stack;
 
+import org.apache.ibatis.session.RowBounds;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +27,10 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
     private boolean finished;
 
     private String statement;
+
+    private Integer rowOffset;
+
+    private Integer rowLimit;
 
     public MBCriteriaQuery() {
         this(DEFAULT_PREFIX);
@@ -49,6 +55,8 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
         finished = false;
         columnPrefix = null;
         orderBySpec = null;
+        rowLimit = null;
+        rowOffset = null;
         super.clear();
     }
 
@@ -64,6 +72,19 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
         if (orderBySpec != null) {
             put(cqPrefix + "ORDERBY", CollectionUtils.join(", ", orderBySpec));
             orderBySpec = null;
+        }
+        return (T) this;
+    }
+
+    public T params(Object... params) {
+        String key = null;
+        for (int i = 0; i < params.length; ++i) {
+            if (i % 2 == 0) {
+                key = String.valueOf(params[i]);
+            } else if (key != null) {
+                put(key, params[i]);
+                key = null;
+            }
         }
         return (T) this;
     }
@@ -97,12 +118,23 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
         return (T) this;
     }
 
-    public T limit(long val) {
+    public T limit(int val) {
+        rowLimit = val;
         return putQ("LIMIT", val);
     }
 
-    public T offset(long val) {
+    public T offset(int val) {
+        rowOffset = val;
         return putQ("OFFSET", val);
+    }
+
+    public RowBounds getRowBounds() {
+        if (rowLimit == null && rowOffset == null) {
+            return RowBounds.DEFAULT;
+        }
+        return new RowBounds(rowOffset != null ? rowOffset : 0,
+                             rowLimit != null ? rowLimit : 0);
+
     }
 
     public T pk(Object val) {
