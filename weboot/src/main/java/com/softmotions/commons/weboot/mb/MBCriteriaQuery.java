@@ -6,6 +6,7 @@ import com.softmotions.commons.cont.Stack;
 import org.apache.ibatis.session.RowBounds;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +20,8 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
     public static final String DEFAULT_PREFIX = "CQ_";
 
     private final String cqPrefix;
+
+    private final MBDAOSupport dao;
 
     private String columnPrefix;
 
@@ -34,23 +37,24 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
 
     private String namespace;
 
-    public MBCriteriaQuery() {
-        this(null, DEFAULT_PREFIX);
+    public MBCriteriaQuery(MBDAOSupport dao) {
+        this(dao, null, DEFAULT_PREFIX);
     }
 
-    public MBCriteriaQuery(String namespace) {
-        this(namespace, DEFAULT_PREFIX);
+    public MBCriteriaQuery(MBDAOSupport dao, String namespace) {
+        this(dao, namespace, DEFAULT_PREFIX);
     }
 
-    public MBCriteriaQuery(String namespace, String cqPrefix) {
-        this(namespace, cqPrefix, null);
+    public MBCriteriaQuery(MBDAOSupport dao, String namespace, String cqPrefix) {
+        this(dao, namespace, cqPrefix, null);
     }
 
-    public MBCriteriaQuery(String namespace, Map<String, Object> params) {
-        this(namespace, DEFAULT_PREFIX, params);
+    public MBCriteriaQuery(MBDAOSupport dao, String namespace, Map<String, Object> params) {
+        this(dao, namespace, DEFAULT_PREFIX, params);
     }
 
-    public MBCriteriaQuery(String namespace, String cqPrefix, Map<String, Object> params) {
+    public MBCriteriaQuery(MBDAOSupport dao, String namespace, String cqPrefix, Map<String, Object> params) {
+        this.dao = dao;
         this.cqPrefix = cqPrefix;
         this.namespace = namespace;
         if (params != null) {
@@ -167,6 +171,46 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
             this.statement = (namespace + "." + this.statement);
         }
         return (T) this;
+    }
+
+    public <E> List<E> select() {
+        return dao.selectByCriteria(this);
+    }
+
+    public <E> List<E> select(String stmtId) {
+        return dao.selectByCriteria(this, stmtId);
+    }
+
+    public <E> E selectOne() {
+        return dao.selectOneByCriteria(this);
+    }
+
+    public <E> E selectOne(String stmtId) {
+        return dao.selectOneByCriteria(this, stmtId);
+    }
+
+    public int update() {
+        return dao.updateByCriteria(this);
+    }
+
+    public int update(String stmtId) {
+        return dao.updateByCriteria(this, stmtId);
+    }
+
+    public int insert() {
+        return dao.insertByCriteria(this);
+    }
+
+    public int insert(String stmtId) {
+        return dao.insertByCriteria(this, stmtId);
+    }
+
+    public int delete() {
+        return dao.deleteByCriteria(this);
+    }
+
+    public int delete(String stmtId) {
+        return dao.deleteByCriteria(this, stmtId);
     }
 
     protected void addOrderByMod(boolean asc) {

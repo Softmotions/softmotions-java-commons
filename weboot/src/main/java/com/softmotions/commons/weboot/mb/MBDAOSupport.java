@@ -99,6 +99,15 @@ public class MBDAOSupport {
         return sess.insert(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId), crit);
     }
 
+    public int deleteByCriteria(MBCriteriaQuery crit) {
+        return deleteByCriteria(crit, null);
+    }
+
+    public int deleteByCriteria(MBCriteriaQuery crit, String defstmtId) {
+        crit.finish();
+        return sess.delete(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId), crit);
+    }
+
     public <E> E selectOne(String stmtId, Object... params) {
         return sess.selectOne(toStatementId(stmtId), toParametersMap(params));
     }
