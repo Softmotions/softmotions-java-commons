@@ -32,20 +32,27 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
 
     private Integer rowLimit;
 
+    private String namespace;
+
     public MBCriteriaQuery() {
-        this(DEFAULT_PREFIX);
+        this(null, DEFAULT_PREFIX);
     }
 
-    public MBCriteriaQuery(String cqPrefix) {
-        this(cqPrefix, null);
+    public MBCriteriaQuery(String namespace) {
+        this(namespace, DEFAULT_PREFIX);
     }
 
-    public MBCriteriaQuery(Map<String, Object> params) {
-        this(DEFAULT_PREFIX, params);
+    public MBCriteriaQuery(String namespace, String cqPrefix) {
+        this(namespace, cqPrefix, null);
     }
 
-    public MBCriteriaQuery(String cqPrefix, Map<String, Object> params) {
+    public MBCriteriaQuery(String namespace, Map<String, Object> params) {
+        this(namespace, DEFAULT_PREFIX, params);
+    }
+
+    public MBCriteriaQuery(String namespace, String cqPrefix, Map<String, Object> params) {
         this.cqPrefix = cqPrefix;
+        this.namespace = namespace;
         if (params != null) {
             putAll(params);
         }
@@ -128,6 +135,10 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
         return putQ("OFFSET", val);
     }
 
+    public String getNamespace() {
+        return namespace;
+    }
+
     public RowBounds getRowBounds() {
         if (rowLimit == null && rowOffset == null) {
             return RowBounds.DEFAULT;
@@ -152,6 +163,9 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
 
     public T withStatement(String statement) {
         this.statement = statement;
+        if (namespace != null) {
+            this.statement = namespace + "." + this.statement;
+        }
         return (T) this;
     }
 
