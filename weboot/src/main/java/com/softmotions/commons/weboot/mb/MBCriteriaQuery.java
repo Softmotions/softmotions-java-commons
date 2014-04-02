@@ -23,6 +23,8 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
 
     private final MBDAOSupport dao;
 
+    private final String namespace;
+
     private String columnPrefix;
 
     private Stack<String> orderBySpec;
@@ -34,8 +36,6 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
     private Integer rowOffset;
 
     private Integer rowLimit;
-
-    private String namespace;
 
     public MBCriteriaQuery(MBDAOSupport dao) {
         this(dao, null, DEFAULT_PREFIX);
