@@ -55,14 +55,25 @@ public class MBDAOSupport {
     }
 
     public <E> List<E> selectByCriteria(MBCriteriaQuery crit, String defstmtId) {
+        crit.finish();
         return sess.selectList(crit.getStatement() != null ? crit.getStatement() : defstmtId,
                                crit,
                                crit.getRowBounds());
-
     }
 
-    public <E> E selectByCriteriaOne(MBCriteriaQuery crit, String defstmtId) {
+    public <E> E selectOneByCriteria(MBCriteriaQuery crit, String defstmtId) {
+        crit.finish();
         return sess.selectOne(crit.getStatement() != null ? crit.getStatement() : defstmtId, crit);
+    }
+
+    public int updateByCriteria(MBCriteriaQuery crit, String defstmtId) {
+        crit.finish();
+        return sess.update(crit.getStatement() != null ? crit.getStatement() : defstmtId, crit);
+    }
+
+    public int insertByCriteria(MBCriteriaQuery crit, String defstmtId) {
+        crit.finish();
+        return sess.insert(crit.getStatement() != null ? crit.getStatement() : defstmtId, crit);
     }
 
     public <E> E selectOne(String stmtId, Object... params) {
@@ -89,5 +100,4 @@ public class MBDAOSupport {
         }
         return pmap;
     }
-
 }
