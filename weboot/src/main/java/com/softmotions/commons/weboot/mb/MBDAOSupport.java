@@ -54,6 +54,17 @@ public class MBDAOSupport {
         return sess.selectList(stmtId, toParametersMap(params), rb);
     }
 
+    public <E> List<E> selectByCriteria(MBCriteriaQuery crit, String defstmtId) {
+        return sess.selectList(crit.getStatement() != null ? crit.getStatement() : defstmtId,
+                               crit,
+                               crit.getRowBounds());
+
+    }
+
+    public <E> E selectByCriteriaOne(MBCriteriaQuery crit, String defstmtId) {
+        return sess.selectOne(crit.getStatement() != null ? crit.getStatement() : defstmtId, crit);
+    }
+
     public <E> E selectOne(String stmtId, Object... params) {
         return sess.selectOne(stmtId, toParametersMap(params));
     }
