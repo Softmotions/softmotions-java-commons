@@ -163,8 +163,8 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
 
     public T withStatement(String statement) {
         this.statement = statement;
-        if (namespace != null) {
-            this.statement = namespace + "." + this.statement;
+        if (namespace != null && !statement.startsWith(namespace)) {
+            this.statement = (namespace + "." + this.statement);
         }
         return (T) this;
     }

@@ -16,6 +16,8 @@ import java.util.Map;
  */
 public class MBDAOSupport {
 
+    protected String namespace;
+
     protected final SqlSession sess;
 
     public SqlSession getSession() {
@@ -34,50 +36,71 @@ public class MBDAOSupport {
         this.sess = sess;
     }
 
+    public MBDAOSupport(String namespace, SqlSession sess) {
+        this.namespace = namespace;
+        this.sess = sess;
+    }
+
     public int insert(String stmtId, Object... params) {
-        return sess.insert(stmtId, toParametersMap(params));
+        return sess.insert(toStatementId(stmtId), toParametersMap(params));
     }
 
     public int update(String stmtId, Object... params) {
-        return sess.update(stmtId, toParametersMap(params));
+        return sess.update(toStatementId(stmtId), toParametersMap(params));
     }
 
     public void select(String stmtId, ResultHandler rh, Object... params) {
-        sess.select(stmtId, toParametersMap(params), rh);
+        sess.select(toStatementId(stmtId), toParametersMap(params), rh);
     }
 
     public <E> List<E> select(String stmtId, Object... params) {
-        return sess.selectList(stmtId, toParametersMap(params));
+        return sess.selectList(toStatementId(stmtId), toParametersMap(params));
     }
 
     public <E> List<E> select(String stmtId, RowBounds rb, Object... params) {
-        return sess.selectList(stmtId, toParametersMap(params), rb);
+        return sess.selectList(toStatementId(stmtId), toParametersMap(params), rb);
+    }
+
+    public <E> List<E> selectByCriteria(MBCriteriaQuery crit) {
+        return selectByCriteria(crit, null);
     }
 
     public <E> List<E> selectByCriteria(MBCriteriaQuery crit, String defstmtId) {
         crit.finish();
-        return sess.selectList(crit.getStatement() != null ? crit.getStatement() : defstmtId,
+        return sess.selectList(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId),
                                crit,
                                crit.getRowBounds());
     }
 
+    public <E> E selectOneByCriteria(MBCriteriaQuery crit) {
+        return selectOneByCriteria(crit, null);
+    }
+
     public <E> E selectOneByCriteria(MBCriteriaQuery crit, String defstmtId) {
         crit.finish();
-        return sess.selectOne(crit.getStatement() != null ? crit.getStatement() : defstmtId, crit);
+        return sess.selectOne(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId), crit);
+    }
+
+    public int updateByCriteria(MBCriteriaQuery crit) {
+        return updateByCriteria(crit, null);
     }
 
     public int updateByCriteria(MBCriteriaQuery crit, String defstmtId) {
         crit.finish();
-        return sess.update(crit.getStatement() != null ? crit.getStatement() : defstmtId, crit);
+        return sess.update(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId), crit);
+    }
+
+    public int insertByCriteria(MBCriteriaQuery crit) {
+        return insertByCriteria(crit, null);
     }
 
     public int insertByCriteria(MBCriteriaQuery crit, String defstmtId) {
         crit.finish();
-        return sess.insert(crit.getStatement() != null ? crit.getStatement() : defstmtId, crit);
+        return sess.insert(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId), crit);
     }
 
     public <E> E selectOne(String stmtId, Object... params) {
-        return sess.selectOne(stmtId, toParametersMap(params));
+        return sess.selectOne(toStatementId(stmtId), toParametersMap(params));
     }
 
     public <T> T withinTransaction(MBAction<T> action) throws SQLException {
@@ -99,5 +122,13 @@ public class MBDAOSupport {
             }
         }
         return pmap;
+    }
+
+    protected String toStatementId(String stmtId) {
+        if (stmtId == null) {
+            throw new RuntimeException("MyBatis statement id cannot be null");
+        }
+        return (namespace == null ? stmtId :
+                (stmtId.startsWith(namespace) ? stmtId : (namespace + "." + stmtId)));
     }
 }
