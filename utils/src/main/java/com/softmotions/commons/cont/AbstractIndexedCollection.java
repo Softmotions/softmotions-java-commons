@@ -17,7 +17,12 @@ public abstract class AbstractIndexedCollection<K, V> implements Collection<V> {
 
     protected AbstractIndexedCollection() {
         this.wrappedCollection = new ArrayList<>();
-        this.index = new HashMap<>(wrappedCollection.size());
+        this.index = new HashMap<>();
+    }
+
+    protected AbstractIndexedCollection(int size) {
+        this.wrappedCollection = new ArrayList<>(size);
+        this.index = new HashMap<>(size);
     }
 
     protected AbstractIndexedCollection(Collection<V> wrappedCollection) {
