@@ -87,19 +87,6 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
         return (T) this;
     }
 
-    public T params(Object... params) {
-        String key = null;
-        for (int i = 0; i < params.length; ++i) {
-            if (i % 2 == 0) {
-                key = String.valueOf(params[i]);
-            } else if (key != null) {
-                put(key, params[i]);
-                key = null;
-            }
-        }
-        return (T) this;
-    }
-
     public T prefixedBy(String prefix) {
         preActionCheck();
         this.columnPrefix = prefix;
@@ -152,17 +139,26 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
 
     }
 
-    public T pk(Object val) {
+    public T withPK(Object val) {
         return putQ("PK", val);
     }
 
-    public T param(String name, Object val) {
+    public T withParam(String name, Object val) {
         put(name, val);
         return (T) this;
     }
 
-    public String getStatement() {
-        return statement;
+    public T withParams(Object... params) {
+        String key = null;
+        for (int i = 0; i < params.length; ++i) {
+            if (i % 2 == 0) {
+                key = String.valueOf(params[i]);
+            } else if (key != null) {
+                put(key, params[i]);
+                key = null;
+            }
+        }
+        return (T) this;
     }
 
     public T withStatement(String statement) {
@@ -171,6 +167,10 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
             this.statement = (namespace + "." + this.statement);
         }
         return (T) this;
+    }
+
+    public String getStatement() {
+        return statement;
     }
 
     public <E> List<E> select() {
