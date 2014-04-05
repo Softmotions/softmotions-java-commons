@@ -3,9 +3,8 @@ package com.softmotions.commons.weboot;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.guice.XMLMyBatisModule;
@@ -13,7 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.util.List;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Properties;
 
 /**
@@ -32,19 +32,22 @@ public class WBMyBatisModule extends XMLMyBatisModule {
     protected void initialize() {
         XMLConfiguration xcfg = cfg.impl();
         setEnvironmentId(cfg.getDBEnvironmentType());
-        SubnodeConfiguration mbCfg = xcfg.configurationAt("mybatis");
-        String cfgLocation = mbCfg.getString("[@config]");
+        String cfgLocation = xcfg.getString("mybatis[@config]");
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in <mybatis> element");
         }
         setClassPathResource(cfgLocation);
 
         Properties props = new Properties();
-        List<HierarchicalConfiguration> fields = mbCfg.configurationsAt("property");
-        for (HierarchicalConfiguration sub : fields) {
-            String pkey = sub.getString("[@name]");
-            String pval = sub.getString("[@value]");
-            props.setProperty(pkey, pval);
+        String propsStr = xcfg.getString("mybatis");
+        if (!StringUtils.isBlank(propsStr)) {
+            try {
+                props.load(new StringReader(propsStr));
+            } catch (IOException e) {
+                String msg = "Failed to load <mybatis> properties";
+                log.error(msg, e);
+                throw new RuntimeException(msg, e);
+            }
         }
         addProperties(props);
 
