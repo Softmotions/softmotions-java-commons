@@ -1,5 +1,6 @@
 package com.softmotions.commons.weboot.mb;
 
+import org.apache.commons.collections.map.Flat3Map;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
@@ -7,7 +8,6 @@ import org.apache.ibatis.session.SqlSession;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -120,7 +120,7 @@ public class MBDAOSupport {
         if (params == null || params.length == 0) {
             return null;
         }
-        Map<String, Object> pmap = new HashMap<>(params.length / 2);
+        Map<String, Object> pmap = new Flat3Map();
         String key = null;
         for (int i = 0; i < params.length; ++i) {
             if (i % 2 == 0) {
