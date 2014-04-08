@@ -120,6 +120,9 @@ public class MBDAOSupport {
         if (params == null || params.length == 0) {
             return null;
         }
+        if (params.length == 1 && params[0] instanceof Map) {
+            return (Map<String, Object>) params[0];
+        }
         Map<String, Object> pmap = new Flat3Map();
         String key = null;
         for (int i = 0; i < params.length; ++i) {
