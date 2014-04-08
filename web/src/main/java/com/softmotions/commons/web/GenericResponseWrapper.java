@@ -1,5 +1,6 @@
 package com.softmotions.commons.web;
 
+import org.apache.commons.io.output.WriterOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +14,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,25 +41,54 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     private int statusCode = SC_OK;
     private int contentLength;
     private String contentType;
-    private Map headerTracker = new HashMap();
-    private final List headers = new ArrayList();
-    private final List cookies = new ArrayList();
+
+    private Map headerTracker;
+    private List headers;
+    private List cookies;
+
     private ServletOutputStream outstr;
-    private PrintWriter writer;
+    private PrintWriter outwr;
+    private boolean delegate;
+
+
+    public GenericResponseWrapper(HttpServletResponse response, Writer outwr, boolean delegate) {
+        super(response);
+        this.outwr = new PrintWriter(outwr);
+        this.delegate = delegate;
+    }
 
     /**
      * Creates a GenericResponseWrapper
      */
-    public GenericResponseWrapper(final HttpServletResponse response, final OutputStream outstr) {
+    public GenericResponseWrapper(HttpServletResponse response, OutputStream outstr, boolean delegate) {
         super(response);
         this.outstr = new FilterServletOutputStream(outstr);
+        this.delegate = delegate;
+    }
+
+
+    public boolean isDelegate() {
+        return delegate;
     }
 
     /**
      * Gets the outputstream.
      */
     public ServletOutputStream getOutputStream() {
+        if (outstr == null) {
+            outstr = new FilterServletOutputStream(new WriterOutputStream(outwr, getCharacterEncoding()));
+        }
         return outstr;
+    }
+
+    /**
+     * Gets the print writer.
+     */
+    public PrintWriter getWriter() throws IOException {
+        if (outwr == null) {
+            outwr = new PrintWriter(new OutputStreamWriter(outstr, getCharacterEncoding()));
+        }
+        return outwr;
     }
 
     /**
@@ -64,7 +96,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      */
     public void setStatus(final int code) {
         statusCode = code;
-        super.setStatus(code);
+        if (delegate) {
+            super.setStatus(code);
+        }
     }
 
     /**
@@ -77,7 +111,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      */
     public void sendError(int i, String string) throws IOException {
         statusCode = i;
-        super.sendError(i, string);
+        if (delegate) {
+            super.sendError(i, string);
+        }
     }
 
     /**
@@ -89,7 +125,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      */
     public void sendError(int i) throws IOException {
         statusCode = i;
-        super.sendError(i);
+        if (delegate) {
+            super.sendError(i);
+        }
     }
 
     /**
@@ -101,7 +139,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      */
     public void sendRedirect(String string) throws IOException {
         statusCode = HttpServletResponse.SC_MOVED_TEMPORARILY;
-        super.sendRedirect(string);
+        if (delegate) {
+            super.sendRedirect(string);
+        }
     }
 
     /**
@@ -110,7 +150,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     public void setStatus(final int code, final String msg) {
         statusCode = code;
         log.warn("Discarding message because this method is deprecated.");
-        super.setStatus(code);
+        if (delegate) {
+            super.setStatus(code);
+        }
     }
 
     /**
@@ -125,7 +167,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      */
     public void setContentLength(final int length) {
         this.contentLength = length;
-        super.setContentLength(length);
+        if (delegate) {
+            super.setContentLength(length);
+        }
     }
 
     /**
@@ -140,7 +184,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      */
     public void setContentType(final String type) {
         this.contentType = type;
-        super.setContentType(type);
+        if (delegate) {
+            super.setContentType(type);
+        }
     }
 
     /**
@@ -150,25 +196,21 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
         return contentType;
     }
 
-
-    /**
-     * Gets the print writer.
-     */
-    public PrintWriter getWriter() throws IOException {
-        if (writer == null) {
-            writer = new PrintWriter(new OutputStreamWriter(outstr, getCharacterEncoding()), true);
-        }
-        return writer;
-    }
-
     /**
      * Adds a header, even if one already exists, in accordance with the spec
      */
     public void addHeader(final String name, final String value) {
         final String[] header = new String[]{name, value};
+        if (headers == null) {
+            headers = new ArrayList();
+        }
         headers.add(header);
-        super.addHeader(name, value);
-
+        if (delegate) {
+            super.addHeader(name, value);
+        }
+        if (headerTracker == null) {
+            headerTracker = new HashMap();
+        }
         Integer count = (Integer) headerTracker.get(name.toLowerCase());
         if (count == null) {
             count = new Integer(1);
@@ -183,8 +225,15 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      * it existed.
      */
     public void setHeader(final String name, final String value) {
-        super.setHeader(name, value);
-
+        if (delegate) {
+            super.setHeader(name, value);
+        }
+        if (headerTracker == null) {
+            headerTracker = new HashMap();
+        }
+        if (headers == null) {
+            headers = new ArrayList();
+        }
         Integer count = (Integer) headerTracker.get(name);
         if (count != null && count.intValue() > 0) {
             for (int i = headers.size() - 1; i >= 0; i--) {
@@ -210,22 +259,27 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      * Gets the headers.
      */
     public Collection getHeaders() {
-        return headers;
+        return headers != null ? headers : Collections.EMPTY_LIST;
     }
 
     /**
      * Adds a cookie.
      */
     public void addCookie(final Cookie cookie) {
+        if (cookies == null) {
+            cookies = new ArrayList();
+        }
         cookies.add(cookie);
-        super.addCookie(cookie);
+        if (delegate) {
+            super.addCookie(cookie);
+        }
     }
 
     /**
      * Gets all the cookies.
      */
     public Collection getCookies() {
-        return cookies;
+        return cookies != null ? cookies : Collections.EMPTY_LIST;
     }
 
     /**
@@ -233,16 +287,24 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      */
     public void flushBuffer() throws IOException {
         flush();
-        super.flushBuffer();
+        if (delegate) {
+            super.flushBuffer();
+        }
     }
 
     /**
      * Resets the response.
      */
     public void reset() {
-        super.reset();
-        cookies.clear();
-        headers.clear();
+        if (delegate) {
+            super.reset();
+        }
+        if (cookies != null) {
+            cookies.clear();
+        }
+        if (headers != null) {
+            headers.clear();
+        }
         statusCode = SC_OK;
         contentType = null;
         contentLength = 0;
@@ -252,23 +314,26 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      * Resets the buffers.
      */
     public void resetBuffer() {
-        super.resetBuffer();
+        if (delegate) {
+            super.resetBuffer();
+        }
     }
 
     /**
      * Flushes all the streams for this response.
      */
     public void flush() throws IOException {
-        if (writer != null) {
-            writer.flush();
+        if (outwr != null) {
+            outwr.flush();
+        } else {
+            outstr.flush();
         }
-        outstr.flush();
     }
 
 
     public static class FilterServletOutputStream extends ServletOutputStream {
 
-        private OutputStream stream;
+        private final OutputStream stream;
 
         /**
          * Creates a FilterServletOutputStream.
@@ -296,6 +361,10 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
          */
         public void write(final byte[] b, final int off, final int len) throws IOException {
             stream.write(b, off, len);
+        }
+
+        public void flush() throws IOException {
+            stream.flush();
         }
 
         public boolean isReady() {
