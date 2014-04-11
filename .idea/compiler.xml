@@ -29,8 +29,10 @@
         <module name="softmotions-pom" />
         <module name="softmotions-utils" />
         <module name="softmotions-web" />
+        <module name="softmotions-web-realms" />
         <module name="softmotions-weboot" />
         <module name="weboot" />
+        <module name="webrealms" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -41,8 +43,10 @@
       <module name="softmotions-pom" target="1.7" />
       <module name="softmotions-utils" target="1.7" />
       <module name="softmotions-web" target="1.7" />
+      <module name="softmotions-web-realms" target="1.7" />
       <module name="softmotions-weboot" target="1.7" />
       <module name="weboot" target="1.7" />
+      <module name="webrealms" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

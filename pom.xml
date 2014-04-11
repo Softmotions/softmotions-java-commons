@@ -62,6 +62,7 @@
         <module>utils</module>
         <module>web</module>
         <module>weboot</module>
+        <module>web-realms</module>
     </modules>
 
 </project>
