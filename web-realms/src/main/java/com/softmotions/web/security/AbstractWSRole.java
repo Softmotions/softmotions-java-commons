@@ -10,7 +10,6 @@ public abstract class AbstractWSRole implements WSRole {
      */
     protected String description = null;
 
-
     /**
      * The role name of this Role.
      */

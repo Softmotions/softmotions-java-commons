@@ -8,19 +8,17 @@ public abstract class AbstractWSUser implements WSUser {
     /**
      * The full name of this user.
      */
-    protected String fullName = null;
-
+    protected String fullName;
 
     /**
      * The logon password of this user.
      */
-    protected String password = null;
-
+    protected String password;
 
     /**
      * The logon username of this user.
      */
-    protected String username = null;
+    protected String username;
 
 
     public String getName() {
