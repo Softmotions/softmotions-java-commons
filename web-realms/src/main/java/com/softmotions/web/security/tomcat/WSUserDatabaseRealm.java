@@ -179,7 +179,7 @@ public class WSUserDatabaseRealm extends RealmBase {
         super.startInternal();
     }
 
-    protected WSUserDatabase getDatabase() {
+    private WSUserDatabase getDatabase() {
         if (database != null) {
             return database;
         }
