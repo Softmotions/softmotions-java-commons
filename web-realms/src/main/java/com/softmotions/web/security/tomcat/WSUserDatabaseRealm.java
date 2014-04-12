@@ -29,28 +29,28 @@ public class WSUserDatabaseRealm extends RealmBase {
      * The <code>UserDatabase</code> we will use to authenticate users
      * and identify associated roles.
      */
-    protected WSUserDatabase database = null;
+    private volatile WSUserDatabase database;
 
     /**
      * Descriptive information about this Realm implementation.
      */
-    protected static final String info = "com.softmotions.web.security.tomcat.WSUserDatabaseRealm/1.0";
+    private static final String info = "com.softmotions.web.security.tomcat.WSUserDatabaseRealm/1.0";
 
     /**
      * Descriptive information about this Realm implementation.
      */
-    protected static final String name = "WSUserDatabaseRealm";
+    private static final String name = "WSUserDatabaseRealm";
 
     /**
      * The global JNDI name of the <code>UserDatabase</code> resource
      * we will be utilizing.
      */
-    protected String resourceName = "WSUserDatabase";
+    private String resourceName = "WSUserDatabase";
 
     /**
      * Use context local database.
      */
-    protected boolean localDatabase;
+    private boolean localDatabase;
 
 
     public String getInfo() {
@@ -106,7 +106,7 @@ public class WSUserDatabaseRealm extends RealmBase {
             return false;
         }
         WSUser user = (WSUser) principal;
-        WSRole dbrole = database.findRole(role);
+        WSRole dbrole = getDatabase().findRole(role);
         if (dbrole == null) {
             return false;
         }
@@ -134,7 +134,7 @@ public class WSUserDatabaseRealm extends RealmBase {
      * Return the password associated with the given principal's user name.
      */
     protected String getPassword(String username) {
-        WSUser user = database.findUser(username);
+        WSUser user = getDatabase().findUser(username);
         if (user == null) {
             return null;
         }
@@ -145,11 +145,11 @@ public class WSUserDatabaseRealm extends RealmBase {
      * Return the Principal associated with the given user name.
      */
     protected Principal getPrincipal(String username) {
-        WSUser user = database.findUser(username);
+        WSUser user = getDatabase().findUser(username);
         if (user == null) {
             return null;
         }
-        List<String> roles = new ArrayList<String>();
+        List<String> roles = new ArrayList<>();
         Iterator<WSRole> uroles = user.getRoles();
         while (uroles.hasNext()) {
             WSRole role = uroles.next();
@@ -176,23 +176,36 @@ public class WSUserDatabaseRealm extends RealmBase {
      *                                                that prevents this component from being used
      */
     protected void startInternal() throws LifecycleException {
-        try {
-            Context context = null;
-            if (localDatabase) {
-                context = ContextBindings.getClassLoader();
-                context = (Context) context.lookup("comp/env");
-            } else {
-                context = getServer().getGlobalNamingContext();
-            }
-            database = (WSUserDatabase) context.lookup(resourceName);
-        } catch (Throwable e) {
-            containerLog.error(sm.getString("wsUserDatabaseRealm.lookup"), e);
-            database = null;
-        }
-        if (database == null) {
-            throw new LifecycleException(sm.getString("wsUserDatabaseRealm.noDatabase", resourceName));
-        }
         super.startInternal();
+    }
+
+    protected WSUserDatabase getDatabase() {
+        if (database != null) {
+            return database;
+        }
+        synchronized (this) {
+            if (database != null) {
+                return database;
+            }
+            try {
+                Context context = null;
+                if (localDatabase) {
+                    context = ContextBindings.getClassLoader();
+                    context = (Context) context.lookup("java:comp/env");
+                    database = (WSUserDatabase) context.lookup(resourceName);
+                } else {
+                    context = getServer().getGlobalNamingContext();
+                    database = (WSUserDatabase) context.lookup(resourceName);
+                }
+            } catch (Throwable e) {
+                containerLog.error(sm.getString("wsUserDatabaseRealm.lookup"), e);
+                database = null;
+            }
+            if (database == null) {
+                throw new RuntimeException(sm.getString("wsUserDatabaseRealm.noDatabase", resourceName));
+            }
+            return database;
+        }
     }
 
     /**
