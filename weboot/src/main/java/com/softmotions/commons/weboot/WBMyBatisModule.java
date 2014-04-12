@@ -1,10 +1,13 @@
 package com.softmotions.commons.weboot;
 
+import ninja.lifecycle.Dispose;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.guice.XMLMyBatisModule;
@@ -61,6 +64,8 @@ public class WBMyBatisModule extends XMLMyBatisModule {
         log.info("MyBatis config: " + cfgLocation);
 
         bind(DataSource.class).toProvider(DataSourceProvider.class);
+        bind(MyBatisInitializer.class).asEagerSingleton();
+
     }
 
     static class DataSourceProvider implements Provider<DataSource> {
@@ -77,4 +82,27 @@ public class WBMyBatisModule extends XMLMyBatisModule {
             return env.getDataSource();
         }
     }
+
+    public static class MyBatisInitializer {
+
+        final Provider<DataSource> dsProvider;
+
+        @Inject
+        public MyBatisInitializer(Provider<DataSource> dsProvider) {
+            this.dsProvider = dsProvider;
+        }
+
+        @Dispose(order = 10)
+        public void shutdown() {
+            log.info("Shutting down MyBatis datasource");
+            DataSource ds = dsProvider.get();
+            if (ds instanceof PooledDataSource) {
+                PooledDataSource pds = (PooledDataSource) ds;
+                pds.forceCloseAll();
+            } else {
+                log.warn("Unknown datasource found: " + ds.getClass().getName() + " it will not be closed");
+            }
+        }
+    }
+
 }
