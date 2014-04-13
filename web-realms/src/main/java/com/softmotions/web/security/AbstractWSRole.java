@@ -10,12 +10,12 @@ public abstract class AbstractWSRole implements WSRole {
     /**
      * The description of this Role.
      */
-    protected String description = null;
+    protected String description;
 
     /**
      * The role name of this Role.
      */
-    protected String rolename = null;
+    protected String rolename;
 
     public String getRolename() {
         return rolename;
@@ -38,12 +38,7 @@ public abstract class AbstractWSRole implements WSRole {
     }
 
     public boolean implies(Subject subject) {
-        if (subject == null)
-            return false;
-        return subject.getPrincipals().contains(this);
-    }
-
-    protected AbstractWSRole() {
+        return (subject != null && subject.getPrincipals().contains(this));
     }
 
     protected AbstractWSRole(String rolename, String description) {
@@ -51,5 +46,14 @@ public abstract class AbstractWSRole implements WSRole {
         this.description = description;
     }
 
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractWSRole that = (AbstractWSRole) o;
+        return rolename.equals(that.rolename);
+    }
 
+    public int hashCode() {
+        return rolename.hashCode();
+    }
 }

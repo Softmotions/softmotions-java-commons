@@ -17,9 +17,6 @@ public abstract class AbstractWSGroup implements WSGroup {
      */
     protected String groupname;
 
-    protected AbstractWSGroup() {
-    }
-
     protected AbstractWSGroup(String groupname, String description) {
         this.groupname = groupname;
         this.description = description;
@@ -30,9 +27,7 @@ public abstract class AbstractWSGroup implements WSGroup {
     }
 
     public boolean implies(Subject subject) {
-        if (subject == null)
-            return false;
-        return subject.getPrincipals().contains(this);
+        return (subject != null && subject.getPrincipals().contains(this));
     }
 
     public String getGroupname() {
@@ -49,5 +44,16 @@ public abstract class AbstractWSGroup implements WSGroup {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractWSGroup that = (AbstractWSGroup) o;
+        return groupname.equals(that.groupname);
+    }
+
+    public int hashCode() {
+        return groupname.hashCode();
     }
 }

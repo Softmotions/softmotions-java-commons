@@ -28,9 +28,7 @@ public abstract class AbstractWSUser implements WSUser {
     }
 
     public boolean implies(Subject subject) {
-        if (subject == null)
-            return false;
-        return subject.getPrincipals().contains(this);
+        return (subject != null && subject.getPrincipals().contains(this));
     }
 
     public String getUsername() {
@@ -57,9 +55,6 @@ public abstract class AbstractWSUser implements WSUser {
         this.fullName = fullName;
     }
 
-    protected AbstractWSUser() {
-    }
-
     protected AbstractWSUser(String username, String fullName) {
         this.username = username;
         this.fullName = fullName;
@@ -71,5 +66,14 @@ public abstract class AbstractWSUser implements WSUser {
         this.password = password;
     }
 
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractWSUser that = (AbstractWSUser) o;
+        return username.equals(that.username);
+    }
 
+    public int hashCode() {
+        return username.hashCode();
+    }
 }
