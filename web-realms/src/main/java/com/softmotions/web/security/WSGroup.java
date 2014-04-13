@@ -25,18 +25,12 @@ public interface WSGroup extends Principal {
     void setDescription(String description);
 
     /**
-     * Return the group name of this group, which must be unique
-     * within the scope of a {@link org.apache.catalina.UserDatabase}.
-     */
-    String getGroupname();
-
-    /**
      * Set the group name of this group, which must be unique
      * within the scope of a {@link org.apache.catalina.UserDatabase}.
      *
      * @param groupname The new group name
      */
-    void setGroupname(String groupname);
+    void setName(String groupname);
 
     /**
      * Return the set of {@link org.apache.catalina.Role}s assigned specifically to this group.

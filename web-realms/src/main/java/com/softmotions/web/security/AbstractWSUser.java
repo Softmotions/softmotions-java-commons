@@ -20,23 +20,19 @@ public abstract class AbstractWSUser implements WSUser {
     /**
      * The logon username of this user.
      */
-    protected String username;
+    protected String name;
 
-
-    public String getName() {
-        return getUsername();
-    }
 
     public boolean implies(Subject subject) {
         return (subject != null && subject.getPrincipals().contains(this));
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPassword() {
@@ -55,13 +51,13 @@ public abstract class AbstractWSUser implements WSUser {
         this.fullName = fullName;
     }
 
-    protected AbstractWSUser(String username, String fullName) {
-        this.username = username;
+    protected AbstractWSUser(String name, String fullName) {
+        this.name = name;
         this.fullName = fullName;
     }
 
-    protected AbstractWSUser(String username, String fullName, String password) {
-        this.username = username;
+    protected AbstractWSUser(String name, String fullName, String password) {
+        this.name = name;
         this.fullName = fullName;
         this.password = password;
     }
@@ -70,10 +66,10 @@ public abstract class AbstractWSUser implements WSUser {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AbstractWSUser that = (AbstractWSUser) o;
-        return username.equals(that.username);
+        return name.equals(that.name);
     }
 
     public int hashCode() {
-        return username.hashCode();
+        return name.hashCode();
     }
 }

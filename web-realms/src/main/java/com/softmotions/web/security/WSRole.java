@@ -23,18 +23,12 @@ public interface WSRole extends Principal {
     void setDescription(String description);
 
     /**
-     * Return the role name of this role, which must be unique
-     * within the scope of a {@link WSUserDatabase}.
-     */
-    String getRolename();
-
-    /**
      * Set the role name of this role, which must be unique
      * within the scope of a {@link WSUserDatabase}.
      *
      * @param rolename The new role name
      */
-    void setRolename(String rolename);
+    void setName(String rolename);
 
     /**
      * Return the {@link WSUserDatabase} within which this Role is defined.

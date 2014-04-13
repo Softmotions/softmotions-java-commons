@@ -15,27 +15,23 @@ public abstract class AbstractWSGroup implements WSGroup {
     /**
      * The group name of this group.
      */
-    protected String groupname;
+    protected String name;
 
-    protected AbstractWSGroup(String groupname, String description) {
-        this.groupname = groupname;
+    protected AbstractWSGroup(String name, String description) {
+        this.name = name;
         this.description = description;
-    }
-
-    public String getName() {
-        return getGroupname();
     }
 
     public boolean implies(Subject subject) {
         return (subject != null && subject.getPrincipals().contains(this));
     }
 
-    public String getGroupname() {
-        return groupname;
+    public String getName() {
+        return name;
     }
 
-    public void setGroupname(String groupname) {
-        this.groupname = groupname;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -50,10 +46,10 @@ public abstract class AbstractWSGroup implements WSGroup {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AbstractWSGroup that = (AbstractWSGroup) o;
-        return groupname.equals(that.groupname);
+        return name.equals(that.name);
     }
 
     public int hashCode() {
-        return groupname.hashCode();
+        return name.hashCode();
     }
 }

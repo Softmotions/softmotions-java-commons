@@ -54,19 +54,12 @@ public interface WSUser extends Principal {
      */
     WSUserDatabase getUserDatabase();
 
-    /**
-     * Return the logon username of this user, which must be unique
-     * within the scope of a {@link WSUserDatabase}.
-     */
-    String getUsername();
-
-    /**
-     * Set the logon username of this user, which must be unique within
+    /* Set the logon username of this user, which must be unique within
      * the scope of a {@link WSUserDatabase}.
      *
      * @param username The new logon username
      */
-    void setUsername(String username);
+    void setName(String username);
 
     /**
      * Add a new {@link WSGroup} to those this user belongs to.
