@@ -9,9 +9,9 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.realm.GenericPrincipal;
 import org.apache.catalina.realm.RealmBase;
-import org.apache.naming.ContextBindings;
 
 import javax.naming.Context;
+import javax.naming.InitialContext;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -190,8 +190,8 @@ public class WSUserDatabaseRealm extends RealmBase {
             try {
                 Context context = null;
                 if (localDatabase) {
-                    context = ContextBindings.getClassLoader();
-                    context = (Context) context.lookup("java:comp/env");
+                    Context initCtx = new InitialContext();
+                    context = (Context) initCtx.lookup("java:comp/env");
                     database = (WSUserDatabase) context.lookup(resourceName);
                 } else {
                     context = getServer().getGlobalNamingContext();
