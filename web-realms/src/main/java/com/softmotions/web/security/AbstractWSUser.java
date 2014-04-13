@@ -1,5 +1,7 @@
 package com.softmotions.web.security;
 
+import javax.security.auth.Subject;
+
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
@@ -23,6 +25,12 @@ public abstract class AbstractWSUser implements WSUser {
 
     public String getName() {
         return getUsername();
+    }
+
+    public boolean implies(Subject subject) {
+        if (subject == null)
+            return false;
+        return subject.getPrincipals().contains(this);
     }
 
     public String getUsername() {

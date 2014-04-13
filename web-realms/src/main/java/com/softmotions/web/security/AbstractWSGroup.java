@@ -1,5 +1,7 @@
 package com.softmotions.web.security;
 
+import javax.security.auth.Subject;
+
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
@@ -25,6 +27,12 @@ public abstract class AbstractWSGroup implements WSGroup {
 
     public String getName() {
         return getGroupname();
+    }
+
+    public boolean implies(Subject subject) {
+        if (subject == null)
+            return false;
+        return subject.getPrincipals().contains(this);
     }
 
     public String getGroupname() {
