@@ -13,25 +13,23 @@ package com.softmotions.commons.cont;
  */
 public class ArrayUtils {
 
-    public static Object getElement(Object[] array, int index) {
+    private ArrayUtils() {
+    }
+
+    public static <T> int indexOf(T[] array, T el) {
+        for (int i = 0, l = array.length; i < l; ++i) {
+            if (array[i] == el || array[i].equals(el)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static <T> T elementAt(T[] array, int index) {
         if (array == null || index < 0 || index >= array.length) {
             return null;
         }
         return array[index];
     }
 
-
-    /**
-     * Конвертирует String[] => Long[]
-     *
-     * @param vals
-     * @return
-     */
-    public static Long[] toLongArray(String[] vals) {
-        Long[] res = new Long[vals.length];
-        for (int i = 0; i < vals.length; ++i) {
-            res[i] = Long.valueOf(vals[i]);
-        }
-        return res;
-    }
 }
