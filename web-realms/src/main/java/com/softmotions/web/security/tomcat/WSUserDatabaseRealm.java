@@ -1,6 +1,5 @@
 package com.softmotions.web.security.tomcat;
 
-import com.softmotions.web.security.WSGroup;
 import com.softmotions.web.security.WSRole;
 import com.softmotions.web.security.WSUser;
 import com.softmotions.web.security.WSUserDatabase;
@@ -107,20 +106,7 @@ public class WSUserDatabaseRealm extends RealmBase {
         }
         WSUser user = (WSUser) principal;
         WSRole dbrole = getDatabase().findRole(role);
-        if (dbrole == null) {
-            return false;
-        }
-        if (user.isInRole(dbrole)) {
-            return true;
-        }
-        Iterator<WSGroup> groups = user.getGroups();
-        while (groups.hasNext()) {
-            WSGroup group = groups.next();
-            if (group.isInRole(dbrole)) {
-                return true;
-            }
-        }
-        return false;
+        return (dbrole != null && user.isInRole(dbrole));
     }
 
     /**
@@ -154,15 +140,6 @@ public class WSUserDatabaseRealm extends RealmBase {
         while (uroles.hasNext()) {
             WSRole role = uroles.next();
             roles.add(role.getName());
-        }
-        Iterator<WSGroup> groups = user.getGroups();
-        while (groups.hasNext()) {
-            WSGroup group = groups.next();
-            uroles = group.getRoles();
-            while (uroles.hasNext()) {
-                WSRole role = uroles.next();
-                roles.add(role.getName());
-            }
         }
         return new GenericPrincipal(username, user.getPassword(), roles, user);
     }
