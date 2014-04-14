@@ -52,4 +52,12 @@ public abstract class AbstractWSGroup implements WSGroup {
     public int hashCode() {
         return name.hashCode();
     }
+
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('{');
+        sb.append("name='").append(name).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

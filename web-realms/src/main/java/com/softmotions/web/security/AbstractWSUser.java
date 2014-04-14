@@ -72,4 +72,12 @@ public abstract class AbstractWSUser implements WSUser {
     public int hashCode() {
         return name.hashCode();
     }
+
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('{');
+        sb.append("name='").append(name).append('\'');
+        sb.append(", fullName='").append(fullName).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
