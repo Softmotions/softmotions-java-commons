@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.Filter;
 import javax.servlet.http.HttpServlet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,12 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
+    private C cfg;
+
+    public C getConfiguration() {
+        return cfg;
+    }
+
     protected void configureServlets() {
         log.info("Configuring WB modules and servlets");
         NinjaProperties nprops =
@@ -36,7 +43,7 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                                        + " attribute");
         }
         //Bind configuration
-        C cfg = createConfiguration(nprops);
+        cfg = createConfiguration(nprops);
         XMLConfiguration xcfg = cfg.impl();
         bind(WBConfiguration.class).toInstance(cfg);
 
@@ -64,7 +71,11 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                     continue;
                 }
                 log.info("Installing " + mclassName + " Guice module");
-                install((Module) mclass.newInstance());
+                Object minst = mclass.newInstance();
+                if (minst instanceof WBServletInitializerModule) {
+                    ((WBServletInitializerModule) minst).initServlets(this);
+                }
+                install((Module) minst);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException("Failed to activate Guice module: " + mclassName, e);
             }
@@ -76,14 +87,24 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
 
     protected abstract void init(C cfg);
 
-    protected void serve(String pattern, Class<? extends HttpServlet> servletClass) {
+    public void serve(String pattern, Class<? extends HttpServlet> servletClass) {
         log.info("Serving {} with {}", pattern, servletClass);
         serve(pattern).with(servletClass);
     }
 
-    protected void serve(String pattern, Class<? extends HttpServlet> servletClass, Map<String, String> params) {
+    public void serve(String pattern, Class<? extends HttpServlet> servletClass, Map<String, String> params) {
         log.info("Serving {} with {}", pattern, servletClass);
         serve(pattern).with(servletClass, params);
     }
 
+
+    public void filter(String pattern, Class<? extends Filter> filterClass) {
+        log.info("Filter {} with {}", pattern, filterClass);
+        filter(pattern).through(filterClass);
+    }
+
+    public void filter(String pattern, Class<? extends Filter> filterClass, Map<String, String> params) {
+        log.info("Filter {} with {}", pattern, filterClass);
+        filter(pattern).through(filterClass, params);
+    }
 }
