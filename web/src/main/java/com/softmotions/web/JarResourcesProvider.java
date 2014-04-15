@@ -1,4 +1,4 @@
-package com.softmotions.commons.web;
+package com.softmotions.web;
 
 import java.net.URL;
 

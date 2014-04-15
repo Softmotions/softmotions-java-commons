@@ -1,4 +1,4 @@
-package com.softmotions.commons.web;
+package com.softmotions.web;
 
 import org.apache.commons.lang3.BooleanUtils;
 

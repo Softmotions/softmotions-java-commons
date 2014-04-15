@@ -1,4 +1,4 @@
-package com.softmotions.commons.web;
+package com.softmotions.web;
 
 import com.softmotions.commons.cl.ClassLoaderUtils;
 
@@ -43,7 +43,7 @@ import java.util.Set;
  * <pre>
  *  &lt;servlet&gt;
  *      &lt;servlet-name&gt;JarResourcesServlet&lt;/servlet-name&gt;
- *      &lt;servlet-class&gt;com.softmotions.commons.web.JarResourcesServlet&lt;/servlet-class&gt;
+ *      &lt;servlet-class&gt;com.softmotions.web.JarResourcesServlet&lt;/servlet-class&gt;
  *      &lt;init-param&gt;
  *          &lt;param-name&gt;ncms&lt;/param-name&gt;
  *          &lt;param-value&gt;ncms-engine-qx/ncms, watch=yes&lt;/param-value&gt;

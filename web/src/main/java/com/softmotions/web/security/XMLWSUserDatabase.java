@@ -1,14 +1,7 @@
-package com.softmotions.commons.web.security;
+package com.softmotions.web.security;
 
 import com.softmotions.commons.cont.ArrayUtils;
 import com.softmotions.commons.io.Loader;
-import com.softmotions.web.security.AbstractWSGroup;
-import com.softmotions.web.security.AbstractWSRole;
-import com.softmotions.web.security.AbstractWSUser;
-import com.softmotions.web.security.WSGroup;
-import com.softmotions.web.security.WSRole;
-import com.softmotions.web.security.WSUser;
-import com.softmotions.web.security.WSUserDatabase;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.configuration.ConfigurationException;

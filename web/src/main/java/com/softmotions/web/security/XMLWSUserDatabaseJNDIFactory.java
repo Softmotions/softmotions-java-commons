@@ -1,9 +1,4 @@
-package com.softmotions.commons.web.security;
-
-import com.softmotions.web.security.WSGroup;
-import com.softmotions.web.security.WSRole;
-import com.softmotions.web.security.WSUser;
-import com.softmotions.web.security.WSUserDatabase;
+package com.softmotions.web.security;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;

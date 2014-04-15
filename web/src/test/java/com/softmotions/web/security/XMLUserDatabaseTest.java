@@ -1,8 +1,4 @@
-package com.softmotions.commons.web.security;
-
-import com.softmotions.web.security.WSGroup;
-import com.softmotions.web.security.WSRole;
-import com.softmotions.web.security.WSUser;
+package com.softmotions.web.security;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.junit.Test;
@@ -26,7 +22,7 @@ public class XMLUserDatabaseTest {
     public void testXMLUserdatabase() throws Exception {
         XMLWSUserDatabase db =
                 new XMLWSUserDatabase("db1",
-                                      "com/softmotions/commons/web/security/test-users-db.xml",
+                                      "com/softmotions/web/security/test-users-db.xml",
                                       false);
 
         List<WSGroup> groups = IteratorUtils.toList(db.getGroups());

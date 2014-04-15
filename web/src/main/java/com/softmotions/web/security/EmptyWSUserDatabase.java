@@ -1,4 +1,4 @@
-package com.softmotions.commons.web.security;
+package com.softmotions.web.security;
 
 import com.softmotions.web.security.WSGroup;
 import com.softmotions.web.security.WSRole;
