@@ -50,6 +50,12 @@ public interface WSUser extends Principal {
     void setEmail(String email);
 
     /**
+     * Return all role names
+     * assigned to user.
+     */
+    String[] getRoleNames();
+
+    /**
      * Return the set of {@link org.apache.catalina.Role}s assigned specifically to this user.
      */
     Iterator<WSRole> getRoles();

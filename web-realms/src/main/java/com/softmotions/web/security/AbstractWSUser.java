@@ -1,6 +1,9 @@
 package com.softmotions.web.security;
 
 import javax.security.auth.Subject;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -60,6 +63,15 @@ public abstract class AbstractWSUser implements WSUser {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String[] getRoleNames() {
+        List<String> rnames = new ArrayList<>();
+        Iterator<WSRole> roles = getRoles();
+        while (roles.hasNext()) {
+            rnames.add(roles.next().getName());
+        }
+        return rnames.toArray(new String[rnames.size()]);
     }
 
     protected AbstractWSUser(String name, String fullName) {
