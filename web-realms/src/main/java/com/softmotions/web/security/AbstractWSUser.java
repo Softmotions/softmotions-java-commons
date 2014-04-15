@@ -23,6 +23,9 @@ public abstract class AbstractWSUser implements WSUser {
     protected String name;
 
 
+    protected String email;
+
+
     public boolean implies(Subject subject) {
         return (subject != null && subject.getPrincipals().contains(this));
     }
@@ -49,6 +52,14 @@ public abstract class AbstractWSUser implements WSUser {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     protected AbstractWSUser(String name, String fullName) {

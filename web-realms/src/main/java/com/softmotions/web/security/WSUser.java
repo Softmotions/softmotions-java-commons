@@ -44,6 +44,11 @@ public interface WSUser extends Principal {
      */
     void setPassword(String password);
 
+
+    String getEmail();
+
+    void setEmail(String email);
+
     /**
      * Return the set of {@link org.apache.catalina.Role}s assigned specifically to this user.
      */

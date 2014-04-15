@@ -368,6 +368,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         private WSUserImpl(HierarchicalConfiguration cfg) {
             super(cfg.getString("[@name]"), cfg.getString("[@fullName]"), cfg.getString("[@password]"));
             this.cfg = cfg;
+            this.email = cfg.getString("[@email]");
             this.roleNames = cfg.getStringArray("[@roles]");
             this.groupNames = cfg.getStringArray("[@groups]");
         }
