@@ -15,7 +15,23 @@
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${softmotions.commons.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>softmotions</groupId>
+            <artifactId>softmotions-web-realms</artifactId>
+            <version>${softmotions.commons.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
         </dependency>
         <dependency>
             <groupId>javax</groupId>
@@ -34,6 +50,27 @@
             <version>2.4</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/java</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+    </build>
 
 
 </project>
