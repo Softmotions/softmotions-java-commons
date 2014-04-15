@@ -3,6 +3,7 @@ package com.softmotions.commons.weboot;
 import ninja.utils.NinjaProperties;
 
 import com.google.inject.Module;
+import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -70,12 +71,12 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                     log.warn("Module class: " + mclassName + " is not Guice module, skipped");
                     continue;
                 }
-                log.info("Installing " + mclassName + " Guice module");
+                log.info("Installing '" + mclassName + "' Guice module");
                 Object minst = mclass.newInstance();
+                install((Module) minst);
                 if (minst instanceof WBServletInitializerModule) {
                     ((WBServletInitializerModule) minst).initServlets(this);
                 }
-                install((Module) minst);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException("Failed to activate Guice module: " + mclassName, e);
             }
@@ -97,6 +98,11 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
         serve(pattern).with(servletClass, params);
     }
 
+    public void serveAndBind(String pattern, Class<? extends HttpServlet> servletClass, Map<String, String> params) {
+        log.info("Serving {} with {}", pattern, servletClass);
+        bind(servletClass).in(Singleton.class);
+        serve(pattern).with(servletClass, params);
+    }
 
     public void filter(String pattern, Class<? extends Filter> filterClass) {
         log.info("Filter {} with {}", pattern, filterClass);
@@ -105,6 +111,12 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
 
     public void filter(String pattern, Class<? extends Filter> filterClass, Map<String, String> params) {
         log.info("Filter {} with {}", pattern, filterClass);
+        filter(pattern).through(filterClass, params);
+    }
+
+    public void filterAndBind(String pattern, Class<? extends Filter> filterClass, Map<String, String> params) {
+        log.info("Filter {} with {}", pattern, filterClass);
+        bind(filterClass).in(Singleton.class);
         filter(pattern).through(filterClass, params);
     }
 }
