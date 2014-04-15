@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,10 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
     protected abstract C createConfiguration(NinjaProperties nprops);
 
     protected abstract void init(C cfg);
+
+    public ServletContext getWBServletContext() {
+        return getServletContext();
+    }
 
     public void serve(String pattern, Class<? extends HttpServlet> servletClass) {
         log.info("Serving {} with {}", pattern, servletClass);
