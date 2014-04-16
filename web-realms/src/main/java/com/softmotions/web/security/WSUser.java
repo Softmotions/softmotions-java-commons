@@ -56,6 +56,14 @@ public interface WSUser extends Principal {
     String[] getRoleNames();
 
     /**
+     * Return true if user
+     * has any of specified role
+     *
+     * @param roles
+     */
+    boolean isHasAnyRole(String... roles);
+
+    /**
      * Return the set of {@link org.apache.catalina.Role}s assigned specifically to this user.
      */
     Iterator<WSRole> getRoles();

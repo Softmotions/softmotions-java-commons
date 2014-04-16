@@ -410,6 +410,27 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             return false;
         }
 
+
+        public boolean isHasAnyRole(String... rlist) {
+            synchronized (lock) {
+                for (final String r : roleNames) {
+                    if (ArrayUtils.indexOf(rlist, r) != -1) {
+                        return true;
+                    }
+                    for (final String g : groupNames) {
+                        WSGroupImpl gi = (WSGroupImpl) groups.get(g);
+                        if (gi == null) continue;
+                        for (final String gr : gi.roleNames) {
+                            if (ArrayUtils.indexOf(rlist, gr) != -1) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         public boolean isInRole(WSRole role) {
             synchronized (lock) {
                 String n = role.getName();
