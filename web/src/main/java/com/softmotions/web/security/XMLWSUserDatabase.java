@@ -417,13 +417,12 @@ public class XMLWSUserDatabase implements WSUserDatabase {
                     if (ArrayUtils.indexOf(rlist, r) != -1) {
                         return true;
                     }
-                    for (final String g : groupNames) {
-                        WSGroupImpl gi = (WSGroupImpl) groups.get(g);
-                        if (gi == null) continue;
-                        for (final String gr : gi.roleNames) {
-                            if (ArrayUtils.indexOf(rlist, gr) != -1) {
-                                return true;
-                            }
+                }
+                for (final String g : groupNames) {
+                    WSGroupImpl gi = (WSGroupImpl) groups.get(g);
+                    for (final String gr : gi.roleNames) {
+                        if (ArrayUtils.indexOf(rlist, gr) != -1) {
+                            return true;
                         }
                     }
                 }
