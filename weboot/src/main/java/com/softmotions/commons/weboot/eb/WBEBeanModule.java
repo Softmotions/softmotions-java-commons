@@ -52,7 +52,7 @@ public class WBEBeanModule extends AbstractModule {
             ServerConfig scfg = new ServerConfig();
             SubnodeConfiguration ebeanCfg = cfg.impl().configurationAt("ebean");
             String propsStr = cfg.impl().getString("ebean");
-            if (ebeanCfg.getBoolean("useGuiceProvidedDatasource")) {
+            if (ebeanCfg.getBoolean("[@useGuiceProvidedDatasource]", false)) {
                 scfg.setDataSource(injector.getInstance(DataSource.class));
             }
             if (propsStr != null) {
@@ -66,7 +66,7 @@ public class WBEBeanModule extends AbstractModule {
                     throw new RuntimeException(msg, e);
                 }
             }
-            if (ebeanCfg.getBoolean("scanGuiceEntities")) {
+            if (ebeanCfg.getBoolean("[@scanGuiceEntities]", false)) {
                 for (final Binding<?> b : injector.getBindings().values()) {
                     final Type type = b.getKey().getTypeLiteral().getType();
                     if (type instanceof Class) {
