@@ -1,6 +1,8 @@
 package com.softmotions.commons.weboot;
 
 import ninja.utils.NinjaProperties;
+import com.softmotions.commons.weboot.eb.WBEBeanModule;
+import com.softmotions.commons.weboot.mb.WBMyBatisModule;
 
 import com.google.inject.Module;
 import com.google.inject.Singleton;
@@ -49,10 +51,15 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
         XMLConfiguration xcfg = cfg.impl();
         bind(WBConfiguration.class).toInstance(cfg);
 
-        if (xcfg.configurationAt("mybatis") != null) {
+        if (!xcfg.configurationsAt("mybatis").isEmpty()) {
             install(new WBMyBatisModule(cfg));
         }
-        if (xcfg.configurationAt("liquibase") != null) {
+
+        if (!xcfg.configurationsAt("ebean").isEmpty()) {
+            install(new WBEBeanModule());
+        }
+
+        if (!xcfg.configurationsAt("liquibase").isEmpty()) {
             install(new WBLiquibaseModule());
         }
 

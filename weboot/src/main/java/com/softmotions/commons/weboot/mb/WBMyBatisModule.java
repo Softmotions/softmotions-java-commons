@@ -1,6 +1,7 @@
-package com.softmotions.commons.weboot;
+package com.softmotions.commons.weboot.mb;
 
 import ninja.lifecycle.Dispose;
+import com.softmotions.commons.weboot.WBConfiguration;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -63,9 +64,10 @@ public class WBMyBatisModule extends XMLMyBatisModule {
         log.info("MyBatis properties: " + props);
         log.info("MyBatis config: " + cfgLocation);
 
-        bind(DataSource.class).toProvider(DataSourceProvider.class);
+        if (xcfg.getBoolean("mybatis[@bindDatasource]", false)) {
+            bind(DataSource.class).toProvider(DataSourceProvider.class);
+        }
         bind(MyBatisInitializer.class).asEagerSingleton();
-
     }
 
     static class DataSourceProvider implements Provider<DataSource> {
