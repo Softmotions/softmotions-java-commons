@@ -61,7 +61,7 @@ public class WBEBeanModule extends AbstractModule {
                     cprops.load(new StringReader(propsStr));
                     BeanUtils.populate(scfg, (Map) cprops);
                 } catch (IllegalAccessException | InvocationTargetException | IOException e) {
-                    String msg = "Failed to load <ebeans> properties";
+                    String msg = "Failed to load <ebean> properties";
                     log.error(msg, e);
                     throw new RuntimeException(msg, e);
                 }
