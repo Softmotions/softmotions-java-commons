@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Properties;
 
 /**
@@ -71,6 +73,7 @@ public class WBMyBatisModule extends XMLMyBatisModule {
     }
 
     static class DataSourceProvider implements Provider<DataSource> {
+
         final Provider<SqlSessionFactory> sessionFactoryProvider;
 
         @Inject
@@ -89,15 +92,30 @@ public class WBMyBatisModule extends XMLMyBatisModule {
 
         final Provider<DataSource> dsProvider;
 
+        final WBConfiguration cfg;
+
         @Inject
-        public MyBatisInitializer(Provider<DataSource> dsProvider) {
+        public MyBatisInitializer(Provider<DataSource> dsProvider,
+                                  WBConfiguration cfg) {
             this.dsProvider = dsProvider;
+            this.cfg = cfg;
         }
 
         @Dispose(order = 5)
         public void shutdown() {
             log.info("Shutting down MyBatis datasource");
             DataSource ds = dsProvider.get();
+            String shutdownSql = cfg.impl().getString("mybatis[@shutdownSQL]");
+            if (ds != null && !StringUtils.isBlank(shutdownSql)) {
+                log.info("Executing shutdown SQL: '" + shutdownSql + '\'');
+                try (Connection c = ds.getConnection()) {
+                    try (Statement stmt = c.createStatement()) {
+                        stmt.execute(shutdownSql);
+                    }
+                } catch (Exception e) {
+                    log.error("", e);
+                }
+            }
             if (ds instanceof PooledDataSource) {
                 PooledDataSource pds = (PooledDataSource) ds;
                 pds.forceCloseAll();
