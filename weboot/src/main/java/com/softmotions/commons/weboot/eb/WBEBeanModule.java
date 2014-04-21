@@ -88,15 +88,19 @@ public class WBEBeanModule extends AbstractModule {
                     }
                 }
             }
-            log.info("Creating EbeanServer instance");
+            log.info("Creating EbeanServer instance. " +
+                     "Name: " + scfg.getName() +
+                     " Register: " + scfg.isRegister() +
+                     " Default: " + scfg.isDefaultServer());
             return EbeanServerFactory.create(scfg);
         }
     }
 
     public static class EbeanInitializer {
 
-        @Dispose(order = 5)
+        @Dispose(order = 10)
         public void shutdown() {
+            log.info("Issue ShutdownManager.shutdown()");
             ShutdownManager.shutdown();
         }
     }

@@ -94,7 +94,7 @@ public class WBMyBatisModule extends XMLMyBatisModule {
             this.dsProvider = dsProvider;
         }
 
-        @Dispose(order = 10)
+        @Dispose(order = 5)
         public void shutdown() {
             log.info("Shutting down MyBatis datasource");
             DataSource ds = dsProvider.get();
