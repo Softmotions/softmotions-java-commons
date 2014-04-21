@@ -1,10 +1,12 @@
 package com.softmotions.commons.weboot.eb;
 
+import ninja.lifecycle.Dispose;
 import com.softmotions.commons.weboot.WBConfiguration;
 
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.ServerConfig;
+import com.avaje.ebeaninternal.server.lib.ShutdownManager;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -38,6 +40,7 @@ public class WBEBeanModule extends AbstractModule {
 
     protected void configure() {
         bind(EbeanServer.class).toProvider(EbeanProvider.class).in(Singleton.class);
+        bind(EbeanInitializer.class).asEagerSingleton();
     }
 
     public static class EbeanProvider implements Provider<EbeanServer> {
@@ -48,12 +51,20 @@ public class WBEBeanModule extends AbstractModule {
         @Inject
         WBConfiguration cfg;
 
+        @Inject(optional = true)
+        Provider<DataSource> dsProvider;
+
         public EbeanServer get() {
             ServerConfig scfg = new ServerConfig();
             SubnodeConfiguration ebeanCfg = cfg.impl().configurationAt("ebean");
             String propsStr = cfg.impl().getString("ebean");
             if (ebeanCfg.getBoolean("[@useGuiceProvidedDatasource]", false)) {
-                scfg.setDataSource(injector.getInstance(DataSource.class));
+                DataSource ds = dsProvider != null ? dsProvider.get() : null;
+                if (ds == null) {
+                    throw new RuntimeException("No Guice bound DataSource.class");
+                }
+                log.info("Bound guice provoded datasource: " + ds);
+                scfg.setDataSource(ds);
             }
             if (propsStr != null) {
                 Properties cprops = new Properties();
@@ -79,6 +90,14 @@ public class WBEBeanModule extends AbstractModule {
             }
             log.info("Creating EbeanServer instance");
             return EbeanServerFactory.create(scfg);
+        }
+    }
+
+    public static class EbeanInitializer {
+
+        @Dispose(order = 5)
+        public void shutdown() {
+            ShutdownManager.shutdown();
         }
     }
 
