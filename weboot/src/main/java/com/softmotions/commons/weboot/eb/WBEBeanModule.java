@@ -88,6 +88,7 @@ public class WBEBeanModule extends AbstractModule {
                     }
                 }
             }
+            ShutdownManager.touch();
             log.info("Creating EbeanServer instance. " +
                      "Name: " + scfg.getName() +
                      " Register: " + scfg.isRegister() +
@@ -100,8 +101,8 @@ public class WBEBeanModule extends AbstractModule {
 
         @Dispose(order = 10)
         public void shutdown() {
-            log.info("Issue ShutdownManager.shutdown()");
-            ShutdownManager.shutdown();
+            //log.info("Issue ShutdownManager.shutdown()");
+            //ShutdownManager.shutdown();
         }
     }
 
