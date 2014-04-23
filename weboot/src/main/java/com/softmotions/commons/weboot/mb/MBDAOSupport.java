@@ -116,6 +116,10 @@ public class MBDAOSupport {
         return action.exec(sess, sess.getConnection());
     }
 
+    public MBCriteriaQuery createCriteria() {
+        return new MBCriteriaQuery(this);
+    }
+
     protected static Map<String, Object> toParametersMap(Object[] params) {
         if (params == null || params.length == 0) {
             return null;

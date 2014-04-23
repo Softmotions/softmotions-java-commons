@@ -38,7 +38,7 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, 
     private Integer rowLimit;
 
     public MBCriteriaQuery(MBDAOSupport dao) {
-        this(dao, null, DEFAULT_PREFIX);
+        this(dao, dao.namespace, DEFAULT_PREFIX);
     }
 
     public MBCriteriaQuery(MBDAOSupport dao, String namespace) {
