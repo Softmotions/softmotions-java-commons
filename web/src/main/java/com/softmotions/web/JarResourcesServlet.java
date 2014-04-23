@@ -218,8 +218,10 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                 if (loader != null) {
                     if (lastLoadMtime < mtime) {
                         try {
+                            log.info("Closing old loader");
                             loader.close();
-                        } catch (IOException e) {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException | IOException e) {
                             log.error("", e);
                         }
                         loader = null;
