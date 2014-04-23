@@ -16,9 +16,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -173,7 +175,11 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
 
         boolean watch;
 
-        JarResourcesClassLoader loader;
+        File jarFile;
+
+        long lastLoadMtime;
+
+        volatile JarResourcesClassLoader loader;
 
         private MappingSlot(String prefix, String spec) throws Exception {
             if (prefix.charAt(0) != '/') {
@@ -206,12 +212,42 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
             URL resourceUrl;
             resource = resource.substring(prefix.length());
             String resourceTranslated = path + ((resource.charAt(0) != '/') ? ("/" + resource) : resource);
-            if (loader != null) {
-                return loader.getResource(resourceTranslated);
+            ClassLoader loaderRef = null;
+            long mtime = (jarFile != null) ? jarFile.lastModified() : 0;
+            synchronized (lock) {
+                if (loader != null) {
+                    if (lastLoadMtime < mtime) {
+                        try {
+                            loader.close();
+                        } catch (IOException e) {
+                            log.error("", e);
+                        }
+                        loader = null;
+                    }
+                    loaderRef = loader;
+                }
             }
+            if (loaderRef != null) {
+                return loaderRef.getResource(resourceTranslated);
+            }
+
+
             ClassLoader baseLoader =
                     ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
                                              getClass().getClassLoader());
+
+            if (jarFile != null) {
+                synchronized (lock) {
+                    try {
+                        log.info("Reloading jar file: " + jarFile.toURI());
+                        lastLoadMtime = jarFile.lastModified();
+                        loader = new JarResourcesClassLoader(jarFile.toURI().toURL(), baseLoader);
+                    } catch (MalformedURLException e) {
+                        log.error("", e);
+                    }
+                }
+            }
+
             resourceUrl = baseLoader.getResource(resourceTranslated);
             if (resourceUrl != null && "jar".equals(resourceUrl.getProtocol())) {
                 synchronized (lock) {
@@ -226,9 +262,19 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                         log.error("", e);
                         return resourceUrl;
                     }
+                    if (watch) {
+                        try {
+                            log.info("Start watching jar file: " + baseJar);
+                            jarFile = new File(baseJar.toURI());
+                            lastLoadMtime = jarFile.lastModified();
+                        } catch (URISyntaxException e) {
+                            log.error("", e);
+                        }
+                    }
                     loader = new JarResourcesClassLoader(baseJar, baseLoader);
-                    return loader.getResource(resourceTranslated);
+                    loaderRef = loader;
                 }
+                return loaderRef.getResource(resourceTranslated);
             }
             return resourceUrl;
         }
