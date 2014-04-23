@@ -213,8 +213,9 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
             resource = resource.substring(prefix.length());
             String resourceTranslated = path + ((resource.charAt(0) != '/') ? ("/" + resource) : resource);
             ClassLoader loaderRef = null;
-            long mtime = (jarFile != null) ? jarFile.lastModified() : 0;
+            long mtime;
             synchronized (lock) {
+                mtime = (jarFile != null) ? jarFile.lastModified() : 0;
                 if (loader != null) {
                     if (lastLoadMtime < mtime) {
                         try {
@@ -237,8 +238,8 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                     ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
                                              getClass().getClassLoader());
 
-            if (jarFile != null) {
-                synchronized (lock) {
+            synchronized (lock) {
+                if (jarFile != null) {
                     try {
                         log.info("Reloading jar file: " + jarFile.toURI());
                         lastLoadMtime = jarFile.lastModified();
