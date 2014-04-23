@@ -4,6 +4,7 @@ import com.softmotions.commons.cl.ClassLoaderUtils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,13 +33,13 @@ import java.util.Set;
  * stored in jar files in the classpath.
  * Supports automatic content reloading if
  * jar file updated.
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Servlet parameters in the following format:
  * <pre>
  *      {prefix} => {injar path} [,watch=yes|no]
  * </pre>
- * <p>
+ * <p/>
  * Example:
  * <pre>
  *  &lt;servlet&gt;
@@ -170,6 +171,8 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
 
         final Object lock = new Object();
 
+        boolean watch;
+
         JarResourcesClassLoader loader;
 
         private MappingSlot(String prefix, String spec) throws Exception {
@@ -182,7 +185,7 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
             }
             this.path = StringUtils.strip(parts[0].trim(), "/");
             //Parse options
-            /*for (int i = 1; i < parts.length; ++i) {
+            for (int i = 1; i < parts.length; ++i) {
                 String p = parts[i].toLowerCase();
                 String[] pp = p.split("=");
                 if (pp.length == 2) {
@@ -194,7 +197,7 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                             break;
                     }
                 }
-            }*/
+            }
             this.prefix = prefix;
             log.info("Registered JAR resources mapping: " + prefix + " => " + spec);
         }

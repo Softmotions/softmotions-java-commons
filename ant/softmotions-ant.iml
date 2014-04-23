@@ -16,6 +16,7 @@
     <orderEntry type="module" module-name="softmotions-utils" />
     <orderEntry type="library" name="Maven: org.beanshell:bsh:2.0b4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.3" level="project" />
+    <orderEntry type="library" name="Maven: commons-collections:commons-collections:3.2.1" level="project" />
     <orderEntry type="library" name="Maven: net.sf.ujac:ujac:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.lowagie:itext:2.1.3" level="project" />
     <orderEntry type="library" name="Maven: bouncycastle:bcmail-jdk14:138" level="project" />
