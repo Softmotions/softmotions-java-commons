@@ -233,7 +233,6 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                 return loaderRef.getResource(resourceTranslated);
             }
 
-
             ClassLoader baseLoader =
                     ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
                                              getClass().getClassLoader());
@@ -244,10 +243,15 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                         log.info("Reloading jar file: " + jarFile.toURI());
                         lastLoadMtime = jarFile.lastModified();
                         loader = new JarResourcesClassLoader(jarFile.toURI().toURL(), baseLoader);
+                        loaderRef = loader;
                     } catch (MalformedURLException e) {
                         log.error("", e);
                     }
                 }
+            }
+
+            if (loaderRef != null) {
+                return loaderRef.getResource(resourceTranslated);
             }
 
             resourceUrl = baseLoader.getResource(resourceTranslated);
