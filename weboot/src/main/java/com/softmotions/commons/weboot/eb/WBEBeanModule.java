@@ -1,6 +1,7 @@
 package com.softmotions.commons.weboot.eb;
 
 import ninja.lifecycle.Dispose;
+import ninja.lifecycle.Start;
 import com.softmotions.commons.weboot.WBConfiguration;
 
 import com.avaje.ebean.EbeanServer;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Properties;
@@ -88,7 +90,19 @@ public class WBEBeanModule extends AbstractModule {
                     }
                 }
             }
-            ShutdownManager.touch();
+
+            try {
+                //Хак ебена
+                log.info("Fixing ebean shutdown manager");
+                ShutdownManager.touch();
+                Class<ShutdownManager> smClass = ShutdownManager.class;
+                Method deregister = smClass.getDeclaredMethod("deregister");
+                deregister.setAccessible(true);
+                deregister.invoke(null);
+            } catch (Exception e) {
+                log.error("Failed to fix shutdown manager", e);
+            }
+
             log.info("Creating EbeanServer instance. " +
                      "Name: " + scfg.getName() +
                      " Register: " + scfg.isRegister() +
@@ -97,12 +111,14 @@ public class WBEBeanModule extends AbstractModule {
         }
     }
 
-    public static class EbeanInitializer {
+    public static class EbeanInitializer extends Thread {
+
+        @Start(order = 10)
+        public void startup() {
+        }
 
         @Dispose(order = 10)
         public void shutdown() {
-            //log.info("Issue ShutdownManager.shutdown()");
-            //ShutdownManager.shutdown();
         }
     }
 
