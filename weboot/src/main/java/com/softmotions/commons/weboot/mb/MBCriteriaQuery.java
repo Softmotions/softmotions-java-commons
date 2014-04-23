@@ -3,9 +3,9 @@ package com.softmotions.commons.weboot.mb;
 import com.softmotions.commons.cont.CollectionUtils;
 import com.softmotions.commons.cont.Stack;
 
+import org.apache.commons.collections.map.Flat3Map;
 import org.apache.ibatis.session.RowBounds;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import java.util.Map;
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 @SuppressWarnings("unchecked")
-public class MBCriteriaQuery<T extends MBCriteriaQuery> extends HashMap<String, Object> {
+public class MBCriteriaQuery<T extends MBCriteriaQuery> extends Flat3Map {
 
     public static final String DEFAULT_PREFIX = "CQ_";
 
