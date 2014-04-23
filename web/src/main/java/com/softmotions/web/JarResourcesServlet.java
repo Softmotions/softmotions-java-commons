@@ -175,9 +175,9 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
 
         boolean watch;
 
-        File jarFile;
-
         long lastLoadMtime;
+
+        volatile File jarFile;
 
         volatile JarResourcesClassLoader loader;
 
