@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSession;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -127,7 +128,7 @@ public class MBDAOSupport {
         if (params.length == 1 && params[0] instanceof Map) {
             return (Map<String, Object>) params[0];
         }
-        Map<String, Object> pmap = new Flat3Map();
+        Map<String, Object> pmap = (params.length / 2 > 3) ? new HashMap<>(params.length / 2) : new Flat3Map();
         String key = null;
         for (int i = 0; i < params.length; ++i) {
             if (i % 2 == 0) {
