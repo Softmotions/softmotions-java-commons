@@ -46,6 +46,10 @@ public class MBDAOSupport {
         return sess.insert(toStatementId(stmtId), toParametersMap(params));
     }
 
+    public int delete(String stmtId, Object... params) {
+        return sess.delete(toStatementId(stmtId), toParametersMap(params));
+    }
+
     public int update(String stmtId, Object... params) {
         return sess.update(toStatementId(stmtId), toParametersMap(params));
     }
