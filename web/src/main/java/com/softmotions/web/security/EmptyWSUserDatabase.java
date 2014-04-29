@@ -36,6 +36,14 @@ public class EmptyWSUserDatabase implements WSUserDatabase {
         return Collections.emptyIterator();
     }
 
+    public int getUsersCount() {
+        return 0;
+    }
+
+    public Iterator<WSUser> getUsers(int skip, int limit) {
+        return Collections.emptyIterator();
+    }
+
     public WSGroup findGroup(String groupname) {
         return null;
     }

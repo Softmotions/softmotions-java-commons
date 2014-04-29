@@ -33,6 +33,19 @@ public interface WSUserDatabase extends Closeable {
     Iterator<WSUser> getUsers();
 
     /**
+     * Return number of users stored in database.
+     */
+    int getUsersCount();
+
+    /**
+     * Return the set of {@link org.apache.catalina.User}s defined in this user database.
+     *
+     * @param skip  Number of users to skip
+     * @param limit Limit number of total users returned.
+     */
+    Iterator<WSUser> getUsers(int skip, int limit);
+
+    /**
      * Create and return a new {@link WSGroup} defined in this user database.
      *
      * @param groupname   The group name of the new group (must be unique)

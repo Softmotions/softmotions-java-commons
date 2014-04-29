@@ -140,6 +140,29 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
     }
 
+    public int getUsersCount() {
+        synchronized (lock) {
+            return users.size();
+        }
+    }
+
+    public Iterator<WSUser> getUsers(int skip, int limit) {
+        synchronized (lock) {
+            Iterator<WSUser> usersIt = users.values().iterator();
+            for (; skip > 0 && usersIt.hasNext(); --skip) {
+                usersIt.next();
+            }
+            if (skip > 0) {
+                return Collections.emptyIterator();
+            }
+            List<WSUser> ret = new ArrayList<>(Math.min(limit, users.size() - skip));
+            for (; limit > 0 && usersIt.hasNext(); --limit) {
+                ret.add(usersIt.next());
+            }
+            return ret.iterator();
+        }
+    }
+
     public WSGroup findGroup(String groupname) {
         synchronized (lock) {
             return groups.get(groupname);

@@ -112,6 +112,14 @@ public class XMLWSUserDatabaseJNDIFactory extends Reference implements ObjectFac
             return wrapped.getUsers();
         }
 
+        public int getUsersCount() {
+            return wrapped.getUsersCount();
+        }
+
+        public Iterator<WSUser> getUsers(int skip, int limit) {
+            return wrapped.getUsers(skip, limit);
+        }
+
         public WSGroup createGroup(String s, String s2) {
             return wrapped.createGroup(s, s2);
         }
