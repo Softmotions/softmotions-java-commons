@@ -16,7 +16,7 @@ import java.net.URL;
  */
 public abstract class WBConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(WBConfiguration.class);
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     protected final NinjaProperties ninjaProperties;
 

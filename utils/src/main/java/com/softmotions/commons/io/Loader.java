@@ -11,6 +11,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
+ * Adaptive resource loader.
+ *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class Loader {
