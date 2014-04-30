@@ -4,14 +4,9 @@ import ninja.utils.NinjaProperties;
 import com.softmotions.commons.weboot.eb.WBEBeanModule;
 import com.softmotions.commons.weboot.mb.WBMyBatisModule;
 
-import com.google.inject.Binding;
-import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
-import com.google.inject.spi.DefaultElementVisitor;
-import com.google.inject.spi.Element;
-import com.google.inject.spi.Elements;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -23,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +47,7 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                                        + " attribute");
         }
         //Bind configuration
-        cfg = createConfiguration(nprops);
+        cfg = createConfiguration(getServletContext(), nprops);
         XMLConfiguration xcfg = cfg.impl();
         bind(WBConfiguration.class).toInstance(cfg);
 
@@ -98,7 +92,7 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
         init(cfg);
     }
 
-    protected abstract C createConfiguration(NinjaProperties nprops);
+    protected abstract C createConfiguration(ServletContext sctx, NinjaProperties nprops);
 
     protected abstract void init(C cfg);
 
