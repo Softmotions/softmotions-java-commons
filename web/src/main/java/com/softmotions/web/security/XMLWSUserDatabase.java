@@ -249,10 +249,11 @@ public class XMLWSUserDatabase implements WSUserDatabase {
                 if (pos >= users.length || limit <= 0) {
                     return endOfData();
                 }
-                if (((WSUserImpl) users[pos++]).isMatchedQuery(query)) {
+                if (((WSUserImpl) users[pos]).isMatchedQuery(query)) {
                     user = users[pos];
                     limit--;
                 }
+                pos++;
             }
             return user;
         }
