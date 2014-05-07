@@ -120,8 +120,8 @@ public class XMLWSUserDatabaseJNDIFactory extends Reference implements ObjectFac
             return wrapped.getUsersCount(query);
         }
 
-        public Iterator<WSUser> getUsers(String query, String orderField, boolean desc, int skip, int limit) {
-            return wrapped.getUsers(query, orderField, desc, skip, limit);
+        public Iterator<WSUser> getUsers(String query, String orderProperty, boolean desc, int skip, int limit) {
+            return wrapped.getUsers(query, orderProperty, desc, skip, limit);
         }
 
         public WSGroup createGroup(String s, String s2) {

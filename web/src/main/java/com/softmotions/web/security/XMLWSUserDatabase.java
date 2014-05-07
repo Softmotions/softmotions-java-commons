@@ -170,7 +170,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
     }
 
     public Iterator<WSUser> getUsers(String query,
-                                     final String orderField,
+                                     final String orderProperty,
                                      final boolean desc,
                                      int skip,
                                      int limit) {
@@ -182,17 +182,17 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         synchronized (lock) {
             uarr = users.values().toArray(new WSUser[users.size()]);
         }
-        if (orderField != null) { //sort users
+        if (orderProperty != null) { //sort users
             try {
                 final Collator coll = Collator.getInstance();
-                final Class pclazz = BeanUtils.getPropertyType(WSUser.class, orderField, false);
+                final Class pclazz = BeanUtils.getPropertyType(WSUser.class, orderProperty, false);
                 final boolean comparable = Comparable.class.isAssignableFrom(pclazz);
                 Arrays.sort(uarr, new Comparator<WSUser>() {
                     public int compare(WSUser u1, WSUser u2) {
                         int res = 0;
                         try {
-                            Object v1 = BeanUtils.getProperty(u1, orderField);
-                            Object v2 = BeanUtils.getProperty(u2, orderField);
+                            Object v1 = BeanUtils.getProperty(u1, orderProperty);
+                            Object v2 = BeanUtils.getProperty(u2, orderProperty);
                             if (comparable) {
                                 res = ObjectUtils.compare((Comparable) v1, (Comparable) v2);
                             } else {

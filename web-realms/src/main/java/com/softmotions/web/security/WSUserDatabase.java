@@ -48,14 +48,14 @@ public interface WSUserDatabase extends Closeable {
     /**
      * Return the set of {@link org.apache.catalina.User}s defined in this user database.
      *
-     * @param query      Optional query text
-     * @param orderField Optional property name used to sort results.
-     * @param desc       If true use DESC sorting based on specified orderField otherwise ASC sorting will be used
-     * @param skip       Number of records to skip
-     * @param limit      Limit number of resulting records
+     * @param query         Optional query text, can be null
+     * @param orderProperty Optional property name used to sort results, can be null
+     * @param desc          If true use DESC sorting based on specified orderProperty otherwise ASC sorting will be used
+     * @param skip          Number of records to skip
+     * @param limit         Limit number of resulting records
      * @return
      */
-    Iterator<WSUser> getUsers(String query, String orderField, boolean desc, int skip, int limit);
+    Iterator<WSUser> getUsers(String query, String orderProperty, boolean desc, int skip, int limit);
 
     /**
      * Create and return a new {@link WSGroup} defined in this user database.
