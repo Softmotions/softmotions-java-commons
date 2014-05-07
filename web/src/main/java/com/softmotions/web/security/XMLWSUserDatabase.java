@@ -155,7 +155,9 @@ public class XMLWSUserDatabase implements WSUserDatabase {
     }
 
     public int getUsersCount(String query) {
-        query = query.toLowerCase();
+        if (query != null) {
+            query = query.trim().toLowerCase();
+        }
         int c = 0;
         synchronized (lock) {
             for (final WSUser u : users.values()) {
@@ -167,13 +169,16 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return c;
     }
 
-    public Iterator<WSUser> getUsers(final String query,
+    public Iterator<WSUser> getUsers(String query,
                                      final String orderField,
                                      final boolean desc,
                                      int skip,
                                      int limit) {
         int i = 0;
         WSUser[] uarr;
+        if (query != null) {
+            query = query.trim().toLowerCase();
+        }
         synchronized (lock) {
             uarr = users.values().toArray(new WSUser[users.size()]);
         }
@@ -635,6 +640,9 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
 
         private boolean isMatchedQuery(String query) {
+            if (query == null || query.isEmpty()) {
+                return true;
+            }
             synchronized (lock) {
                 if (getName() != null && getName().toLowerCase().startsWith(query)) {
                     return true;
