@@ -1,10 +1,5 @@
 package com.softmotions.web.security;
 
-import com.softmotions.web.security.WSGroup;
-import com.softmotions.web.security.WSRole;
-import com.softmotions.web.security.WSUser;
-import com.softmotions.web.security.WSUserDatabase;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
@@ -40,7 +35,11 @@ public class EmptyWSUserDatabase implements WSUserDatabase {
         return 0;
     }
 
-    public Iterator<WSUser> getUsers(int skip, int limit) {
+    public int getUsersCount(String query) {
+        return 0;
+    }
+
+    public Iterator<WSUser> getUsers(String query, String orderField, boolean desc, int skip, int limit) {
         return Collections.emptyIterator();
     }
 

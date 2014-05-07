@@ -3,23 +3,31 @@ package com.softmotions.web.security;
 import com.softmotions.commons.cont.ArrayUtils;
 import com.softmotions.commons.io.Loader;
 
+import com.google.common.collect.AbstractIterator;
+
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ujac.util.BeanException;
+import org.ujac.util.BeanUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -146,20 +154,102 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
     }
 
-    public Iterator<WSUser> getUsers(int skip, int limit) {
+    public int getUsersCount(String query) {
+        query = query.toLowerCase();
+        int c = 0;
         synchronized (lock) {
-            Iterator<WSUser> usersIt = users.values().iterator();
-            for (; skip > 0 && usersIt.hasNext(); --skip) {
-                usersIt.next();
+            for (final WSUser u : users.values()) {
+                if (((WSUserImpl) u).isMatchedQuery(query)) {
+                    ++c;
+                }
             }
-            if (skip > 0) {
-                return Collections.emptyIterator();
+        }
+        return c;
+    }
+
+    public Iterator<WSUser> getUsers(final String query,
+                                     final String orderField,
+                                     final boolean desc,
+                                     int skip,
+                                     int limit) {
+        int i = 0;
+        WSUser[] uarr;
+        synchronized (lock) {
+            uarr = users.values().toArray(new WSUser[users.size()]);
+        }
+        if (orderField != null) { //sort users
+            try {
+                final Collator coll = Collator.getInstance();
+                final Class pclazz = BeanUtils.getPropertyType(WSUser.class, orderField, false);
+                final boolean comparable = Comparable.class.isAssignableFrom(pclazz);
+                Arrays.sort(uarr, new Comparator<WSUser>() {
+                    public int compare(WSUser u1, WSUser u2) {
+                        int res = 0;
+                        try {
+                            Object v1 = BeanUtils.getProperty(u1, orderField);
+                            Object v2 = BeanUtils.getProperty(u2, orderField);
+                            if (comparable) {
+                                res = ObjectUtils.compare((Comparable) v1, (Comparable) v2);
+                            } else {
+                                res = coll.compare(String.valueOf(v1), String.valueOf(v2));
+                            }
+                        } catch (BeanException e) {
+                            log.error("", e);
+                        }
+                        if (desc) {
+                            res *= -1;
+                        }
+                        return res;
+                    }
+                });
+            } catch (BeanException e) {
+                log.error("", e);
+                throw new RuntimeException(e);
             }
-            List<WSUser> ret = new ArrayList<>(Math.min(limit, users.size() - skip));
-            for (; limit > 0 && usersIt.hasNext(); --limit) {
-                ret.add(usersIt.next());
+        }
+        if (skip > 0) {
+            for (; skip > 0 && i < uarr.length; ++i) {
+                if (((WSUserImpl) uarr[i]).isMatchedQuery(query)) {
+                    --skip;
+                }
             }
-            return ret.iterator();
+        }
+        if (i >= uarr.length) {
+            return Collections.emptyIterator();
+        }
+        return new WSUsersIterator(i, limit, uarr, query);
+    }
+
+
+    private static final class WSUsersIterator extends AbstractIterator<WSUser> {
+
+        private int pos;
+
+        private int limit;
+
+        private final WSUser[] users;
+
+        private final String query;
+
+        private WSUsersIterator(int start, int limit, WSUser[] users, String query) {
+            this.pos = start;
+            this.limit = limit;
+            this.query = query;
+            this.users = users;
+        }
+
+        protected WSUser computeNext() {
+            WSUser user = null;
+            while (user == null) {
+                if (pos >= users.length || limit <= 0) {
+                    return endOfData();
+                }
+                if (((WSUserImpl) users[pos++]).isMatchedQuery(query)) {
+                    user = users[pos];
+                    limit--;
+                }
+            }
+            return user;
         }
     }
 
@@ -542,6 +632,21 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             synchronized (lock) {
                 cfg.clearProperty("[@roles]");
             }
+        }
+
+        private boolean isMatchedQuery(String query) {
+            synchronized (lock) {
+                if (getName() != null && getName().toLowerCase().startsWith(query)) {
+                    return true;
+                }
+                if (getEmail() != null && getEmail().toLowerCase().startsWith(query)) {
+                    return true;
+                }
+                if (getFullName() != null && getFullName().toLowerCase().contains(query)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
