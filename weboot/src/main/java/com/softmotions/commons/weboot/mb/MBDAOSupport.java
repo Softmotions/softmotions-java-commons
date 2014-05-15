@@ -62,7 +62,6 @@ public class MBDAOSupport {
         crit.finish();
         sess.select(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId),
                     crit,
-                    crit.getRowBounds(),
                     rh);
     }
 
@@ -81,8 +80,7 @@ public class MBDAOSupport {
     public <E> List<E> selectByCriteria(MBCriteriaQuery crit, String defstmtId) {
         crit.finish();
         return sess.selectList(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId),
-                               crit,
-                               crit.getRowBounds());
+                               crit);
     }
 
     public <E> E selectOneByCriteria(MBCriteriaQuery crit) {
