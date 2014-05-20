@@ -1,5 +1,8 @@
 package com.softmotions.web;
 
+import org.apache.commons.collections.iterators.IteratorEnumeration;
+import org.apache.commons.collections.map.Flat3Map;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -28,6 +31,8 @@ import java.util.Map;
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 public abstract class HttpServletRequestAdapter implements HttpServletRequest {
+
+    private Map<String, Object> attrs;
 
     public String getAuthType() {
         return null;
@@ -158,11 +163,14 @@ public abstract class HttpServletRequestAdapter implements HttpServletRequest {
     }
 
     public Object getAttribute(String name) {
-        return null;
+        return attrs != null ? attrs.get(name) : null;
     }
 
     public Enumeration<String> getAttributeNames() {
-        return Collections.emptyEnumeration();
+        if (attrs == null) {
+            return Collections.emptyEnumeration();
+        }
+        return new IteratorEnumeration(attrs.keySet().iterator());
     }
 
     public String getCharacterEncoding() {
@@ -234,11 +242,16 @@ public abstract class HttpServletRequestAdapter implements HttpServletRequest {
     }
 
     public void setAttribute(String name, Object o) {
-
+        if (attrs == null) {
+            attrs = new Flat3Map();
+        }
+        attrs.put(name, o);
     }
 
     public void removeAttribute(String name) {
-
+        if (attrs != null) {
+            attrs.remove(name);
+        }
     }
 
     public Locale getLocale() {
