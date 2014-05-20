@@ -1,4 +1,4 @@
-package com.softmotions.commons.weboot.mb;
+package com.softmotions.weboot.mb;
 
 import org.apache.ibatis.session.SqlSession;
 

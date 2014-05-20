@@ -1,4 +1,4 @@
-package com.softmotions.commons.weboot;
+package com.softmotions.weboot;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;

@@ -1,4 +1,4 @@
-package com.softmotions.commons.weboot.mb;
+package com.softmotions.weboot.mb;
 
 import com.softmotions.commons.cont.CollectionUtils;
 import com.softmotions.commons.cont.Stack;

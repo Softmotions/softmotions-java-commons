@@ -1,4 +1,4 @@
-package com.softmotions.commons.weboot;
+package com.softmotions.weboot;
 
 
 import ninja.utils.NinjaProperties;

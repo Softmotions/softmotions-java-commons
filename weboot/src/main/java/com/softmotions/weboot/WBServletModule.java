@@ -1,8 +1,8 @@
-package com.softmotions.commons.weboot;
+package com.softmotions.weboot;
 
 import ninja.utils.NinjaProperties;
-import com.softmotions.commons.weboot.eb.WBEBeanModule;
-import com.softmotions.commons.weboot.mb.WBMyBatisModule;
+import com.softmotions.weboot.eb.WBEBeanModule;
+import com.softmotions.weboot.mb.WBMyBatisModule;
 
 import com.google.inject.Module;
 import com.google.inject.Singleton;

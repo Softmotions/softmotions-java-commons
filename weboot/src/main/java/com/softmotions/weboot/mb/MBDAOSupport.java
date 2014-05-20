@@ -1,4 +1,4 @@
-package com.softmotions.commons.weboot.mb;
+package com.softmotions.weboot.mb;
 
 import org.apache.commons.collections.map.Flat3Map;
 import org.apache.ibatis.session.ResultHandler;
