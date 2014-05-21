@@ -1,6 +1,7 @@
 package com.softmotions.web;
 
 import com.softmotions.commons.cl.ClassLoaderUtils;
+import com.softmotions.commons.ctype.CTypeUtils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -26,9 +27,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Servlet provides access to the set of resources
@@ -108,7 +107,7 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
         }
         if (cd.getMimeType() != null) {
             resp.setContentType(cd.getMimeType());
-            if (resp.getCharacterEncoding() == null && isTextualMimeType(cd.getMimeType())) {
+            if (resp.getCharacterEncoding() == null && CTypeUtils.isTextualContentType(cd.getMimeType())) {
                 resp.setCharacterEncoding("UTF-8");
             }
         }
@@ -306,31 +305,6 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                 loader = null;
             }
         }
-    }
-
-    @SuppressWarnings("StaticCollection")
-    static final Set<String> APP_TXT_MTYPES;
-
-    static {
-        APP_TXT_MTYPES = new HashSet<>();
-        APP_TXT_MTYPES.add("application/atom+xml");
-        APP_TXT_MTYPES.add("application/rdf+xml");
-        APP_TXT_MTYPES.add("application/rss+xml");
-        APP_TXT_MTYPES.add("application/soap+xml");
-        APP_TXT_MTYPES.add("application/xop+xml");
-        APP_TXT_MTYPES.add("application/xhtml+xml");
-        APP_TXT_MTYPES.add("application/json");
-        APP_TXT_MTYPES.add("application/javascript");
-        APP_TXT_MTYPES.add("application/xml");
-        APP_TXT_MTYPES.add("application/xml-dtd");
-        APP_TXT_MTYPES.add("application/x-tex");
-        APP_TXT_MTYPES.add("application/x-latex");
-        APP_TXT_MTYPES.add("application/x-javascript");
-        APP_TXT_MTYPES.add("application/ecmascript");
-    }
-
-    private static boolean isTextualMimeType(String mtype) {
-        return mtype != null && (mtype.startsWith("text/") || APP_TXT_MTYPES.contains(mtype));
     }
 
     private static final class JarResourcesClassLoader extends URLClassLoader {
