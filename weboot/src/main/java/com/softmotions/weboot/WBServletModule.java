@@ -2,7 +2,7 @@ package com.softmotions.weboot;
 
 import ninja.utils.NinjaProperties;
 import com.softmotions.weboot.eb.WBEBeanModule;
-import com.softmotions.weboot.mb.WBMyBatisModule;
+import com.softmotions.weboot.mb.MBMyBatisModule;
 
 import com.google.inject.Module;
 import com.google.inject.Singleton;
@@ -52,7 +52,7 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
         bind(WBConfiguration.class).toInstance(cfg);
 
         if (!xcfg.configurationsAt("mybatis").isEmpty()) {
-            install(new WBMyBatisModule(cfg));
+            install(new MBMyBatisModule(cfg));
         }
 
         if (!xcfg.configurationsAt("ebean").isEmpty()) {

@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.guice.XMLMyBatisModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +24,13 @@ import java.util.Properties;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class WBMyBatisModule extends XMLMyBatisModule {
+public class MBMyBatisModule extends MBXMLMyBatisModule {
 
-    private static final Logger log = LoggerFactory.getLogger(WBMyBatisModule.class);
+    private static final Logger log = LoggerFactory.getLogger(MBMyBatisModule.class);
 
     final WBConfiguration cfg;
 
-    public WBMyBatisModule(WBConfiguration cfg) {
+    public MBMyBatisModule(WBConfiguration cfg) {
         this.cfg = cfg;
     }
 
