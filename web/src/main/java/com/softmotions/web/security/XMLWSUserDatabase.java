@@ -594,7 +594,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
         public void removeGroup(WSGroup group) {
             synchronized (lock) {
-                int ind = ArrayUtils.indexOf(roleNames, group.getName());
+                int ind = ArrayUtils.indexOf(groupNames, group.getName());
                 if (ind == -1) {
                     return;
                 }
