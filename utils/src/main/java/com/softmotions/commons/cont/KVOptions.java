@@ -1,5 +1,6 @@
 package com.softmotions.commons.cont;
 
+import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.map.Flat3Map;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,6 +25,7 @@ public class KVOptions extends Flat3Map {
     }
 
     public void loadOptions(String spec) {
+        @SuppressWarnings("MultipleVariablesInDeclaration")
         int idx, sp1 = 0, sp2 = 0;
         int len = spec.length();
         boolean escaped = false;
@@ -55,6 +57,17 @@ public class KVOptions extends Flat3Map {
                 }
             }
         }
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        MapIterator mit = this.mapIterator();
+        while (mit.hasNext()) {
+            sb.append(StringUtils.replace((String) mit.next(), ",", "\\,"));
+            sb.append('=');
+            sb.append(StringUtils.replace((String) mit.getValue(), ",", "\\,"));
+        }
+        return sb.toString();
     }
 }
 
