@@ -43,19 +43,19 @@ public class MBDAOSupport {
     }
 
     public int insert(String stmtId, Object... params) {
-        return sess.insert(toStatementId(stmtId), toParametersMap(params));
+        return sess.insert(toStatementId(stmtId), toParametersObj(params));
     }
 
     public int delete(String stmtId, Object... params) {
-        return sess.delete(toStatementId(stmtId), toParametersMap(params));
+        return sess.delete(toStatementId(stmtId), toParametersObj(params));
     }
 
     public int update(String stmtId, Object... params) {
-        return sess.update(toStatementId(stmtId), toParametersMap(params));
+        return sess.update(toStatementId(stmtId), toParametersObj(params));
     }
 
     public void select(String stmtId, ResultHandler rh, Object... params) {
-        sess.select(toStatementId(stmtId), toParametersMap(params), rh);
+        sess.select(toStatementId(stmtId), toParametersObj(params), rh);
     }
 
     public void selectByCriteria(MBCriteriaQuery crit, ResultHandler rh, String defstmtId) {
@@ -66,11 +66,11 @@ public class MBDAOSupport {
     }
 
     public <E> List<E> select(String stmtId, Object... params) {
-        return sess.selectList(toStatementId(stmtId), toParametersMap(params));
+        return sess.selectList(toStatementId(stmtId), toParametersObj(params));
     }
 
     public <E> List<E> select(String stmtId, RowBounds rb, Object... params) {
-        return sess.selectList(toStatementId(stmtId), toParametersMap(params), rb);
+        return sess.selectList(toStatementId(stmtId), toParametersObj(params), rb);
     }
 
     public <E> List<E> selectByCriteria(MBCriteriaQuery crit) {
@@ -120,7 +120,7 @@ public class MBDAOSupport {
     }
 
     public <E> E selectOne(String stmtId, Object... params) {
-        return sess.selectOne(toStatementId(stmtId), toParametersMap(params));
+        return sess.selectOne(toStatementId(stmtId), toParametersObj(params));
     }
 
     public <T> T withinTransaction(MBAction<T> action) throws SQLException {
@@ -131,12 +131,12 @@ public class MBDAOSupport {
         return new MBCriteriaQuery(this);
     }
 
-    protected static Map<String, Object> toParametersMap(Object[] params) {
+    protected static Object toParametersObj(Object[] params) {
         if (params == null || params.length == 0) {
             return null;
         }
-        if (params.length == 1 && params[0] instanceof Map) {
-            return (Map<String, Object>) params[0];
+        if (params.length == 1) {
+            return params[0];
         }
         Map<String, Object> pmap = (params.length / 2 > 3) ? new HashMap<>(params.length / 2) : new Flat3Map();
         String key = null;
