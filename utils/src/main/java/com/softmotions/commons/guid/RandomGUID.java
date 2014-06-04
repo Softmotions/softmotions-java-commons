@@ -91,10 +91,9 @@ import java.util.Random;
  * @version $Id$
  */
 
-public class RandomGUID {
+public final class RandomGUID {
 
-    public String valueBeforeMD5 = "";
-    public String valueAfterMD5 = "";
+    private String valueAfterMD5;
 
     private static Random myRand;
     private static SecureRandom mySecureRand;
@@ -171,9 +170,7 @@ public class RandomGUID {
             sbValueBeforeMD5.append(Long.toString(time));
             sbValueBeforeMD5.append(":");
             sbValueBeforeMD5.append(Long.toString(rand));
-
-            valueBeforeMD5 = sbValueBeforeMD5.toString();
-            md5.update(valueBeforeMD5.getBytes());
+            md5.update(sbValueBeforeMD5.toString().getBytes());
 
             byte[] array = md5.digest();
             StringBuilder sb = new StringBuilder(34);
