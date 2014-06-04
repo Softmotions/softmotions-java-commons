@@ -177,7 +177,7 @@ public final class RandomGUID {
             for (int j = 0; j < array.length; ++j) {
                 int b = array[j] & 0xFF;
                 if (b < 0x10) sb.append('0');
-                sb.append(Integer.toHexString(b).toUpperCase());
+                sb.append(Integer.toHexString(b));
             }
             valueAfterMD5 = sb.toString();
         } catch (Exception e) {
@@ -188,7 +188,7 @@ public final class RandomGUID {
     /*
      * Convert to the standard format for GUID
      * (Useful for SQL Server UniqueIdentifiers, etc.)
-     * Example: C2FEEEACCFCD11D18B0500600806D9B6
+     * Example: c2feeeaccfcd11d18b0500600806d9b6
      */
     public String toString() {
         return valueAfterMD5;
