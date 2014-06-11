@@ -67,12 +67,16 @@ public class KVOptions extends Flat3Map {
             if (mit.getValue() == null) {
                 continue;
             }
+            String val = mit.getValue().toString();
+            if (val.isEmpty()) {
+                continue;
+            }
             if (i > 0) {
                 sb.append(',');
             }
             sb.append(StringUtils.replace(key, ",", "\\,"));
             sb.append('=');
-            sb.append(StringUtils.replace(String.valueOf(mit.getValue()), ",", "\\,"));
+            sb.append(StringUtils.replace(val, ",", "\\,"));
             ++i;
         }
         return sb.toString();
