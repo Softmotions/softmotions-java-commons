@@ -63,13 +63,14 @@ public class KVOptions extends Flat3Map {
         StringBuilder sb = new StringBuilder();
         MapIterator mit = this.mapIterator();
         for (int i = 0; mit.hasNext(); ) {
+            String key = String.valueOf(mit.next());
             if (mit.getValue() == null) {
                 continue;
             }
             if (i > 0) {
                 sb.append(',');
             }
-            sb.append(StringUtils.replace(String.valueOf(mit.next()), ",", "\\,"));
+            sb.append(StringUtils.replace(key, ",", "\\,"));
             sb.append('=');
             sb.append(StringUtils.replace(String.valueOf(mit.getValue()), ",", "\\,"));
             ++i;
