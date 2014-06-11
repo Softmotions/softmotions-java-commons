@@ -1,12 +1,20 @@
 package com.softmotions.commons.json;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BinaryNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
 
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -17,6 +25,57 @@ import java.util.Map;
 public class JsonUtils {
 
     private JsonUtils() {
+    }
+
+
+    public static Map populateMapByJsonNode(ObjectNode n, Map m, String... keys) {
+        Iterator<Map.Entry<String, JsonNode>> fields = n.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> f = fields.next();
+            String key = f.getKey();
+            if (keys != null && keys.length > 0 && ArrayUtils.indexOf(keys, key) == -1) {
+                continue;
+            }
+            m.put(key, nodeAsObject(f.getValue()));
+        }
+        return m;
+    }
+
+    public static Object nodeAsObject(JsonNode n) {
+        JsonNodeType type = n.getNodeType();
+        switch (type) {
+            case NULL:
+            case MISSING:
+                return null;
+            case STRING:
+                return n.asText();
+            case NUMBER:
+                if (n.isInt()) {
+                    return n.asInt();
+                } else if (n.isLong()) {
+                    return n.asLong();
+                } else if (n.isFloatingPointNumber() || n.isFloat() || n.isDouble()) {
+                    return n.asDouble();
+                }
+                break;
+            case BOOLEAN:
+                return n.asBoolean();
+            case OBJECT:
+                return populateMapByJsonNode((ObjectNode) n, new HashMap());
+            case ARRAY:
+                ArrayNode an = (ArrayNode) n;
+                ArrayList al = new ArrayList(an.size());
+                Iterator<JsonNode> elements = an.elements();
+                while (elements.hasNext()) {
+                    al.add(nodeAsObject(elements.next()));
+                }
+                return al;
+            case POJO:
+                return ((POJONode) n).getPojo();
+            case BINARY:
+                return ((BinaryNode) n).binaryValue();
+        }
+        return new AssertionError("Unknown node type");
     }
 
 
