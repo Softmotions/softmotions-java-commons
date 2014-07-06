@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -80,7 +82,25 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                     continue;
                 }
                 log.info("Installing '" + mclassName + "' Guice module");
-                Object minst = mclass.newInstance();
+                Object minst = null;
+
+                for (Constructor c : mclass.getConstructors()) {
+                    Class[] ptypes = c.getParameterTypes();
+                    if (ptypes.length != 1) {
+                        continue;
+                    }
+                    if (ptypes[0].isAssignableFrom(cfg.getClass())) {
+                        try {
+                            minst = c.newInstance(cfg);
+                        } catch (InvocationTargetException e) {
+                            log.error("", e);
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+                if (minst == null) {
+                    minst = mclass.newInstance();
+                }
                 install((Module) minst);
                 if (minst instanceof WBServletInitializerModule) {
                     ((WBServletInitializerModule) minst).initServlets(this);
