@@ -35,6 +35,11 @@ public class CTypeUtils {
 
 
     public static boolean isTextualContentType(String ctype) {
-        return ctype != null && (ctype.startsWith("text/") || TXT_MTYPES.contains(ctype));
+        return (ctype != null && (ctype.startsWith("text/") || TXT_MTYPES.contains(ctype)));
     }
+
+    public static boolean isImageContentType(String ctype) {
+        return (ctype != null && ctype.startsWith("image/"));
+    }
+
 }
