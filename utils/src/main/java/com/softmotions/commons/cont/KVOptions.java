@@ -25,6 +25,9 @@ public class KVOptions extends Flat3Map {
     }
 
     public void loadOptions(String spec) {
+        if (spec == null) {
+            return;
+        }
         @SuppressWarnings("MultipleVariablesInDeclaration")
         int idx, sp1 = 0, sp2 = 0;
         int len = spec.length();
