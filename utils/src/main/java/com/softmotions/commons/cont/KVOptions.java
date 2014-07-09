@@ -2,6 +2,7 @@ package com.softmotions.commons.cont;
 
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.map.Flat3Map;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -22,6 +23,25 @@ public class KVOptions extends Flat3Map {
 
     public KVOptions(String spec) {
         loadOptions(spec);
+    }
+
+    public boolean getBoolean(String key) {
+        return BooleanUtils.toBoolean(getString(key));
+    }
+
+    public String getString(String key) {
+        return (String) get(key);
+    }
+
+    public int getInt(String key, int defVal) {
+        if (!containsKey(key)) {
+            return defVal;
+        }
+        try {
+            return Integer.parseInt(String.valueOf(get(key)));
+        } catch (NumberFormatException e) {
+            return defVal;
+        }
     }
 
     public void loadOptions(String spec) {
