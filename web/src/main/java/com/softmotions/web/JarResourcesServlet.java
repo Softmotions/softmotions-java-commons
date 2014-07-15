@@ -210,6 +210,9 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
         URL getResourceUrl(String resource) {
             URL resourceUrl;
             resource = resource.substring(prefix.length());
+            if (resource.isEmpty()) {
+                resource = "/index.html";
+            }
             String resourceTranslated = path + ((resource.charAt(0) != '/') ? ("/" + resource) : resource);
             ClassLoader loaderRef = null;
             long mtime;
