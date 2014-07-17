@@ -52,12 +52,15 @@ public class FSWatcher implements Closeable, Runnable {
 
     private Thread watchThread;
 
+    private String name;
 
-    public FSWatcher(FSWatcherEventHandler handler) throws IOException {
-        this(FileSystems.getDefault(), handler);
+
+    public FSWatcher(String name, FSWatcherEventHandler handler) throws IOException {
+        this(name, FileSystems.getDefault(), handler);
     }
 
-    public FSWatcher(FileSystem fileSystem, FSWatcherEventHandler handler) throws IOException {
+    public FSWatcher(String name, FileSystem fileSystem, FSWatcherEventHandler handler) throws IOException {
+        this.name = name;
         this.fileSystem = fileSystem;
         this.keys = new HashSet<>();
         this.slots = new HashMap<>();
@@ -82,15 +85,21 @@ public class FSWatcher implements Closeable, Runnable {
         register(Paths.get(path), recursive);
     }
 
-    public void register(Path path, boolean recursive) throws IOException {
-        register(path, new WatchSlot(recursive));
+    public void register(Path path, final boolean recursive) throws IOException {
         if (recursive) {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    register(dir, true);
+                    register(dir, new WatchSlot(true));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    fireRegister(new FSWatcherRegisterEvent(FSWatcher.this, file));
                     return FileVisitResult.CONTINUE;
                 }
             });
+        } else {
+            register(path, new WatchSlot(false));
         }
     }
 
@@ -103,6 +112,7 @@ public class FSWatcher implements Closeable, Runnable {
                 slots.put(key, slot);
             }
         }
+        fireRegister(new FSWatcherRegisterEvent(this, path));
     }
 
     public void unregister(File path) throws IOException {
@@ -173,6 +183,20 @@ public class FSWatcher implements Closeable, Runnable {
         }
     }
 
+    public void join() throws InterruptedException {
+        join(Long.MAX_VALUE);
+    }
+
+    public void join(long maxWaitMills) throws InterruptedException {
+        Thread wt;
+        synchronized (lock) {
+            wt = this.watchThread;
+        }
+        if (wt != null) {
+            wt.join(maxWaitMills);
+        }
+    }
+
     private void ensureWatchingThread() {
         synchronized (lock) {
             if (watchThread == null ||
@@ -187,6 +211,7 @@ public class FSWatcher implements Closeable, Runnable {
         synchronized (lock) {
             destroyWatchingThread();
             watchThread = new Thread(this, toString());
+            watchThread.start();
         }
     }
 
@@ -200,39 +225,60 @@ public class FSWatcher implements Closeable, Runnable {
 
     protected void fireCreate(FSWatcherCreateEvent ev) {
         if (handler != null) {
-            handler.handleCreateEvent(ev);
+            try {
+                handler.handleCreateEvent(ev);
+            } catch (Exception e) {
+                log.error("", e);
+            }
         }
     }
 
-
     protected void fireModify(FSWatcherModifyEvent ev) {
         if (handler != null) {
-            handler.handleModifyEvent(ev);
+            try {
+                handler.handleModifyEvent(ev);
+            } catch (Exception e) {
+                log.error("", e);
+            }
         }
     }
 
     protected void fireDelete(FSWatcherDeleteEvent ev) {
         if (handler != null) {
-            handler.handleDeleteEvent(ev);
+            try {
+                handler.handleDeleteEvent(ev);
+            } catch (Exception e) {
+                log.error("", e);
+            }
+        }
+    }
+
+
+    protected void fireRegister(FSWatcherRegisterEvent ev) {
+        if (handler != null) {
+            try {
+                handler.handleRegisterEvent(ev);
+            } catch (Exception e) {
+                log.error("", e);
+            }
         }
     }
 
 
     public void run() {
+        log.info("Starting watcher thread: " + Thread.currentThread().getName());
         while (!Thread.currentThread().isInterrupted()) {
             WatchKey key;
             try {
                 key = ws.take();
             } catch (ClosedWatchServiceException | InterruptedException e) {
-                log.warn("Watcher thread: " + Thread.currentThread().getName() + " finished");
-                return;
+                break;
             }
             WatchSlot slot;
             synchronized (lock) {
                 slot = slots.get(key);
             }
             if (slot == null) {
-                log.error("No slots found for watch key=" + key);
                 continue;
             }
             for (WatchEvent ev : key.pollEvents()) {
@@ -269,8 +315,12 @@ public class FSWatcher implements Closeable, Runnable {
                 }
             }
         }
+        log.warn("Watcher thread: " + Thread.currentThread().getName() + " finished");
     }
 
+    public String toString() {
+        return getClass().getSimpleName() + '[' + name + ']';
+    }
 
     private static final class WatchSlot {
 

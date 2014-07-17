@@ -9,6 +9,8 @@ public interface FSWatcherEventHandler {
 
     void init(FSWatcher watcher) throws IOException;
 
+    void handleRegisterEvent(FSWatcherRegisterEvent ev);
+
     void handleCreateEvent(FSWatcherCreateEvent ev);
 
     void handleDeleteEvent(FSWatcherDeleteEvent ev);

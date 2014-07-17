@@ -16,6 +16,8 @@ public class FSWatcherEventSupport implements Serializable {
 
     final Path child;
 
+    final Path fullPath;
+
 
     public FSWatcher getWatcher() {
         return watcher;
@@ -29,10 +31,15 @@ public class FSWatcherEventSupport implements Serializable {
         return child;
     }
 
+    public Path getFullPath() {
+        return fullPath;
+    }
+
     public FSWatcherEventSupport(FSWatcher watcher, Path directory, Path child) {
         this.watcher = watcher;
         this.directory = directory;
         this.child = child;
+        this.fullPath = directory.resolve(child);
     }
 
     public String toString() {

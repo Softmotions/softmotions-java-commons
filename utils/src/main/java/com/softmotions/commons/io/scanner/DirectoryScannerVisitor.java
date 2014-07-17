@@ -9,8 +9,8 @@ import java.nio.file.attribute.BasicFileAttributes;
  */
 public interface DirectoryScannerVisitor {
 
-    void visit(Path file, BasicFileAttributes attrs);
+    void visit(Path file, BasicFileAttributes attrs) throws IOException;
 
-    void error(Path file, IOException exc);
+    void error(Path file, IOException exc) throws IOException;
 
 }

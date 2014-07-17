@@ -19,6 +19,10 @@ public class FSWatcherEBusEventHandler implements FSWatcherEventHandler {
 
     }
 
+    public void handleRegisterEvent(FSWatcherRegisterEvent ev) {
+        ebus.fire(ev);
+    }
+
     public void handleCreateEvent(FSWatcherCreateEvent ev) {
         ebus.fire(ev);
     }
