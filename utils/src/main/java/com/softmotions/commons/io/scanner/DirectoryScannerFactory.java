@@ -8,6 +8,8 @@ import com.softmotions.commons.io.watcher.FSWatcherModifyEvent;
 import com.softmotions.commons.io.watcher.FSWatcherRegisterEvent;
 import com.softmotions.commons.re.RegexpHelper;
 
+import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +29,15 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 /**
- * Abstract directory scanner.
+ * Factory for directory scanners.
+ * <p/>
+ * This implementation is thread-safe but
+ * scanner instances produces by {@link #createScanner()}
+ * may not be thread-safe.
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@ThreadSafe
 public class DirectoryScannerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(DirectoryScannerFactory.class);
@@ -160,6 +167,7 @@ public class DirectoryScannerFactory {
         return new DirectoryScannerImpl();
     }
 
+    @NotThreadSafe
     private class DirectoryScannerImpl
             implements DirectoryScanner, FileVisitor<Path>, FSWatcherEventHandler {
 
