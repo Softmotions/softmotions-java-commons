@@ -7,7 +7,7 @@ import java.nio.file.Path;
  */
 public class FSWatcherDeleteEvent extends FSWatcherEventSupport {
 
-    public FSWatcherDeleteEvent(Path directory, Path child) {
-        super(directory, child);
+    public FSWatcherDeleteEvent(FSWatcher watcher, Path directory, Path child) {
+        super(watcher, directory, child);
     }
 }

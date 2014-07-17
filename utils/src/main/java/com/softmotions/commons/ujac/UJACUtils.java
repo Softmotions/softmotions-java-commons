@@ -391,7 +391,7 @@ public class UJACUtils {
                 return "";
             }
             String val = obj.getValue().toString();
-            if (val.length() == 0) {
+            if (val.isEmpty()) {
                 return "";
             }
             if (Character.isUpperCase(val.charAt(0))) {

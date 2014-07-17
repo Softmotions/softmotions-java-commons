@@ -1,7 +1,5 @@
 package com.softmotions.commons.io.watcher;
 
-import com.google.common.eventbus.EventBus;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,38 +40,38 @@ public class FSWatcher implements Closeable, Runnable {
 
     private final Object lock = new Object();
 
-    private final EventBus ebus;
-
     private final WatchService ws;
 
-    private final FileSystem fsys;
+    private final FileSystem fileSystem;
 
     private final Set<WatchKey> keys;
 
     private final Map<WatchKey, WatchSlot> slots;
 
+    private final FSWatcherEventHandler handler;
+
     private Thread watchThread;
 
-    public FSWatcher(EventBus ebus) throws IOException {
-        this(ebus, FileSystems.getDefault());
+
+    public FSWatcher(FSWatcherEventHandler handler) throws IOException {
+        this(FileSystems.getDefault(), handler);
     }
 
-    public FSWatcher(EventBus ebus, FileSystem fsys) throws IOException {
-        this.ebus = ebus;
-        this.fsys = fsys;
+    public FSWatcher(FileSystem fileSystem, FSWatcherEventHandler handler) throws IOException {
+        this.fileSystem = fileSystem;
         this.keys = new HashSet<>();
         this.slots = new HashMap<>();
-        this.ws = fsys.newWatchService();
+        this.ws = fileSystem.newWatchService();
+        this.handler = handler;
         this.watchThread = null;
         this.initWatchingThread();
-    }
-
-    public EventBus getEventBus() {
-        return this.ebus;
+        if (this.handler != null) {
+            this.handler.init(this);
+        }
     }
 
     public FileSystem getFileSystem() {
-        return this.fsys;
+        return this.fileSystem;
     }
 
     public void register(File file, boolean recursive) throws IOException {
@@ -97,6 +95,7 @@ public class FSWatcher implements Closeable, Runnable {
     }
 
     private void register(Path path, WatchSlot slot) throws IOException {
+        ensureWatchingThread();
         synchronized (lock) {
             WatchKey key = path.register(ws, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
             if (!keys.contains(key)) {
@@ -149,7 +148,7 @@ public class FSWatcher implements Closeable, Runnable {
         return slot;
     }
 
-    public void cleanup() throws IOException {
+    public void reset() throws IOException {
         synchronized (lock) {
             for (final WatchKey k : keys) {
                 k.cancel();
@@ -162,6 +161,7 @@ public class FSWatcher implements Closeable, Runnable {
     public void close() throws IOException {
         try {
             synchronized (lock) {
+                destroyWatchingThread();
                 for (WatchKey k : keys) {
                     k.cancel();
                 }
@@ -173,14 +173,50 @@ public class FSWatcher implements Closeable, Runnable {
         }
     }
 
+    private void ensureWatchingThread() {
+        synchronized (lock) {
+            if (watchThread == null ||
+                !watchThread.isAlive() ||
+                watchThread.isInterrupted()) {
+                initWatchingThread();
+            }
+        }
+    }
+
     private void initWatchingThread() {
+        synchronized (lock) {
+            destroyWatchingThread();
+            watchThread = new Thread(this, toString());
+        }
+    }
+
+    private void destroyWatchingThread() {
         synchronized (lock) {
             if (watchThread != null && watchThread.isAlive()) {
                 watchThread.interrupt();
             }
-            watchThread = new Thread(this, toString());
         }
     }
+
+    protected void fireCreate(FSWatcherCreateEvent ev) {
+        if (handler != null) {
+            handler.handleCreateEvent(ev);
+        }
+    }
+
+
+    protected void fireModify(FSWatcherModifyEvent ev) {
+        if (handler != null) {
+            handler.handleModifyEvent(ev);
+        }
+    }
+
+    protected void fireDelete(FSWatcherDeleteEvent ev) {
+        if (handler != null) {
+            handler.handleDeleteEvent(ev);
+        }
+    }
+
 
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
@@ -207,7 +243,7 @@ public class FSWatcher implements Closeable, Runnable {
                 Path dir = (Path) key.watchable();
                 Path child = (Path) ev.context();
                 if (kind == ENTRY_MODIFY) {
-                    ebus.post(new FSWatcherEventSupport(dir, child));
+                    fireModify(new FSWatcherModifyEvent(this, dir, child));
                 } else if (kind == ENTRY_CREATE) {
                     if (slot.recursive) {
                         child = dir.resolve(child);
@@ -219,9 +255,9 @@ public class FSWatcher implements Closeable, Runnable {
                             }
                         }
                     }
-                    ebus.post(new FSWatcherCreateEvent(dir, child));
+                    fireCreate(new FSWatcherCreateEvent(this, dir, child));
                 } else if (kind == ENTRY_DELETE) {
-                    ebus.post(new FSWatcherDeleteEvent(dir, child));
+                    fireDelete(new FSWatcherDeleteEvent(this, dir, child));
                 } else {
                     log.error("Unknown event type: " + kind);
                 }

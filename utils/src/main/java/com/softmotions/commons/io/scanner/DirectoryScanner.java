@@ -1,22 +1,17 @@
 package com.softmotions.commons.io.scanner;
 
-import java.io.File;
+import com.softmotions.commons.io.watcher.FSWatcher;
+import com.softmotions.commons.io.watcher.FSWatcherEventHandler;
+
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * Abstract directory scanner.
- *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class DirectoryScanner {
+public interface DirectoryScanner extends Closeable {
 
-    protected File basedir;
+    void scan(DirectoryScannerVisitor visitor) throws IOException;
 
-    public DirectoryScanner setBaseDir(File basedir) throws IOException {
-        if (!basedir.isDirectory()) {
-            throw new IOException("Not a directory: " + basedir);
-        }
-        this.basedir = basedir;
-        return this;
-    }
+    FSWatcher activateFileSystemWatcher(FSWatcherEventHandler handler) throws IOException;
 }

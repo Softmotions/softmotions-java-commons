@@ -7,7 +7,7 @@ import java.nio.file.Path;
  */
 public class FSWatcherModifyEvent extends FSWatcherEventSupport {
 
-    public FSWatcherModifyEvent(Path directory, Path child) {
-        super(directory, child);
+    public FSWatcherModifyEvent(FSWatcher watcher, Path directory, Path child) {
+        super(watcher, directory, child);
     }
 }

@@ -6,16 +6,17 @@ public class RegexpHelper {
     }
 
     public static String convertGlobToRegEx(String line) {
+
         line = line.trim();
-        int strLen = line.length();
-        StringBuilder sb = new StringBuilder(strLen);
+        StringBuilder sb = new StringBuilder(line.length());
 
         boolean escaping = false;
-        int inCurlies = 0;
+        int incurlies = 0;
+        char pc = 0;
 
-        char previousChar = 0;
-        for (char currentChar : line.toCharArray()) {
-            switch (currentChar) {
+        for (int i = 0, l = line.length(); i < l; ++i) {
+            char cc = line.charAt(i);
+            switch (cc) {
                 case '*':
                     if (escaping) {
                         sb.append("\\*");
@@ -42,7 +43,7 @@ public class RegexpHelper {
                 case '@':
                 case '%':
                     sb.append('\\');
-                    sb.append(currentChar);
+                    sb.append(cc);
                     escaping = false;
                     break;
                 case '\\':
@@ -58,33 +59,41 @@ public class RegexpHelper {
                         sb.append("\\{");
                     } else {
                         sb.append('(');
-                        inCurlies++;
+                        incurlies++;
                     }
                     escaping = false;
                     break;
                 case '}':
-                    if (inCurlies > 0 && !escaping) {
+                    if (incurlies > 0 && !escaping) {
                         sb.append(')');
-                        inCurlies--;
+                        incurlies--;
                     } else if (escaping) {
                         sb.append("\\}");
                     } else {
-                        sb.append("}");
+                        sb.append('}');
+                    }
+                    escaping = false;
+                    break;
+                case ',':
+                    if (incurlies > 0 && !escaping) {
+                        sb.append('|');
+                    } else {
+                        sb.append(cc);
                     }
                     escaping = false;
                     break;
                 default:
-                    if (Character.isWhitespace(currentChar)) {
-                        if (previousChar != 0
-                            && !Character.isWhitespace(previousChar)) {
+                    if (!escaping && Character.isWhitespace(cc)) {
+                        if (pc != 0 && !Character.isWhitespace(pc)) {
                             sb.append("\\s*");
                         }
                     } else {
-                        sb.append(currentChar);
+                        sb.append(cc);
                     }
                     escaping = false;
+                    break;
             }
-            previousChar = currentChar;
+            pc = cc;
         }
         return sb.toString();
     }
