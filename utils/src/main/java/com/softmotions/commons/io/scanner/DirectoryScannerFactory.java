@@ -70,7 +70,9 @@ public class DirectoryScannerFactory {
             "**/.hgtags",
             "**/.bzr",
             "**/.bzr/**",
-            "**/.bzrignore"
+            "**/.bzrignore",
+            "**/*___jb_bak___",
+            "**/*___jb_old___"
     };
 
     private final Object lock = new Object();
