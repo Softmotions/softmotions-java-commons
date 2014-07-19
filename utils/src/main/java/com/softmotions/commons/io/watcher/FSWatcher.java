@@ -1,5 +1,8 @@
 package com.softmotions.commons.io.watcher;
 
+import com.softmotions.commons.UserDataStore;
+
+import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
@@ -34,7 +38,9 @@ import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class FSWatcher implements Closeable, Runnable {
+
+@ThreadSafe
+public class FSWatcher implements Closeable, Runnable, UserDataStore {
 
     private static final Logger log = LoggerFactory.getLogger(FSWatcher.class);
 
@@ -50,26 +56,43 @@ public class FSWatcher implements Closeable, Runnable {
 
     private final FSWatcherEventHandler handler;
 
+    private final long pollTimeoutMills;
+
     private Thread watchThread;
 
     private String name;
 
+    private Object userData;
 
-    public FSWatcher(String name, FSWatcherEventHandler handler) throws IOException {
-        this(name, FileSystems.getDefault(), handler);
+
+    public FSWatcher(String name, FSWatcherEventHandler handler, long pollTimeoutMills) throws IOException {
+        this(name, FileSystems.getDefault(), handler, pollTimeoutMills);
     }
 
-    public FSWatcher(String name, FileSystem fileSystem, FSWatcherEventHandler handler) throws IOException {
+    public FSWatcher(String name, FileSystem fileSystem, FSWatcherEventHandler handler, long pollTimeoutMills) throws IOException {
         this.name = name;
         this.fileSystem = fileSystem;
         this.keys = new HashSet<>();
         this.slots = new HashMap<>();
         this.ws = fileSystem.newWatchService();
         this.handler = handler;
+        this.pollTimeoutMills = (pollTimeoutMills <= 0) ? Long.MAX_VALUE : pollTimeoutMills;
         this.watchThread = null;
         this.initWatchingThread();
         if (this.handler != null) {
             this.handler.init(this);
+        }
+    }
+
+    public <T> T getUserData() {
+        synchronized (lock) {
+            return (T) userData;
+        }
+    }
+
+    public <T> void setUserData(T data) {
+        synchronized (lock) {
+            userData = data;
         }
     }
 
@@ -122,6 +145,7 @@ public class FSWatcher implements Closeable, Runnable {
     public void unregister(String path) throws IOException {
         unregister(Paths.get(path));
     }
+
 
     public void unregister(Path path) throws IOException {
         WatchSlot slot = unregisterFlat(path);
@@ -270,7 +294,17 @@ public class FSWatcher implements Closeable, Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             WatchKey key;
             try {
-                key = ws.take();
+                key = ws.poll(pollTimeoutMills, TimeUnit.MILLISECONDS);
+                if (key == null) {
+                    if (handler != null) {
+                        try {
+                            handler.handlePollTimeout(this);
+                        } catch (Exception e) {
+                            log.error("", e);
+                        }
+                    }
+                    continue;
+                }
             } catch (ClosedWatchServiceException | InterruptedException e) {
                 break;
             }

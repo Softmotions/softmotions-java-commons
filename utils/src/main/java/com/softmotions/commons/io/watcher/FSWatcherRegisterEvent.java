@@ -5,23 +5,10 @@ import java.nio.file.Path;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class FSWatcherRegisterEvent {
-
-    final FSWatcher watcher;
-
-    final Path fullPath;
-
-    public Path getFullPath() {
-        return fullPath;
-    }
-
-    public FSWatcher getWatcher() {
-        return watcher;
-    }
+public class FSWatcherRegisterEvent extends FSWatcherEventSupport {
 
     public FSWatcherRegisterEvent(FSWatcher watcher, Path fullPath) {
-        this.watcher = watcher;
-        this.fullPath = fullPath;
+        super(watcher, fullPath.getParent(), fullPath.getFileName());
     }
 
     public String toString() {

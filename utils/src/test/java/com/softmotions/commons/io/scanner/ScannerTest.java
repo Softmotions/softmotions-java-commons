@@ -128,7 +128,7 @@ public class ScannerTest {
 
         DirectoryScanner scanner = dsf.createScanner();
         FSWatcherCollectEventHandler cv = new FSWatcherCollectEventHandler(tdir);
-        FSWatcher watcher = scanner.activateFileSystemWatcher(cv);
+        FSWatcher watcher = scanner.activateFileSystemWatcher(cv, 0, null);
         assertNotNull(watcher);
 
         Files.createFile(tdir.resolve("foo.txt"));

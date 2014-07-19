@@ -1,24 +1,32 @@
 package com.softmotions.commons.io.watcher;
 
-import java.io.IOException;
+import net.jcip.annotations.NotThreadSafe;
+
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class FSWatcherCollectEventHandler implements FSWatcherEventHandler {
 
-    private final Set<Path> registered = new HashSet<>();
+@NotThreadSafe
+public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Cloneable {
 
-    private final Set<Path> created = new HashSet<>();
+    public static final int MOVE_CREATED_INTO_MODIFIED = 1;
 
-    private final Set<Path> deleted = new HashSet<>();
+    private ArrayList<Path> registered;
 
-    private final Set<Path> modified = new HashSet<>();
+    private ArrayList<Path> created;
 
-    private final Path basedir;
+    private ArrayList<Path> deleted;
+
+    private ArrayList<Path> modified;
+
+    private Path basedir;
+
+    private int flags;
 
     public FSWatcherCollectEventHandler() {
         this(null);
@@ -28,48 +36,104 @@ public class FSWatcherCollectEventHandler implements FSWatcherEventHandler {
         this.basedir = basedir;
     }
 
-    public Set<Path> getRegistered() {
-        return registered;
+    public FSWatcherCollectEventHandler(int flags) {
+        this.basedir = null;
+        this.flags = flags;
     }
 
-    public Set<Path> getCreated() {
-        return created;
+    public FSWatcherCollectEventHandler(Path basedir, int flags) {
+        this.flags = flags;
+        this.basedir = basedir;
     }
 
-    public Set<Path> getDeleted() {
-        return deleted;
+    public List<Path> getRegistered() {
+        return (registered != null) ? registered : Collections.EMPTY_LIST;
     }
 
-    public Set<Path> getModified() {
-        return modified;
+    public List<Path> getCreated() {
+        return (created != null) ? created : Collections.EMPTY_LIST;
+    }
+
+    public List<Path> getDeleted() {
+        return (deleted != null) ? deleted : Collections.EMPTY_LIST;
+    }
+
+    public List<Path> getModified() {
+        return (modified != null) ? modified : Collections.EMPTY_LIST;
+    }
+
+    public int getFlags() {
+        return flags;
     }
 
     public void clear() {
-        created.clear();
-        deleted.clear();
-        modified.clear();
-        registered.clear();
+        if (created != null) {
+            created.clear();
+        }
+        if (deleted != null) {
+            deleted.clear();
+        }
+        if (modified != null) {
+            modified.clear();
+        }
+        if (registered != null) {
+            registered.clear();
+        }
     }
 
+    public void init(FSWatcher watcher) {
 
-    public void init(FSWatcher watcher) throws IOException {
+    }
+
+    public void handlePollTimeout(FSWatcher watcher) {
 
     }
 
     public void handleRegisterEvent(FSWatcherRegisterEvent ev) {
+        if (registered == null) {
+            registered = new ArrayList<>();
+        }
         registered.add(toPath(ev.getFullPath()));
     }
 
     public void handleCreateEvent(FSWatcherCreateEvent ev) {
-        created.add(toPath(ev.getFullPath()));
+        if ((flags & MOVE_CREATED_INTO_MODIFIED) != 0) {
+            if (modified == null) {
+                modified = new ArrayList<>();
+            }
+            modified.add(toPath(ev.getFullPath()));
+        } else {
+            if (created == null) {
+                created = new ArrayList<>();
+            }
+            created.add(toPath(ev.getFullPath()));
+        }
     }
 
     public void handleDeleteEvent(FSWatcherDeleteEvent ev) {
+        if (deleted == null) {
+            deleted = new ArrayList<>();
+        }
         deleted.add(toPath(ev.getFullPath()));
     }
 
     public void handleModifyEvent(FSWatcherModifyEvent ev) {
+        if (modified == null) {
+            modified = new ArrayList<>();
+        }
         modified.add(toPath(ev.getFullPath()));
+    }
+
+
+    public Object clone() {
+        FSWatcherCollectEventHandler cloned = new FSWatcherCollectEventHandler();
+        cloned.basedir = basedir;
+        cloned.flags = flags;
+        cloned.registered = (registered != null && !registered.isEmpty()) ? (ArrayList<Path>) registered.clone() : null;
+        cloned.modified = (modified != null && !modified.isEmpty()) ? (ArrayList<Path>) modified.clone() : null;
+        cloned.created = (created != null && !created.isEmpty()) ? (ArrayList<Path>) created.clone() : null;
+        cloned.deleted = (deleted != null && !deleted.isEmpty()) ? (ArrayList<Path>) deleted.clone() : null;
+        return cloned;
     }
 
     private Path toPath(Path p) {

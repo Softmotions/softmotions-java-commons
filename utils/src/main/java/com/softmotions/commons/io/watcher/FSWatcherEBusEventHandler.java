@@ -2,8 +2,6 @@ package com.softmotions.commons.io.watcher;
 
 import com.softmotions.commons.ebus.EBus;
 
-import java.io.IOException;
-
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
@@ -15,7 +13,11 @@ public class FSWatcherEBusEventHandler implements FSWatcherEventHandler {
         this.ebus = ebus;
     }
 
-    public void init(FSWatcher watcher) throws IOException {
+    public void init(FSWatcher watcher) {
+
+    }
+
+    public void handlePollTimeout(FSWatcher watcher) {
 
     }
 

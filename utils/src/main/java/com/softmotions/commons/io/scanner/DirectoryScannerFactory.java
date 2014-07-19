@@ -179,6 +179,8 @@ public class DirectoryScannerFactory {
 
         private FSWatcherEventHandler handler;
 
+        private Object userData;
+
         private DirectoryScannerImpl() {
             List<String> iList;
             List<String> eList;
@@ -193,6 +195,15 @@ public class DirectoryScannerFactory {
                 iList.add("**/*");
             }
             matcher = new AntPatternMatcher(iList, eList);
+        }
+
+
+        public <T> T getUserData() {
+            return (T) userData;
+        }
+
+        public <T> void setUserData(T data) {
+            userData = data;
         }
 
         public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) throws IOException {
@@ -230,29 +241,33 @@ public class DirectoryScannerFactory {
             return matcher.voteAll(segments, (attrs != null && attrs.isDirectory()));
         }
 
-        public void init(FSWatcher w) throws IOException {
+        public void init(FSWatcher w) {
         }
 
 
-        public void handleRegisterEvent(FSWatcherRegisterEvent e) {
+        public void handlePollTimeout(FSWatcher watcher) throws Exception {
+            handler.handlePollTimeout(watcher);
+        }
+
+        public void handleRegisterEvent(FSWatcherRegisterEvent e) throws Exception {
             if (!Files.isDirectory(e.getFullPath()) && acceptWatcherEvent(e.getFullPath())) {
                 handler.handleRegisterEvent(e);
             }
         }
 
-        public void handleCreateEvent(FSWatcherCreateEvent e) {
+        public void handleCreateEvent(FSWatcherCreateEvent e) throws Exception {
             if (!Files.isDirectory(e.getFullPath()) && acceptWatcherEvent(e.getFullPath())) {
                 handler.handleCreateEvent(e);
             }
         }
 
-        public void handleDeleteEvent(FSWatcherDeleteEvent e) {
+        public void handleDeleteEvent(FSWatcherDeleteEvent e) throws Exception {
             if (acceptWatcherEvent(e.getFullPath())) {
                 handler.handleDeleteEvent(e);
             }
         }
 
-        public void handleModifyEvent(FSWatcherModifyEvent e) {
+        public void handleModifyEvent(FSWatcherModifyEvent e) throws Exception {
             if (!Files.isDirectory(e.getFullPath()) && acceptWatcherEvent(e.getFullPath())) {
                 handler.handleModifyEvent(e);
             }
@@ -272,12 +287,24 @@ public class DirectoryScannerFactory {
         }
 
         public FSWatcher activateFileSystemWatcher(FSWatcherEventHandler handler) throws IOException {
+            return activateFileSystemWatcher(handler, 0, null);
+        }
+
+
+        public FSWatcher activateFileSystemWatcher(FSWatcherEventHandler handler,
+                                                   long pollTimeoutMills,
+                                                   Object userData) throws IOException {
             if (watcher == null) {
-                watcher = new FSWatcher(basedir.toString(), basedir.getFileSystem(), this);
+                watcher = new FSWatcher(basedir.toString(), basedir.getFileSystem(), this, pollTimeoutMills);
             }
             this.handler = handler;
+            this.watcher.setUserData(userData);
             this.watcher.register(basedir, true);
             return watcher;
+        }
+
+        public Path getBasedir() {
+            return basedir;
         }
 
         public void scan(DirectoryScannerVisitor visitor) throws IOException {

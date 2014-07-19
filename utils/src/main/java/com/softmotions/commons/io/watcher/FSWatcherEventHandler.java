@@ -1,19 +1,19 @@
 package com.softmotions.commons.io.watcher;
 
-import java.io.IOException;
-
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 public interface FSWatcherEventHandler {
 
-    void init(FSWatcher watcher) throws IOException;
+    void init(FSWatcher watcher);
 
-    void handleRegisterEvent(FSWatcherRegisterEvent ev);
+    void handlePollTimeout(FSWatcher watcher) throws Exception;
 
-    void handleCreateEvent(FSWatcherCreateEvent ev);
+    void handleRegisterEvent(FSWatcherRegisterEvent ev) throws Exception;
 
-    void handleDeleteEvent(FSWatcherDeleteEvent ev);
+    void handleCreateEvent(FSWatcherCreateEvent ev) throws Exception;
 
-    void handleModifyEvent(FSWatcherModifyEvent ev);
+    void handleDeleteEvent(FSWatcherDeleteEvent ev) throws Exception;
+
+    void handleModifyEvent(FSWatcherModifyEvent ev) throws Exception;
 }
