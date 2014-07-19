@@ -140,8 +140,7 @@ public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Clon
         if (basedir != null) {
             try {
                 p = basedir.relativize(p);
-            } catch (Exception e) {
-                ;
+            } catch (Exception ignored) {
             }
         }
         return p;
