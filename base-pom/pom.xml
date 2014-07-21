@@ -78,7 +78,7 @@
     <distributionManagement>
         <repository>
             <id>jaxion_repository</id>
-            <url>sftp://nice.france.nsu.ru/home/uis/projects/jaxion/site/mvn</url>
+            <url>sftp://jaxion.org/home/uis/projects/jaxion/site/mvn</url>
         </repository>
     </distributionManagement>
 
