@@ -29,6 +29,10 @@ public class KVOptions extends Flat3Map {
         return BooleanUtils.toBoolean(getString(key));
     }
 
+    public Boolean getBooleanObject(String key) {
+        return BooleanUtils.toBoolean(getString(key));
+    }
+
     public String getString(String key) {
         return (String) get(key);
     }
@@ -43,6 +47,18 @@ public class KVOptions extends Flat3Map {
             return defVal;
         }
     }
+
+    public Integer getIntObject(String key, Integer defVal) {
+        if (!containsKey(key)) {
+            return defVal;
+        }
+        try {
+            return Integer.parseInt(String.valueOf(get(key)));
+        } catch (NumberFormatException e) {
+            return defVal;
+        }
+    }
+
 
     public void loadOptions(String spec) {
         if (spec == null) {
