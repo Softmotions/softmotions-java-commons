@@ -58,6 +58,11 @@ public class MBDAOSupport {
         sess.select(toStatementId(stmtId), toParametersObj(params), rh);
     }
 
+    public long count(String stmtId, Object... params) {
+        Number cnt = sess.selectOne(toStatementId(stmtId), toParametersObj(params));
+        return (cnt != null) ? cnt.longValue() : 0;
+    }
+
     public void selectByCriteria(MBCriteriaQuery crit, ResultHandler rh, String defstmtId) {
         crit.finish();
         sess.select(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId),
