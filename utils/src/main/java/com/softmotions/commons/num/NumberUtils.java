@@ -10,19 +10,19 @@ public class NumberUtils {
     private NumberUtils() {
     }
 
-    public long number2Long(Number n, long defval) {
+    public static long number2Long(Number n, long defval) {
         return (n != null) ? n.longValue() : defval;
     }
 
-    public int number2Int(Number n, int defval) {
+    public static int number2Int(Number n, int defval) {
         return (n != null) ? n.intValue() : defval;
     }
 
-    public boolean number2Boolean(Number n) {
+    public static boolean number2Boolean(Number n) {
         return (n != null) && (n.intValue() != 0);
     }
 
-    public boolean number2Boolean(Number n, boolean defval) {
+    public static boolean number2Boolean(Number n, boolean defval) {
         return (n != null) ? (n.intValue() != 0) : defval;
     }
 }
