@@ -58,6 +58,10 @@ public class MBDAOSupport {
         sess.select(toStatementId(stmtId), toParametersObj(params), rh);
     }
 
+    public <K, V> Map<K, V> selectMap(String stmtId, String mapKey, Object... params) {
+        return sess.selectMap(toStatementId(stmtId), toParametersObj(params), mapKey);
+    }
+
     public long count(String stmtId, Object... params) {
         Number cnt = sess.selectOne(toStatementId(stmtId), toParametersObj(params));
         return (cnt != null) ? cnt.longValue() : 0;
