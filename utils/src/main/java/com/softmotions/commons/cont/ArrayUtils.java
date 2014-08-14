@@ -22,6 +22,11 @@ public class ArrayUtils {
     private ArrayUtils() {
     }
 
+    @SafeVarargs
+    public static <T> boolean isAnyOf(T val, T... vals) {
+        return (indexOf(vals, val) != -1);
+    }
+
     public static <T> int indexOf(T[] array, T el) {
         for (int i = 0, l = array.length; i < l; ++i) {
             if (array[i] == el || array[i].equals(el)) {
