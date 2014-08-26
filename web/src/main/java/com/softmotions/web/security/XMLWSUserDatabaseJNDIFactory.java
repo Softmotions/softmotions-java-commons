@@ -54,7 +54,7 @@ public class XMLWSUserDatabaseJNDIFactory extends AbstractWSUserDatabaseJNDIFact
             }
             log.info("Using database configuration: " + config);
             log.info("autoSave: " + autoSave);
-            db = new WSUserDatabaseWrapper(new XMLWSUserDatabase(name.toString(), config, autoSave));
+            db = createWrapper(new XMLWSUserDatabase(name.toString(), config, autoSave));
             DB_CACHE.put(name, (WSUserDatabaseWrapper) db);
         }
         return db;

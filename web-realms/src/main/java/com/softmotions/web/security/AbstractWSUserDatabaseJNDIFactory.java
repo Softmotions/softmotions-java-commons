@@ -25,6 +25,10 @@ public abstract class AbstractWSUserDatabaseJNDIFactory extends Reference implem
         super(className, factory, factoryLocation);
     }
 
+    protected WSUserDatabase createWrapper(WSUserDatabase wsUserDatabase) {
+        return new WSUserDatabaseWrapper(wsUserDatabase);
+    }
+
     protected static class WSUserDatabaseWrapper implements WSUserDatabase {
 
         private final WSUserDatabase wrapped;
