@@ -106,7 +106,7 @@ public class WSUserDatabaseRealm extends RealmBase {
         }
         WSUser user = (WSUser) principal;
         WSRole dbrole = getDatabase().findRole(role);
-        return (dbrole != null && user.isInRole(dbrole));
+        return (dbrole != null && user.isHasAnyRole(dbrole.getName()));
     }
 
     /**
