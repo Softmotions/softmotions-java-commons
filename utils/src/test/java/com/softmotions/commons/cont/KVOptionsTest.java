@@ -22,5 +22,12 @@ public class KVOptionsTest {
         assertEquals("xxx", opts.get("fff"));
         assertEquals("123", opts.get("k"));
         assertEquals("some, escaped, text", opts.get("esc,aped"));
+
+
+        //allowPages=true,ncms.asm.am.RichRefAM=image=restrict=false\\,width=10\\,skipSmall=true\\,resize=false\,allowDescription=true\,allowImage=true,nestingLevel=2
+        /*opts = new KVOptions("allowPages=true,ncms.asm.am.RichRefAM=image=restrict=false\\\\,width=10\\\\,skipSmall=true\\\\,resize=false\\,allowDescription=true\\,allowImage=true,nestingLevel=2");
+        System.out.println("O=" + opts.keySet());
+        System.out.println("V=" + opts.values());*/
+
     }
 }

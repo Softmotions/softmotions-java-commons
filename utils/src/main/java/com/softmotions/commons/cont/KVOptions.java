@@ -1,5 +1,9 @@
 package com.softmotions.commons.cont;
 
+import com.softmotions.commons.json.JsonUtils;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.map.Flat3Map;
 import org.apache.commons.lang3.BooleanUtils;
@@ -106,8 +110,18 @@ public class KVOptions extends Flat3Map {
             if (mit.getValue() == null) {
                 continue;
             }
-            String val = mit.getValue().toString();
-            if (val.isEmpty()) {
+            Object val = mit.getValue();
+            if (val instanceof Map) {
+                KVOptions nopts = new KVOptions();
+                nopts.putAll((Map) val);
+                val = nopts;
+            } else if (val instanceof ObjectNode) {
+                KVOptions nopts = new KVOptions();
+                JsonUtils.populateMapByJsonNode((ObjectNode) val, nopts);
+                val = nopts;
+            }
+            String sval = val.toString();
+            if (sval.isEmpty()) {
                 continue;
             }
             if (i > 0) {
@@ -115,7 +129,7 @@ public class KVOptions extends Flat3Map {
             }
             sb.append(StringUtils.replace(key, ",", "\\,"));
             sb.append('=');
-            sb.append(StringUtils.replace(val, ",", "\\,"));
+            sb.append(StringUtils.replace(sval, ",", "\\,"));
             ++i;
         }
         return sb.toString();
