@@ -32,10 +32,18 @@
     <orderEntry type="library" name="Maven: com.github.stephenc.jcip:jcip-annotations:1.0-1" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.7" level="project" />
     <orderEntry type="module" module-name="softmotions-web-realms" scope="PROVIDED" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.nimbusds:oauth2-oidc-sdk:3.4.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.mail:mail:1.4.7" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.activation:activation:1.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: net.minidev:json-smart:1.1.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.nimbusds:lang-tag:1.4" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.nimbusds:nimbus-jose-jwt:2.26.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.bouncycastle:bcprov-jdk15on:1.50" level="project" />
     <orderEntry type="library" name="Maven: commons-configuration:commons-configuration:1.10" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax:javaee-web-api:7.0" level="project" />
-    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-simple:1.7.7" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.11" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
