@@ -82,7 +82,7 @@ public class ArrayUtils {
     }
 
 
-    public String[] split(String str, String delims) {
+    public static String[] split(String str, String delims) {
         StringTokenizer st = new StringTokenizer(str, delims);
         String[] res = new String[st.countTokens()];
         for (int i = 0, l = res.length; i < l && st.hasMoreTokens(); ++i) {
