@@ -4,6 +4,7 @@ import com.softmotions.commons.cont.CollectionUtils;
 import com.softmotions.commons.cont.Stack;
 
 import org.apache.commons.collections.map.Flat3Map;
+import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;
@@ -179,6 +180,21 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends Flat3Map {
 
     public <E> List<E> select(String stmtId) {
         return dao.selectByCriteria(this, stmtId);
+    }
+
+
+    public void select(ResultHandler rh) {
+        dao.selectByCriteria(this, rh, null);
+    }
+
+    public void select(String stmtId, ResultHandler rh) {
+        String oldStatement = this.statement;
+        try {
+            this.withStatement(stmtId);
+            dao.selectByCriteria(this, rh, null);
+        } finally {
+            this.statement = oldStatement;
+        }
     }
 
     public <E> E selectOne() {
