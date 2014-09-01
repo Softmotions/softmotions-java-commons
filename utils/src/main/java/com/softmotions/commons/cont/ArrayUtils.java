@@ -13,6 +13,7 @@ import java.lang.reflect.Array;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 
 /**
  * @author Adamansky Anton (anton@adamansky.com)
@@ -78,6 +79,16 @@ public class ArrayUtils {
             sb.append(String.valueOf(Array.get(array, i)));
         }
         return sb.toString();
+    }
+
+
+    public String[] split(String str, String delims) {
+        StringTokenizer st = new StringTokenizer(str, delims);
+        String[] res = new String[st.countTokens()];
+        for (int i = 0, l = res.length; i < l && st.hasMoreTokens(); ++i) {
+            res[i] = st.nextToken();
+        }
+        return res;
     }
 
 
