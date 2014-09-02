@@ -127,6 +127,11 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends Flat3Map {
         return putQ("OFFSET", val);
     }
 
+    public T skip(int val) {
+        rowOffset = val;
+        return putQ("OFFSET", val);
+    }
+
     public String getNamespace() {
         return namespace;
     }
