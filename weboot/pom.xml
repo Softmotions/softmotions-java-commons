@@ -111,22 +111,17 @@
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
             <version>4.9.0</version>
-            <!--<type>jar</type>-->
-            <!--<scope>compile</scope>-->
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.solr</groupId>-->
-            <!--<artifactId>solr-core</artifactId>-->
-            <!--<version>4.9.0</version>-->
-            <!--&lt;!&ndash;<type>jar</type>&ndash;&gt;-->
-            <!--&lt;!&ndash;<scope>compile</scope>&ndash;&gt;-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.solr</groupId>-->
-            <!--<artifactId>solr-common</artifactId>-->
-            <!--<version>1.3.0</version>-->
-            <!--<type>jar</type>-->
-            <!--<scope>compile</scope>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-core</artifactId>
+            <version>4.9.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.jetty.orbit</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 </project>

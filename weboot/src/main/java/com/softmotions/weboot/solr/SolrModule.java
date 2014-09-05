@@ -1,19 +1,24 @@
 package com.softmotions.weboot.solr;
 
+import ninja.lifecycle.Dispose;
+import ninja.lifecycle.Start;
 import com.softmotions.weboot.WBConfiguration;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 
-import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
-import org.apache.solr.client.solrj.request.UpdateRequest;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -24,13 +29,14 @@ import java.util.Iterator;
  */
 public class SolrModule extends AbstractModule {
 
+    protected final static Logger log = LoggerFactory.getLogger(SolrModule.class);
+
     private WBConfiguration cfg;
 
-    private Collection<SolrImportHandler> importHandlers;
+//    private Collection<SolrImportHandler> importHandlers;
 
     public SolrModule(WBConfiguration cfg) {
         this.cfg = cfg;
-        this.importHandlers = new ArrayList<>();
     }
 
     @Override
@@ -44,67 +50,109 @@ public class SolrModule extends AbstractModule {
             XMLConfiguration xcfg = cfg.impl();
             HierarchicalConfiguration scfg = (HierarchicalConfiguration) xcfg.subset("solr");
 
-            // TODO: check
             String providerClassName = scfg.getString("provider[@class]");
             Class<?> providerClass = cl.loadClass(providerClassName);
-            if (!SolrServerProvider.class.isAssignableFrom(providerClass)) {
-                // TODO: error
-                throw new RuntimeException("provider class");
-            }
-            SolrServerProvider ssp = ((Class<? extends SolrServerProvider>) providerClass).newInstance();
-            SolrServer solr = ssp.get(scfg.configurationAt("provider"));
+//        if (!SolrServerProvider.class.isAssignableFrom(providerClass)) {
+////            TODO: error
+//            throw new RuntimeException("provider class");
+//        }
+//
+//        SolrServerProvider ssp = injector.getInstance((Class<? extends SolrServerProvider>) providerClass);;
+//        SolrServer solr = ssp.get(scfg.configurationAt("provider"));
 
-            for (HierarchicalConfiguration dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
-                try {
-                    String dhClassName = dhcfg.getString("[@class]");
-                    Class<?> dhClass = cl.loadClass(dhClassName);
-
-                    // TODO: check
-                    if (!SolrImportHandler.class.isAssignableFrom(dhClass)) {
-                        throw new RuntimeException("data handler");
-                    }
-
-                    importHandlers.add(((Class<? extends SolrImportHandler>) dhClass).newInstance());
-                } catch (ClassNotFoundException e) {
-                    // TODO:
-                }
-            }
-
-            if (scfg.getBoolean("[@rebuildIndex]", false)) {
-                rebuildIndex(solr);
-            }
-
-            bind(SolrServer.class).toInstance(solr);
+            bind(SolrServer.class).toProvider((Class<? extends Provider<? extends SolrServer>>) providerClass).asEagerSingleton();
+            bind(SolrServerInitializer.class).asEagerSingleton();
         } catch (Exception e) {
-            System.out.println();
-            System.out.println("error");
-            // TODO:
+            throw new RuntimeException(e);
         }
+
     }
 
-    protected void rebuildIndex(SolrServer solr) {
-        try {
-            solr.deleteByQuery("*:*");
-            solr.commit();
+    protected static class SolrServerInitializer {
 
-            for (SolrImportHandler importHandler : importHandlers) {
-//                UpdateRequest req = new UpdateRequest();
-//                req.setAction(UpdateRequest.ACTION.COMMIT, false, false);
-//
-//                if (solr instanceof HttpSolrServer) {
-//                    ((HttpSolrServer) solr).add(importHandler.getData());
-//                } else {
-                for (Iterator<SolrInputDocument> iter = importHandler.getData(); iter.hasNext(); ) {
-                    SolrInputDocument doc = iter.next();
-//                    req.add(doc);
-                    solr.add(doc);
+        final Injector injector;
+
+        final WBConfiguration cfg;
+
+        final SolrServer solr;
+
+        @Inject
+        public SolrServerInitializer(Injector injector, WBConfiguration cfg, SolrServer solr) {
+            this.injector = injector;
+            this.cfg = cfg;
+            this.solr = solr;
+        }
+
+        @Start
+        public void start() {
+            ClassLoader cl = ObjectUtils.firstNonNull(
+                    Thread.currentThread().getContextClassLoader(),
+                    getClass().getClassLoader()
+            );
+
+            SubnodeConfiguration scfg = cfg.impl().configurationAt("solr");
+
+            try {
+                Collection<SolrImportHandler> importHandlers = new ArrayList<>();
+
+                for (HierarchicalConfiguration dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
+                    try {
+                        String dhClassName = dhcfg.getString("[@class]");
+                        Class<?> dhClass = cl.loadClass(dhClassName);
+
+                        // TODO: check
+                        if (!SolrImportHandler.class.isAssignableFrom(dhClass)) {
+                            throw new RuntimeException("data handler");
+                        }
+
+                        importHandlers.add(injector.getInstance((Class<? extends SolrImportHandler>) dhClass));
+                    } catch (ClassNotFoundException e) {
+                        // TODO:
+                    }
                 }
-//                }
-                solr.commit();
-//                UpdateResponse rsp = req.process(solr);
+
+                if (scfg.getBoolean("[@rebuildIndex]", false)) {
+                    rebuildIndex(solr, importHandlers);
+                }
+
+                for (SolrImportHandler importHandler : importHandlers) {
+                    importHandler.init();
+                }
+            } catch (Exception e) {
+                // TODO:
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+
+        @Dispose
+        public void shutdown() {
+            solr.shutdown();
+        }
+
+        /**
+         * Rebuild index for all documents
+         */
+        private void rebuildIndex(SolrServer solr, Collection<SolrImportHandler> importHandlers) {
+            try {
+                solr.deleteByQuery("*:*");
+                solr.commit();
+
+
+
+                for (SolrImportHandler importHandler : importHandlers) {
+                    if (solr instanceof HttpSolrServer) {
+                        ((HttpSolrServer) solr).add(importHandler.getData());
+                    } else {
+                        for (Iterator<SolrInputDocument> iter = importHandler.getData(); iter.hasNext(); ) {
+                            SolrInputDocument doc = iter.next();
+                            solr.add(doc);
+                        }
+                    }
+                    solr.commit();
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
