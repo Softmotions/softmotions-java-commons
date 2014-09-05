@@ -100,13 +100,13 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
             String pdir = FilenameUtils.getPath(cfgLocation);
             String lcfg = pdir + lref;
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-            URL url = getUrlForStringFromClasspathAsFileOrUrl(lcfg);
+            URL url = ref2Url(lcfg);
             try {
                 JoranConfigurator configurator = new JoranConfigurator();
                 configurator.setContext(context);
                 context.reset();
                 configurator.doConfigure(url);
-            } catch (JoranException je) {
+            } catch (JoranException ignored) {
                 // StatusPrinter will handle this
             }
             log.info("Successfully configured application logging from: {}", url);
@@ -116,30 +116,25 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         super.contextInitialized(evt);
     }
 
-    private static URL getUrlForStringFromClasspathAsFileOrUrl(String logbackConfigurationFile) {
+    private static URL ref2Url(String ref) {
         URL url = null;
         try {
-            url = Resources.getResource(logbackConfigurationFile);
-        } catch (IllegalArgumentException ex) {
-            // doing nothing intentionally..
+            url = Resources.getResource(ref);
+        } catch (IllegalArgumentException ignored) {
         }
         if (url == null) {
-            // configuring from file:
             try {
-                File file = new File(logbackConfigurationFile);
+                File file = new File(ref);
                 if (file.exists()) {
-                    url = new File(logbackConfigurationFile).toURI().toURL();
+                    url = new File(ref).toURI().toURL();
                 }
-            } catch (MalformedURLException ex) {
-                // doing nothing intentionally..
+            } catch (MalformedURLException ignored) {
             }
         }
         if (url == null) {
             try {
-                // we assume we got a real http://... url here...
-                url = new URL(logbackConfigurationFile);
-            } catch (MalformedURLException ex) {
-                // doing nothing intentionally..
+                url = new URL(ref);
+            } catch (MalformedURLException ignored) {
             }
         }
         return url;
