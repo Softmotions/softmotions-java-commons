@@ -1,7 +1,7 @@
 package com.softmotions.weboot.mb;
 
-import ninja.lifecycle.Dispose;
 import com.softmotions.weboot.WBConfiguration;
+import com.softmotions.weboot.lifecycle.Dispose;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

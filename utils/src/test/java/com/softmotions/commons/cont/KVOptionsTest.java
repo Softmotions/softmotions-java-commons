@@ -2,7 +2,7 @@ package com.softmotions.commons.cont;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 /**
@@ -22,6 +22,9 @@ public class KVOptionsTest {
         assertEquals("xxx", opts.get("fff"));
         assertEquals("123", opts.get("k"));
         assertEquals("some, escaped, text", opts.get("esc,aped"));
+
+
+        System.out.println("opts=" + new KVOptions("foo=n,bar=b"));
 
 
         //allowPages=true,ncms.asm.am.RichRefAM=image=restrict=false\\,width=10\\,skipSmall=true\\,resize=false\,allowDescription=true\,allowImage=true,nestingLevel=2

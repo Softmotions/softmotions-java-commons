@@ -19,6 +19,9 @@ public class Loader {
 
     private static final Logger log = LoggerFactory.getLogger(Loader.class);
 
+    private Loader() {
+    }
+
     public static URL getResourceAsUrl(String location, Class owner) {
         if (location == null) {
             return null;
