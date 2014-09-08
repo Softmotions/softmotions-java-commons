@@ -1,4 +1,4 @@
-package com.softmotions.weboot;
+package com.softmotions.weboot.liquibase;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -7,7 +7,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import ninja.lifecycle.Start;
+import com.softmotions.weboot.WBConfiguration;
+import com.softmotions.weboot.lifecycle.Start;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;

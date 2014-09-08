@@ -68,7 +68,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         this.xmlLocationUrl = Loader.getResourceAsUrl(xmlLocation, getClass());
 
         if (xmlLocationUrl == null) {
-            throw new RuntimeException("Unable to find database xml file: " + xmlLocation);
+            throw new RuntimeException("Failed to find database xml file: " + xmlLocation);
         }
 
         try {

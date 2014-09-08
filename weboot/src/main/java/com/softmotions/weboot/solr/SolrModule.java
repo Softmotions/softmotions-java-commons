@@ -1,8 +1,8 @@
 package com.softmotions.weboot.solr;
 
-import ninja.lifecycle.Dispose;
-import ninja.lifecycle.Start;
 import com.softmotions.weboot.WBConfiguration;
+import com.softmotions.weboot.lifecycle.Dispose;
+import com.softmotions.weboot.lifecycle.Start;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

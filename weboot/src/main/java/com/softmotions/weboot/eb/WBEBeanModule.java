@@ -1,8 +1,8 @@
 package com.softmotions.weboot.eb;
 
-import ninja.lifecycle.Dispose;
-import ninja.lifecycle.Start;
 import com.softmotions.weboot.WBConfiguration;
+import com.softmotions.weboot.lifecycle.Dispose;
+import com.softmotions.weboot.lifecycle.Start;
 
 import com.avaje.ebean.EbeanServer;
 import com.avaje.ebean.EbeanServerFactory;

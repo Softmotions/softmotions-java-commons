@@ -1,7 +1,7 @@
 package com.softmotions.weboot;
 
-import ninja.utils.NinjaProperties;
 import com.softmotions.weboot.eb.WBEBeanModule;
+import com.softmotions.weboot.liquibase.WBLiquibaseModule;
 import com.softmotions.weboot.mb.MBMyBatisModule;
 import com.softmotions.weboot.solr.SolrModule;
 
@@ -42,16 +42,15 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
 
     protected void configureServlets() {
         log.info("Configuring WB modules and servlets");
-        NinjaProperties nprops =
-                (NinjaProperties) getServletContext()
-                        .getAttribute(WBServletListener.WB_NINJA_PROPS_SCTX_KEY);
-        if (nprops == null) {
-            throw new RuntimeException("Unable to find Ninja framework properties in " +
-                                       "ServletContext#" + WBServletListener.WB_NINJA_PROPS_SCTX_KEY
-                                       + " attribute");
+        ServletContext sc = getServletContext();
+        if (sc == null) {
+            return;
         }
-        //Bind configuration
-        cfg = createConfiguration(getServletContext(), nprops);
+        cfg = (C) sc.getAttribute(WBServletListener.WEBOOT_CFG_SCTX_KEY);
+        if (cfg == null) {
+            throw new RuntimeException("Application configuration is not registered in the servlet context, " +
+                                       "key: " + WBServletListener.WEBOOT_CFG_SCTX_KEY);
+        }
         XMLConfiguration xcfg = cfg.impl();
         bind(WBConfiguration.class).toInstance(cfg);
 
@@ -118,8 +117,6 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
 
         init(cfg);
     }
-
-    protected abstract C createConfiguration(ServletContext sctx, NinjaProperties nprops);
 
     protected abstract void init(C cfg);
 

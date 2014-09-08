@@ -1,14 +1,12 @@
 package com.softmotions.weboot;
 
 
-import ninja.utils.NinjaProperties;
 import com.softmotions.commons.io.Loader;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletContext;
 import java.net.URL;
 
 /**
@@ -16,21 +14,15 @@ import java.net.URL;
  */
 public abstract class WBConfiguration {
 
-    protected final Logger log = LoggerFactory.getLogger(getClass());
+    protected XMLConfiguration xcfg;
 
-    protected final NinjaProperties ninjaProperties;
-
-    protected final XMLConfiguration xcfg;
-
-    protected WBConfiguration(NinjaProperties ninjaProperties) {
-        this(ninjaProperties, null, true);
+    protected WBConfiguration() {
     }
 
-    protected WBConfiguration(NinjaProperties ninjaProperties, String cfgResource, boolean resource) {
-        this.ninjaProperties = ninjaProperties;
-        URL cfgUrl = Loader.getResourceAsUrl(cfgResource, resource ? getClass() : null);
+    public void load(String location, ServletContext sctx) {
+        URL cfgUrl = Loader.getResourceAsUrl(location, getClass());
         if (cfgUrl == null) {
-            throw new RuntimeException("Unable to find configuration: " + cfgResource);
+            throw new RuntimeException("Failed to find configuration: " + location);
         }
         try {
             xcfg = new XMLConfiguration(cfgUrl);
@@ -46,8 +38,4 @@ public abstract class WBConfiguration {
     public abstract String getEnvironmentType();
 
     public abstract String getDBEnvironmentType();
-
-    public NinjaProperties getNinjaProperties() {
-        return ninjaProperties;
-    }
 }
