@@ -1,5 +1,6 @@
 package com.softmotions.weboot.solr;
 
+import org.apache.commons.configuration.Configuration;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.util.Iterator;
@@ -8,9 +9,9 @@ import java.util.Iterator;
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
  * @version $Id$
  */
-public interface SolrImportHandler {
+public interface SolrDataHandler {
 
-    void init();
+    void init(Configuration cfg);
 
     Iterator<SolrInputDocument> getData();
 }
