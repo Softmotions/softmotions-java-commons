@@ -145,7 +145,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         this.injector = null;
     }
 
-    protected final Injector getInjector() {
+    public final Injector getInjector() {
         if (injector != null) {
             return injector;
         }
