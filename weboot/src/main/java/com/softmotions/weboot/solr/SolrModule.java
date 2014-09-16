@@ -80,6 +80,7 @@ public class SolrModule extends AbstractModule {
 
         @Start(order = Integer.MAX_VALUE)
         public void start() throws Exception {
+            log.info("Staring SOLR services");
             ClassLoader cl = ObjectUtils.firstNonNull(
                     Thread.currentThread().getContextClassLoader(),
                     getClass().getClassLoader()
@@ -108,6 +109,7 @@ public class SolrModule extends AbstractModule {
 
         @Dispose(order = Integer.MAX_VALUE)
         public void shutdown() {
+            log.info("Shutting down SOLR");
             solr.shutdown();
         }
 
@@ -115,6 +117,7 @@ public class SolrModule extends AbstractModule {
          * Rebuild index for all documents
          */
         private void rebuildIndex(SolrServer solr, Collection<SolrDataHandler> importHandlers) throws Exception {
+            log.info("Rebuilding SORL index");
             solr.deleteByQuery("*:*");
             solr.commit();
 
