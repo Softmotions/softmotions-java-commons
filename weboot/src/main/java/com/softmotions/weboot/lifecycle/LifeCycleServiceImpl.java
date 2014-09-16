@@ -94,6 +94,7 @@ public class LifeCycleServiceImpl implements LifeCycleService {
             lc.stopSet.clear();
         }
         Collections.sort(stopList);
+        Collections.reverse(stopList);
         for (final LCSlot s : stopList) {
             try {
                 lc.invokeTarget(s);

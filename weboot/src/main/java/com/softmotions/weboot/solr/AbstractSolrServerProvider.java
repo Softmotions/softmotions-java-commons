@@ -14,10 +14,13 @@ import javax.inject.Provider;
  */
 public abstract class AbstractSolrServerProvider implements Provider<SolrServer> {
 
-    protected final Configuration cfg;
+    protected final WBConfiguration cfg;
+
+    protected final Configuration scfg;
 
     @Inject
     protected AbstractSolrServerProvider(WBConfiguration cfg) {
-        this.cfg = cfg.impl().configurationAt("solr.provider");
+        this.cfg = cfg;
+        this.scfg = cfg.impl().configurationAt("solr.provider");
     }
 }

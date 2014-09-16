@@ -20,6 +20,6 @@ public class HttpSolrServerProvider extends AbstractSolrServerProvider {
 
     public SolrServer get() {
 //        TODO: check & configure
-        return new HttpSolrServer(cfg.getString("connectionUrl"));
+        return new HttpSolrServer(scfg.getString("connectionUrl"));
     }
 }

@@ -14,9 +14,12 @@ import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 import javax.inject.Inject;
+import java.io.InputStream;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -24,57 +27,65 @@ import javax.inject.Inject;
  */
 public class EmbeddedSolrServerProvider extends AbstractSolrServerProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(EmbeddedSolrServerProvider.class);
+
     @Inject
     public EmbeddedSolrServerProvider(WBConfiguration cfg) {
         super(cfg);
     }
 
     public SolrServer get() {
-        String coreName = cfg.getString("[@name]");
+
+        String coreName = scfg.getString("[@name]");
         if (StringUtils.isBlank(coreName)) {
             throw new RuntimeException("Missing required '@name' parameter for EmbeddedSolrServerProvider");
         }
-        String solrHome = cfg.getString("instance-dir");
+        String solrHome = cfg.substitutePath(scfg.getString("instance-dir"));
         if (StringUtils.isBlank(solrHome)) {
             throw new RuntimeException("Missing required 'instance-dir' parameter for EmbeddedSolrServerProvider");
         }
-        // TODO: substitute {home}|{tmp}|...
-        System.setProperty("solr.solr.home", solrHome);
-
-        SolrResourceLoader solrResourceLoader = new SolrResourceLoader(solrHome);
-
-        String solrConfigFile = cfg.getString("config");
+        String solrConfigFile = scfg.getString("config");
         if (StringUtils.isBlank(solrConfigFile)) {
             throw new RuntimeException("Missing required 'config' parameter for EmbeddedSolrServerProvider");
         }
-        ConfigSolr solrConfig = null;
-        try {
-            solrConfig = ConfigSolr.fromInputStream(solrResourceLoader, Loader.getResourceAsUrl(solrConfigFile, getClass()).openStream());
+        String coreConfigFile = scfg.getString("core-config");
+        if (StringUtils.isBlank(coreConfigFile)) {
+            throw new RuntimeException("Missing required 'core-config' parameter for EmbeddedSolrServerProvider");
+        }
+        String coreSchemaFile = scfg.getString("core-schema");
+        if (StringUtils.isBlank(coreSchemaFile)) {
+            throw new RuntimeException("Missing required 'core-schema' parameter for EmbeddedSolrServerProvider");
+        }
+
+        log.info("SOLR" +
+                 "\n\tHOME: " + solrHome +
+                 "\n\tCORE NAME: " + coreName +
+                 "\n\tCONFIG: " + solrConfigFile +
+                 "\n\tCORE CONFIG: " + coreConfigFile +
+                 "\n\tSCHEMA: " + coreSchemaFile);
+
+        System.setProperty("solr.solr.home", solrHome);
+
+        ConfigSolr solrConfig;
+        SolrConfig coreConfig;
+        IndexSchema coreSchema;
+
+        SolrResourceLoader solrResourceLoader = new SolrResourceLoader(solrHome);
+        try (InputStream is = Loader.getResourceAsUrl(solrConfigFile, getClass()).openStream()) {
+            solrConfig = ConfigSolr.fromInputStream(solrResourceLoader, is);
         } catch (Exception e) {
             throw new RuntimeException("Error loading solr core config: " + e.getLocalizedMessage(), e);
         }
 
         CoreContainer coreContainer = new CoreContainer(solrResourceLoader, solrConfig);
         coreContainer.load();
-
-        String coreConfigFile = cfg.getString("core-config");
-        if (StringUtils.isBlank(coreConfigFile)) {
-            throw new RuntimeException("Missing required 'core-config' parameter for EmbeddedSolrServerProvider");
-        }
-        SolrConfig coreConfig = null;
-        try {
-            coreConfig = new SolrConfig(solrHome, coreName, new InputSource(Loader.getResourceAsUrl(coreConfigFile, getClass()).openStream()));
+        try (InputStream is = Loader.getResourceAsUrl(coreConfigFile, getClass()).openStream()) {
+            coreConfig = new SolrConfig(solrHome, coreName, new InputSource(is));
         } catch (Exception e) {
             throw new RuntimeException("Error loading solr core config: " + e.getLocalizedMessage(), e);
         }
-
-        String coreSchemaFile = cfg.getString("core-schema");
-        if (StringUtils.isBlank(coreSchemaFile)) {
-            throw new RuntimeException("Missing required 'core-schema' parameter for EmbeddedSolrServerProvider");
-        }
-        IndexSchema coreSchema = null;
-        try {
-            coreSchema = new IndexSchema(coreConfig, coreName, new InputSource(Loader.getResourceAsUrl(coreSchemaFile, getClass()).openStream()));
+        try (InputStream is = Loader.getResourceAsUrl(coreSchemaFile, getClass()).openStream()) {
+            coreSchema = new IndexSchema(coreConfig, coreName, new InputSource(is));
         } catch (Exception e) {
             throw new RuntimeException("Error loading solr core shema: " + e.getLocalizedMessage(), e);
         }

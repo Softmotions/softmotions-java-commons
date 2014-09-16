@@ -30,7 +30,7 @@ import java.util.Iterator;
  */
 public class SolrModule extends AbstractModule {
 
-    protected final static Logger log = LoggerFactory.getLogger(SolrModule.class);
+    protected static final Logger log = LoggerFactory.getLogger(SolrModule.class);
 
     private WBConfiguration cfg;
 
@@ -52,7 +52,7 @@ public class SolrModule extends AbstractModule {
         if (StringUtils.isBlank(providerClassName)) {
             throw new RuntimeException("Missing required parameter '@class' for solr server provider");
         }
-        Class<?> providerClass = null;
+        Class<?> providerClass;
         try {
             providerClass = cl.loadClass(providerClassName);
         } catch (ClassNotFoundException e) {
@@ -61,7 +61,6 @@ public class SolrModule extends AbstractModule {
 
         bind(SolrServer.class).toProvider((Class<? extends Provider<? extends SolrServer>>) providerClass).asEagerSingleton();
         bind(SolrServerInitializer.class).asEagerSingleton();
-
     }
 
     protected static class SolrServerInitializer {
@@ -79,7 +78,7 @@ public class SolrModule extends AbstractModule {
             this.solr = solr;
         }
 
-        @Start
+        @Start(order = Integer.MAX_VALUE)
         public void start() throws Exception {
             ClassLoader cl = ObjectUtils.firstNonNull(
                     Thread.currentThread().getContextClassLoader(),
@@ -87,7 +86,6 @@ public class SolrModule extends AbstractModule {
             );
 
             SubnodeConfiguration scfg = cfg.impl().configurationAt("solr");
-
             Collection<SolrDataHandler> dataHandlers = new ArrayList<>();
 
             for (HierarchicalConfiguration dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
@@ -108,7 +106,7 @@ public class SolrModule extends AbstractModule {
             }
         }
 
-        @Dispose
+        @Dispose(order = Integer.MAX_VALUE)
         public void shutdown() {
             solr.shutdown();
         }
