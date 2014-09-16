@@ -1,0 +1,136 @@
+package com.softmotions.weboot.solr;
+
+import com.softmotions.weboot.WBConfiguration;
+import com.softmotions.weboot.lifecycle.Dispose;
+import com.softmotions.weboot.lifecycle.Start;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.SubnodeConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
+/**
+ * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
+ * @version $Id$
+ */
+public class SolrModule extends AbstractModule {
+
+    protected final static Logger log = LoggerFactory.getLogger(SolrModule.class);
+
+    private WBConfiguration cfg;
+
+    public SolrModule(WBConfiguration cfg) {
+        this.cfg = cfg;
+    }
+
+    @Override
+    protected void configure() {
+        ClassLoader cl = ObjectUtils.firstNonNull(
+                Thread.currentThread().getContextClassLoader(),
+                getClass().getClassLoader()
+        );
+
+        XMLConfiguration xcfg = cfg.impl();
+        HierarchicalConfiguration scfg = (HierarchicalConfiguration) xcfg.subset("solr");
+
+        String providerClassName = scfg.getString("provider[@class]");
+        if (StringUtils.isBlank(providerClassName)) {
+            throw new RuntimeException("Missing required parameter '@class' for solr server provider");
+        }
+        Class<?> providerClass = null;
+        try {
+            providerClass = cl.loadClass(providerClassName);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Not found class for solr server provider");
+        }
+
+        bind(SolrServer.class).toProvider((Class<? extends Provider<? extends SolrServer>>) providerClass).asEagerSingleton();
+        bind(SolrServerInitializer.class).asEagerSingleton();
+
+    }
+
+    protected static class SolrServerInitializer {
+
+        final Injector injector;
+
+        final WBConfiguration cfg;
+
+        final SolrServer solr;
+
+        @Inject
+        public SolrServerInitializer(Injector injector, WBConfiguration cfg, SolrServer solr) {
+            this.injector = injector;
+            this.cfg = cfg;
+            this.solr = solr;
+        }
+
+        @Start
+        public void start() throws Exception {
+            ClassLoader cl = ObjectUtils.firstNonNull(
+                    Thread.currentThread().getContextClassLoader(),
+                    getClass().getClassLoader()
+            );
+
+            SubnodeConfiguration scfg = cfg.impl().configurationAt("solr");
+
+            Collection<SolrDataHandler> dataHandlers = new ArrayList<>();
+
+            for (HierarchicalConfiguration dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
+                String dhClassName = dhcfg.getString("[@class]");
+                Class<?> dhClass = cl.loadClass(dhClassName);
+
+                if (!SolrDataHandler.class.isAssignableFrom(dhClass)) {
+                    throw new RuntimeException("Invalid class for solr data handler");
+                }
+
+                SolrDataHandler dataHandler = injector.getInstance((Class<? extends SolrDataHandler>) dhClass);
+                dataHandler.init(dhcfg);
+                dataHandlers.add(dataHandler);
+            }
+
+            if (scfg.getBoolean("[@rebuildIndex]", false)) {
+                rebuildIndex(solr, dataHandlers);
+            }
+        }
+
+        @Dispose
+        public void shutdown() {
+            solr.shutdown();
+        }
+
+        /**
+         * Rebuild index for all documents
+         */
+        private void rebuildIndex(SolrServer solr, Collection<SolrDataHandler> importHandlers) throws Exception {
+            solr.deleteByQuery("*:*");
+            solr.commit();
+
+            for (SolrDataHandler dataHandler : importHandlers) {
+                if (solr instanceof HttpSolrServer) {
+                    ((HttpSolrServer) solr).add(dataHandler.getData());
+                } else {
+                    for (Iterator<SolrInputDocument> iter = dataHandler.getData(); iter.hasNext(); ) {
+                        SolrInputDocument doc = iter.next();
+                        solr.add(doc);
+                    }
+                }
+                solr.commit();
+            }
+        }
+    }
+}
