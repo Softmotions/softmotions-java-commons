@@ -12,9 +12,14 @@ import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +107,8 @@ public class SolrModule extends AbstractModule {
                 dataHandlers.add(dataHandler);
             }
 
-            if (scfg.getBoolean("[@rebuildIndex]", false)) {
+            boolean rebuild = scfg.getBoolean("[@rebuildIndex]", false);
+            if (rebuild || checkEmptyIndex(solr)) {
                 rebuildIndex(solr, dataHandlers);
             }
         }
@@ -111,6 +117,21 @@ public class SolrModule extends AbstractModule {
         public void shutdown() {
             log.info("Shutting down SOLR");
             solr.shutdown();
+        }
+
+        /**
+         * Checks if solr index is empty
+         */
+        private boolean checkEmptyIndex(SolrServer solr) throws Exception {
+            ModifiableSolrParams params = new ModifiableSolrParams();
+
+            params.add(CommonParams.Q, "*");
+            params.add(CommonParams.ROWS, "1");
+
+            QueryResponse queryResponse = solr.query(params);
+            SolrDocumentList results = queryResponse.getResults();
+
+            return results.isEmpty();
         }
 
         /**
