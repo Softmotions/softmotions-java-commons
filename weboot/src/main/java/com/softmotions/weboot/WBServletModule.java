@@ -1,6 +1,5 @@
 package com.softmotions.weboot;
 
-import com.softmotions.weboot.eb.WBEBeanModule;
 import com.softmotions.weboot.liquibase.WBLiquibaseModule;
 import com.softmotions.weboot.mb.MBMyBatisModule;
 import com.softmotions.weboot.solr.SolrModule;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -56,10 +54,6 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
 
         if (!xcfg.configurationsAt("mybatis").isEmpty()) {
             install(new MBMyBatisModule(cfg));
-        }
-
-        if (!xcfg.configurationsAt("ebean").isEmpty()) {
-            install(new WBEBeanModule());
         }
 
         if (!xcfg.configurationsAt("liquibase").isEmpty()) {
