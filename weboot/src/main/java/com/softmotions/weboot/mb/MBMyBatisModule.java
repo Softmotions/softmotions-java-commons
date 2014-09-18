@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.sql.Connection;
@@ -52,6 +53,17 @@ public class MBMyBatisModule extends MBXMLMyBatisModule {
                 String msg = "Failed to load <mybatis> properties";
                 log.error(msg, e);
                 throw new RuntimeException(msg, e);
+            }
+        }
+
+        String propsFile = cfg.substitutePath(xcfg.getString("mybatis[@propsFile]"));
+        if (!StringUtils.isBlank(propsFile)) {
+            log.info("MyBatis loading the properties file: " + propsFile);
+            try (FileInputStream is = new FileInputStream(propsFile)) {
+                props.load(is);
+            } catch (IOException e) {
+                log.error("Failed to load the properties file: " + propsFile);
+                throw new RuntimeException(e);
             }
         }
         addProperties(props);
