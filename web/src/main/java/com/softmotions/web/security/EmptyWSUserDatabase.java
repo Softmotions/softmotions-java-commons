@@ -15,6 +15,26 @@ public class EmptyWSUserDatabase implements WSUserDatabase {
         this.databaseName = name;
     }
 
+    public boolean isCanUsersWrite() {
+        return false;
+    }
+
+    public boolean isCanUsersAccessWrite() {
+        return false;
+    }
+
+    public boolean isCanGroupsWrite() {
+        return false;
+    }
+
+    public boolean isCanRolesWrite() {
+        return false;
+    }
+
+    public int getWriteMask() {
+        return 0;
+    }
+
     public String getDatabaseName() {
         return databaseName;
     }

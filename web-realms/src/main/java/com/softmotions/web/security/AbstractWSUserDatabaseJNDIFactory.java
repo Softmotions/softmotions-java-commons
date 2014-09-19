@@ -37,6 +37,26 @@ public abstract class AbstractWSUserDatabaseJNDIFactory extends Reference implem
             this.wrapped = wrapped;
         }
 
+        public boolean isCanUsersWrite() {
+            return wrapped.isCanUsersWrite();
+        }
+
+        public boolean isCanUsersAccessWrite() {
+            return wrapped.isCanUsersAccessWrite();
+        }
+
+        public boolean isCanGroupsWrite() {
+            return wrapped.isCanGroupsWrite();
+        }
+
+        public boolean isCanRolesWrite() {
+            return wrapped.isCanRolesWrite();
+        }
+
+        public int getWriteMask() {
+            return wrapped.getWriteMask();
+        }
+
         public String getDatabaseName() {
             return wrapped.getDatabaseName();
         }

@@ -59,6 +59,26 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
     private boolean canSave;
 
+    public boolean isCanUsersWrite() {
+        return canSave;
+    }
+
+    public boolean isCanUsersAccessWrite() {
+        return canSave;
+    }
+
+    public boolean isCanGroupsWrite() {
+        return canSave;
+    }
+
+    public boolean isCanRolesWrite() {
+        return canSave;
+    }
+
+    public int getWriteMask() {
+        return canSave ? USERS_WRITABLE | GROUPS_WRITABLE | ROLES_WRITABLE | USERS_ACCESS_WRITABLE : 0;
+    }
+
     public String getDatabaseName() {
         return databaseName;
     }
