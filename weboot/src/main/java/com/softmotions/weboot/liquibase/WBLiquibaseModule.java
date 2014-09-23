@@ -47,7 +47,7 @@ public class WBLiquibaseModule extends AbstractModule {
 
         @Start(order = 10)
         public void start() {
-            XMLConfiguration xcfg = cfg.impl();
+            XMLConfiguration xcfg = cfg.xcfg();
             SubnodeConfiguration lbCfg = xcfg.configurationAt("liquibase");
             if (lbCfg == null) {
                 log.warn("No <liquibase> configuration found");

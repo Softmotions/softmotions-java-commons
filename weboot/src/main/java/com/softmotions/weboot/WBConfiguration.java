@@ -88,7 +88,7 @@ public abstract class WBConfiguration {
         return sessionTmpDir;
     }
 
-    public XMLConfiguration impl() {
+    public XMLConfiguration xcfg() {
         return xcfg;
     }
 

@@ -36,7 +36,7 @@ public class MBMyBatisModule extends MBXMLMyBatisModule {
     }
 
     protected void initialize() {
-        XMLConfiguration xcfg = cfg.impl();
+        XMLConfiguration xcfg = cfg.xcfg();
         setEnvironmentId(cfg.getDBEnvironmentType());
         String cfgLocation = xcfg.getString("mybatis[@config]");
         if (cfgLocation == null) {
@@ -116,7 +116,7 @@ public class MBMyBatisModule extends MBXMLMyBatisModule {
         public void shutdown() {
             log.info("Shutting down MyBatis datasource");
             DataSource ds = dsProvider.get();
-            String shutdownSql = cfg.impl().getString("mybatis[@shutdownSQL]");
+            String shutdownSql = cfg.xcfg().getString("mybatis[@shutdownSQL]");
             if (ds != null && !StringUtils.isBlank(shutdownSql)) {
                 log.info("Executing shutdown SQL: '" + shutdownSql + '\'');
                 try (Connection c = ds.getConnection()) {

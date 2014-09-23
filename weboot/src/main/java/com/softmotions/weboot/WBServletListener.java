@@ -95,7 +95,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         cfg.load(cfgLocation, sctx);
 
         //init logging
-        String lref = cfg.impl().getString("logging[@ref]");
+        String lref = cfg.xcfg().getString("logging[@ref]");
         if (!StringUtils.isBlank(lref)) {
             String pdir = FilenameUtils.getPath(cfgLocation);
             String lcfg = pdir + lref;

@@ -21,6 +21,6 @@ public abstract class AbstractSolrServerProvider implements Provider<SolrServer>
     @Inject
     protected AbstractSolrServerProvider(WBConfiguration cfg) {
         this.cfg = cfg;
-        this.scfg = cfg.impl().configurationAt("solr.provider");
+        this.scfg = cfg.xcfg().configurationAt("solr.provider");
     }
 }

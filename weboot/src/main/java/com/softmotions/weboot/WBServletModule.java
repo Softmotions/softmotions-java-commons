@@ -49,7 +49,7 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
             throw new RuntimeException("Application configuration is not registered in the servlet context, " +
                                        "key: " + WBServletListener.WEBOOT_CFG_SCTX_KEY);
         }
-        XMLConfiguration xcfg = cfg.impl();
+        XMLConfiguration xcfg = cfg.xcfg();
         bind(WBConfiguration.class).toInstance(cfg);
 
         if (!xcfg.configurationsAt("mybatis").isEmpty()) {

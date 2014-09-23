@@ -12,7 +12,6 @@ import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -50,7 +49,7 @@ public class SolrModule extends AbstractModule {
                 getClass().getClassLoader()
         );
 
-        XMLConfiguration xcfg = cfg.impl();
+        XMLConfiguration xcfg = cfg.xcfg();
         HierarchicalConfiguration scfg = (HierarchicalConfiguration) xcfg.subset("solr");
 
         String providerClassName = scfg.getString("provider[@class]");
@@ -91,7 +90,7 @@ public class SolrModule extends AbstractModule {
                     getClass().getClassLoader()
             );
 
-            SubnodeConfiguration scfg = cfg.impl().configurationAt("solr");
+            SubnodeConfiguration scfg = cfg.xcfg().configurationAt("solr");
             Collection<SolrDataHandler> dataHandlers = new ArrayList<>();
 
             for (HierarchicalConfiguration dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
