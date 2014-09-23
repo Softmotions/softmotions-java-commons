@@ -11,9 +11,15 @@ public class HttpUtils {
     }
 
     public static String toAbsoluteUrl(HttpServletRequest req) {
+        return toAbsoluteUrl(req, null, null);
+    }
+
+    public static String toAbsoluteUrl(HttpServletRequest req,
+                                       String overrideServerName,
+                                       Integer overrideServerPort) {
         String u = req.getScheme() +
-                   "://" + req.getServerName() +
-                   ":" + req.getServerPort() +
+                   "://" + ((overrideServerName != null) ? overrideServerName : req.getServerName()) +
+                   ":" + ((overrideServerPort != null) ? overrideServerPort : req.getServerPort()) +
                    req.getRequestURI();
         if (req.getQueryString() != null) {
             u += '?' + req.getQueryString();
