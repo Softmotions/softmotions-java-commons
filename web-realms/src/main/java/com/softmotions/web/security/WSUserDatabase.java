@@ -15,47 +15,47 @@ public interface WSUserDatabase extends Closeable {
     /**
      * Flag "can edit users (parameters)" in access mask (include creation/deletion users)
      */
-    public static final int USERS_WRITABLE = 1;
+    int USERS_WRITABLE = 1;
 
     /**
      * Flag "can edit groups" in access mask (include creation/deletion groups)
      */
-    public static final int GROUPS_WRITABLE = 1 << 1;
+    int GROUPS_WRITABLE = 1 << 1;
 
     /**
      * Flag "can edit roles" in access mask (include creation/deletion roles)
      */
-    public static final int ROLES_WRITABLE = 1 << 2;
+    int ROLES_WRITABLE = 1 << 2;
 
     /**
      * Flag "can edit users access" in access mask: add/remove groups and roles for users
      */
-    public static final int USERS_ACCESS_WRITABLE = 1 << 3;
+    int USERS_ACCESS_WRITABLE = 1 << 3;
 
     /**
      * Returns <code>true</code> if can write users parameters (name, email, ...; include creation/deletion), otherwise returns <code>false</code>
      */
-    public boolean isCanUsersWrite();
+    boolean isCanUsersWrite();
 
     /**
      * Returns <code>true</code> if can edit users access (list of roles and groups), otherwise returns <code>false</code>
      */
-    public boolean isCanUsersAccessWrite();
+    boolean isCanUsersAccessWrite();
 
     /**
      * Returns <code>true</code> if can write groups parameters (include creation/deletion), otherwise returns <code>false</code>
      */
-    public boolean isCanGroupsWrite();
+    boolean isCanGroupsWrite();
 
     /**
      * Returns <code>true</code> if can write roles parameters (include creation/deletion), otherwise returns <code>false</code>
      */
-    public boolean isCanRolesWrite();
+    boolean isCanRolesWrite();
 
     /**
      * Return access mask for write operations
      */
-    public int getWriteMask();
+    int getWriteMask();
 
 
     /**
