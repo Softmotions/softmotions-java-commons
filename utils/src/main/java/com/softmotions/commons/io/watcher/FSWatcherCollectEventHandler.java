@@ -1,7 +1,7 @@
 package com.softmotions.commons.io.watcher;
 
-import net.jcip.annotations.NotThreadSafe;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import java.util.List;
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 
+@SuppressWarnings("unchecked")
 @NotThreadSafe
 public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Cloneable {
 

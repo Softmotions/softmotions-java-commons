@@ -2,10 +2,10 @@ package com.softmotions.commons.io.watcher;
 
 import com.softmotions.commons.UserDataStore;
 
-import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;

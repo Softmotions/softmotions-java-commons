@@ -9,10 +9,10 @@ package com.softmotions.commons.perf;
 
 import com.softmotions.commons.cont.Stack;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -29,6 +29,8 @@ import java.util.Objects;
  * @author Adamansky Anton (anton@adamansky.com)
  * @version $Id: TimePointLogger.java 14910 2010-08-25 04:45:39Z adam $
  */
+
+@NotThreadSafe
 public final class TimePointLogger {
 
     private final Logger log = LoggerFactory.getLogger(TimePointLogger.class);
