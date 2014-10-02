@@ -133,6 +133,7 @@
     <modules>
         <module>ant</module>
         <module>utils</module>
+        <module>utils-ujac</module>
         <module>web</module>
         <module>weboot</module>
         <module>web-realms</module>

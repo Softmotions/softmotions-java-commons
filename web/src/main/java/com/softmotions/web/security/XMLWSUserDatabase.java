@@ -1,5 +1,7 @@
 package com.softmotions.web.security;
 
+import com.softmotions.commons.bean.BeanException;
+import com.softmotions.commons.bean.BeanUtils;
 import com.softmotions.commons.cont.ArrayUtils;
 import com.softmotions.commons.io.Loader;
 
@@ -14,8 +16,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ujac.util.BeanException;
-import org.ujac.util.BeanUtils;
 
 import java.io.File;
 import java.io.IOException;

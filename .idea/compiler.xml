@@ -34,6 +34,7 @@
         <module name="softmotions-weboot" />
         <module name="solr" />
         <module name="utils" />
+        <module name="utils-ujac" />
         <module name="web" />
         <module name="web-realms" />
         <module name="weboot" />
@@ -55,6 +56,7 @@
       <module name="softmotions-weboot" target="1.7" />
       <module name="solr" target="1.7" />
       <module name="utils" target="1.7" />
+      <module name="utils-ujac" target="1.7" />
       <module name="web" target="1.7" />
       <module name="web-realms" target="1.7" />
       <module name="weboot" target="1.7" />
