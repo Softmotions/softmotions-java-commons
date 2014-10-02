@@ -63,6 +63,7 @@ public class WBMongoModule extends AbstractModule {
 
         private final Provider<WBMongo> mp;
 
+        @Inject
         DBProvider(Provider<WBMongo> mp) {
             this.mp = mp;
         }
@@ -77,6 +78,7 @@ public class WBMongoModule extends AbstractModule {
 
         private final Provider<WBMongo> mp;
 
+        @Inject
         MongoProvider(Provider<WBMongo> mp) {
             this.mp = mp;
         }
@@ -91,6 +93,7 @@ public class WBMongoModule extends AbstractModule {
 
         private final Provider<WBMongo> mp;
 
+        @Inject
         JongoProvider(Provider<WBMongo> mp) {
             this.mp = mp;
         }
