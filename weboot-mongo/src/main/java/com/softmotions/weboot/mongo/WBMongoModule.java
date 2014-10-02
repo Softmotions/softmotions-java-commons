@@ -53,6 +53,51 @@ public class WBMongoModule extends AbstractModule {
             return;
         }
         bind(WBMongo.class).toProvider(WBMongoProvider.class).in(Singleton.class);
+        bind(Jongo.class).toProvider(JongoProvider.class).in(Singleton.class);
+        bind(Mongo.class).toProvider(MongoProvider.class).in(Singleton.class);
+        bind(DB.class).toProvider(DBProvider.class).in(Singleton.class);
+    }
+
+
+    static class DBProvider implements Provider<DB> {
+
+        private final Provider<WBMongo> mp;
+
+        DBProvider(Provider<WBMongo> mp) {
+            this.mp = mp;
+        }
+
+        public DB get() {
+            return mp.get().getDefaultDB();
+        }
+    }
+
+
+    static class MongoProvider implements Provider<Mongo> {
+
+        private final Provider<WBMongo> mp;
+
+        MongoProvider(Provider<WBMongo> mp) {
+            this.mp = mp;
+        }
+
+        public Mongo get() {
+            return mp.get().getMongo();
+        }
+    }
+
+
+    static class JongoProvider implements Provider<Jongo> {
+
+        private final Provider<WBMongo> mp;
+
+        JongoProvider(Provider<WBMongo> mp) {
+            this.mp = mp;
+        }
+
+        public Jongo get() {
+            return mp.get().getJongo();
+        }
     }
 
 
