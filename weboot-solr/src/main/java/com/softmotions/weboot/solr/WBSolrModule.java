@@ -32,13 +32,13 @@ import java.util.Iterator;
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
  * @version $Id$
  */
-public class SolrModule extends AbstractModule {
+public class WBSolrModule extends AbstractModule {
 
-    protected static final Logger log = LoggerFactory.getLogger(SolrModule.class);
+    protected static final Logger log = LoggerFactory.getLogger(WBSolrModule.class);
 
     private WBConfiguration cfg;
 
-    public SolrModule(WBConfiguration cfg) {
+    public WBSolrModule(WBConfiguration cfg) {
         this.cfg = cfg;
     }
 

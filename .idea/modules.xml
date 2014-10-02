@@ -11,6 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/web-realms/web-realms.iml" filepath="$PROJECT_DIR$/web-realms/web-realms.iml" />
       <module fileurl="file://$PROJECT_DIR$/weboot/weboot.iml" filepath="$PROJECT_DIR$/weboot/weboot.iml" />
       <module fileurl="file://$PROJECT_DIR$/weboot-liqubase/weboot-liqubase.iml" filepath="$PROJECT_DIR$/weboot-liqubase/weboot-liqubase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/weboot-mongo/weboot-mongo.iml" filepath="$PROJECT_DIR$/weboot-mongo/weboot-mongo.iml" />
       <module fileurl="file://$PROJECT_DIR$/weboot-mybatis/weboot-mybatis.iml" filepath="$PROJECT_DIR$/weboot-mybatis/weboot-mybatis.iml" />
       <module fileurl="file://$PROJECT_DIR$/weboot-solr/weboot-solr.iml" filepath="$PROJECT_DIR$/weboot-solr/weboot-solr.iml" />
     </modules>

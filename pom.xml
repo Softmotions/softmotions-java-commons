@@ -140,6 +140,7 @@
         <module>weboot-solr</module>
         <module>weboot-mybatis</module>
         <module>weboot-liqubase</module>
+        <module>weboot-mongo</module>
     </modules>
 
 </project>

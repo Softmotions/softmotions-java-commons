@@ -25,13 +25,13 @@ import java.util.Properties;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class MBMyBatisModule extends MBXMLMyBatisModule {
+public class WBMyBatisModule extends MBXMLMyBatisModule {
 
-    private static final Logger log = LoggerFactory.getLogger(MBMyBatisModule.class);
+    private static final Logger log = LoggerFactory.getLogger(WBMyBatisModule.class);
 
     final WBConfiguration cfg;
 
-    public MBMyBatisModule(WBConfiguration cfg) {
+    public WBMyBatisModule(WBConfiguration cfg) {
         this.cfg = cfg;
     }
 
