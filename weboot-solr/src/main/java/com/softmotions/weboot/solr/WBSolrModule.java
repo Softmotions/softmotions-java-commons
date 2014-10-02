@@ -5,7 +5,10 @@ import com.softmotions.weboot.lifecycle.Dispose;
 import com.softmotions.weboot.lifecycle.Start;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -59,14 +62,14 @@ public class WBSolrModule extends AbstractModule {
         if (StringUtils.isBlank(providerClassName)) {
             throw new RuntimeException("Missing required parameter '@class' for solr server provider");
         }
-        Class<?> providerClass;
+        Class<? extends Provider<? extends SolrServer>> providerClass;
         try {
-            providerClass = cl.loadClass(providerClassName);
+            providerClass = (Class<? extends Provider<? extends SolrServer>>) cl.loadClass(providerClassName);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Not found class for solr server provider");
         }
 
-        bind(SolrServer.class).toProvider((Class<? extends Provider<? extends SolrServer>>) providerClass).asEagerSingleton();
+        bind(SolrServer.class).toProvider(providerClass).in(Singleton.class);
         bind(SolrServerInitializer.class).asEagerSingleton();
     }
 
@@ -76,18 +79,17 @@ public class WBSolrModule extends AbstractModule {
 
         final WBConfiguration cfg;
 
-        final SolrServer solr;
-
         @Inject
-        public SolrServerInitializer(Injector injector, WBConfiguration cfg, SolrServer solr) {
+        public SolrServerInitializer(Injector injector, WBConfiguration cfg) {
             this.injector = injector;
             this.cfg = cfg;
-            this.solr = solr;
         }
 
         @Start(order = Integer.MAX_VALUE, parallel = true)
         public void start() throws Exception {
             log.info("Staring SOLR services");
+            SolrServer solr = injector.getInstance(SolrServer.class);
+
             ClassLoader cl = ObjectUtils.firstNonNull(
                     Thread.currentThread().getContextClassLoader(),
                     getClass().getClassLoader()
@@ -117,8 +119,12 @@ public class WBSolrModule extends AbstractModule {
 
         @Dispose(order = Integer.MAX_VALUE)
         public void shutdown() {
-            log.info("Shutting down SOLR");
-            solr.shutdown();
+            log.info("Shutting down SOLR server");
+            Binding<SolrServer> sb = injector.getExistingBinding(Key.get(SolrServer.class));
+            if (sb != null) {
+                SolrServer solr = sb.getProvider().get();
+                solr.shutdown();
+            }
         }
 
         /**
