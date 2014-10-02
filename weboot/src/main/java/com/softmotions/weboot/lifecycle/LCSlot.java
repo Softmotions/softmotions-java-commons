@@ -9,11 +9,13 @@ class LCSlot implements Comparable<LCSlot> {
     final Method method;
     final Object target;
     final int order;
+    final boolean parallel;
 
-    LCSlot(Method method, Object target, int order) {
+    LCSlot(Method method, Object target, int order, boolean parallel) {
         this.method = method;
         this.target = target;
         this.order = order;
+        this.parallel = parallel;
     }
 
     public int compareTo(LCSlot o) {

@@ -85,7 +85,7 @@ public class WBSolrModule extends AbstractModule {
             this.solr = solr;
         }
 
-        @Start(order = Integer.MAX_VALUE)
+        @Start(order = Integer.MAX_VALUE, parallel = true)
         public void start() throws Exception {
             log.info("Staring SOLR services");
             ClassLoader cl = ObjectUtils.firstNonNull(
