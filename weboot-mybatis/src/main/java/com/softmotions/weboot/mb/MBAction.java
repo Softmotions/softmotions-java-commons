@@ -10,5 +10,5 @@ import java.sql.SQLException;
  */
 public interface MBAction<T> {
 
-     T exec(SqlSession sess, Connection conn) throws SQLException;
+    T exec(SqlSession sess, Connection conn) throws SQLException;
 }

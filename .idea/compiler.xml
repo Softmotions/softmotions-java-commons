@@ -24,6 +24,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="ant" />
         <module name="softmotions-ant" />
         <module name="softmotions-base-pom" />
         <module name="softmotions-pom" />
@@ -31,7 +32,14 @@
         <module name="softmotions-web" />
         <module name="softmotions-web-realms" />
         <module name="softmotions-weboot" />
+        <module name="solr" />
+        <module name="utils" />
+        <module name="web" />
+        <module name="web-realms" />
         <module name="weboot" />
+        <module name="weboot-liqubase" />
+        <module name="weboot-mybatis" />
+        <module name="weboot-solr" />
         <module name="webrealms" />
       </profile>
     </annotationProcessing>
@@ -45,7 +53,14 @@
       <module name="softmotions-web" target="1.7" />
       <module name="softmotions-web-realms" target="1.7" />
       <module name="softmotions-weboot" target="1.7" />
+      <module name="solr" target="1.7" />
+      <module name="utils" target="1.7" />
+      <module name="web" target="1.7" />
+      <module name="web-realms" target="1.7" />
       <module name="weboot" target="1.7" />
+      <module name="weboot-liqubase" target="1.7" />
+      <module name="weboot-mybatis" target="1.7" />
+      <module name="weboot-solr" target="1.7" />
       <module name="webrealms" target="1.7" />
     </bytecodeTargetLevel>
   </component>

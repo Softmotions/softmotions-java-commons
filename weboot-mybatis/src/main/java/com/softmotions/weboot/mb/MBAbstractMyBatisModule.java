@@ -28,7 +28,7 @@ public abstract class MBAbstractMyBatisModule extends AbstractModule {
      * {@inheritDoc}
      */
     @Override
-    protected final void configure() {
+    protected void configure() {
         try {
             // sql session manager
             bind(MBSqlSessionManager.class).toProvider(createSqlSessionManagerProviderClass()).in(Scopes.SINGLETON);

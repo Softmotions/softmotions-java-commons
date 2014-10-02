@@ -1,9 +1,5 @@
 package com.softmotions.weboot;
 
-import com.softmotions.weboot.liquibase.WBLiquibaseModule;
-import com.softmotions.weboot.mb.MBMyBatisModule;
-import com.softmotions.weboot.solr.SolrModule;
-
 import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
@@ -52,14 +48,6 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
         XMLConfiguration xcfg = cfg.xcfg();
         bind(WBConfiguration.class).toInstance(cfg);
 
-        if (!xcfg.configurationsAt("mybatis").isEmpty()) {
-            install(new MBMyBatisModule(cfg));
-        }
-
-        if (!xcfg.configurationsAt("liquibase").isEmpty()) {
-            install(new WBLiquibaseModule());
-        }
-
         ClassLoader cl = ObjectUtils.firstNonNull(
                 Thread.currentThread().getContextClassLoader(),
                 getClass().getClassLoader()
@@ -103,10 +91,6 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException("Failed to activate Guice module: " + mclassName, e);
             }
-        }
-
-        if (!xcfg.configurationsAt("solr").isEmpty()) {
-            install(new SolrModule(cfg));
         }
 
         init(cfg);

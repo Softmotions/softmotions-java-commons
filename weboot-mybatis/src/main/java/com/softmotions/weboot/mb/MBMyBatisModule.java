@@ -35,6 +35,13 @@ public class MBMyBatisModule extends MBXMLMyBatisModule {
         this.cfg = cfg;
     }
 
+    protected void configure() {
+        if (cfg.xcfg().configurationsAt("mybatis").isEmpty()) {
+            return;
+        }
+        super.configure();
+    }
+
     protected void initialize() {
         XMLConfiguration xcfg = cfg.xcfg();
         setEnvironmentId(cfg.getDBEnvironmentType());

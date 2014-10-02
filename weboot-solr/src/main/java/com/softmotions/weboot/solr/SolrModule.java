@@ -44,6 +44,9 @@ public class SolrModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        if (cfg.xcfg().configurationsAt("solr").isEmpty()) {
+            return;
+        }
         ClassLoader cl = ObjectUtils.firstNonNull(
                 Thread.currentThread().getContextClassLoader(),
                 getClass().getClassLoader()

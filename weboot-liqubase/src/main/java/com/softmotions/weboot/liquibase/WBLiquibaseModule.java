@@ -33,7 +33,16 @@ public class WBLiquibaseModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBLiquibaseModule.class);
 
+    private final WBConfiguration cfg;
+
+    public WBLiquibaseModule(WBConfiguration cfg) {
+        this.cfg = cfg;
+    }
+
     protected void configure() {
+        if (cfg.xcfg().configurationsAt("liquibase").isEmpty()) {
+            return;
+        }
         bind(LiquibaseInitializer.class).asEagerSingleton();
     }
 
@@ -83,7 +92,6 @@ public class WBLiquibaseModule extends AbstractModule {
                         liquibase.setChangeLogParameter(name, value);
                     }
                 }
-
                 List<ConfigurationNode> children = lbCfg.getRootNode().getChildren();
                 for (ConfigurationNode c : children) {
                     String cn = c.getName();

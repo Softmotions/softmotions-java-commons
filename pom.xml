@@ -136,6 +136,9 @@
         <module>web</module>
         <module>weboot</module>
         <module>web-realms</module>
+        <module>weboot-solr</module>
+        <module>weboot-mybatis</module>
+        <module>weboot-liqubase</module>
     </modules>
 
 </project>
