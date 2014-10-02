@@ -84,7 +84,9 @@ public class LifeCycleServiceImpl implements LifeCycleService {
                 }
             } else {
                 if (parallelExec == null) {
-                    parallelExec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+                    parallelExec = Executors.newFixedThreadPool(
+                            Math.max(1, Runtime.getRuntime().availableProcessors() - 1)
+                    );
                 }
                 invokeTargetParallel(parallelExec, s);
             }

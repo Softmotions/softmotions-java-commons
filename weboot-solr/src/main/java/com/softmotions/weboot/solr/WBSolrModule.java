@@ -8,7 +8,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.Singleton;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -69,7 +68,7 @@ public class WBSolrModule extends AbstractModule {
             throw new RuntimeException("Not found class for solr server provider");
         }
 
-        bind(SolrServer.class).toProvider(providerClass).in(Singleton.class);
+        bind(SolrServer.class).toProvider(providerClass).asEagerSingleton();
         bind(SolrServerInitializer.class).asEagerSingleton();
     }
 
@@ -79,17 +78,20 @@ public class WBSolrModule extends AbstractModule {
 
         final WBConfiguration cfg;
 
+        final SolrServer solr;
+
         @Inject
-        public SolrServerInitializer(Injector injector, WBConfiguration cfg) {
+        public SolrServerInitializer(Injector injector,
+                                     WBConfiguration cfg,
+                                     SolrServer solr) {
             this.injector = injector;
             this.cfg = cfg;
+            this.solr = solr;
         }
 
         @Start(order = Integer.MAX_VALUE, parallel = true)
         public void start() throws Exception {
             log.info("Staring SOLR services");
-            SolrServer solr = injector.getInstance(SolrServer.class);
-
             ClassLoader cl = ObjectUtils.firstNonNull(
                     Thread.currentThread().getContextClassLoader(),
                     getClass().getClassLoader()
