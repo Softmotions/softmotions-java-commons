@@ -3,6 +3,8 @@ package com.softmotions.weboot.solr;
 import com.softmotions.commons.io.Loader;
 import com.softmotions.weboot.WBConfiguration;
 
+import com.google.inject.Singleton;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -25,6 +27,7 @@ import java.io.InputStream;
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
  * @version $Id$
  */
+@Singleton
 public class EmbeddedSolrServerProvider extends AbstractSolrServerProvider {
 
     private static final Logger log = LoggerFactory.getLogger(EmbeddedSolrServerProvider.class);

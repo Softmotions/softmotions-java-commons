@@ -12,4 +12,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Start {
     int order() default 50;
+
+    boolean parallel() default false;
 }

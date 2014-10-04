@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -35,6 +37,7 @@ public class LifeCycleServiceImpl implements LifeCycleService {
     }
 
     public void start() {
+        ExecutorService parallelExec = null;
         log.info("Starting");
         for (final Binding binding : injector.getBindings().values()) {
             binding.acceptScopingVisitor(new DefaultBindingScopingVisitor() {
@@ -73,12 +76,37 @@ public class LifeCycleServiceImpl implements LifeCycleService {
         }
         Collections.sort(startList);
         for (final LCSlot s : startList) {
-            try {
-                lc.invokeTarget(s);
-            } catch (Exception e) {
-                log.error("", e);
+            if (!s.parallel) {
+                try {
+                    lc.invokeTarget(s);
+                } catch (Exception e) {
+                    log.error("", e);
+                }
+            } else {
+                if (parallelExec == null) {
+                    parallelExec = Executors.newFixedThreadPool(
+                            Math.max(1, Runtime.getRuntime().availableProcessors() - 1)
+                    );
+                }
+                invokeTargetParallel(parallelExec, s);
             }
         }
+
+        if (parallelExec != null) {
+            parallelExec.shutdown();
+        }
+    }
+
+    private void invokeTargetParallel(ExecutorService exec, final LCSlot s) {
+        exec.execute(new Runnable() {
+            public void run() {
+                try {
+                    lc.invokeTarget(s);
+                } catch (Exception e) {
+                    log.error("", e);
+                }
+            }
+        });
     }
 
     public void stop() {

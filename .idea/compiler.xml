@@ -39,6 +39,7 @@
         <module name="web-realms" />
         <module name="weboot" />
         <module name="weboot-liqubase" />
+        <module name="weboot-mongo" />
         <module name="weboot-mybatis" />
         <module name="weboot-solr" />
         <module name="webrealms" />
@@ -61,6 +62,7 @@
       <module name="web-realms" target="1.7" />
       <module name="weboot" target="1.7" />
       <module name="weboot-liqubase" target="1.7" />
+      <module name="weboot-mongo" target="1.7" />
       <module name="weboot-mybatis" target="1.7" />
       <module name="weboot-solr" target="1.7" />
       <module name="webrealms" target="1.7" />

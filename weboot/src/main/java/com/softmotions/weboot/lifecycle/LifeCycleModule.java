@@ -60,11 +60,11 @@ public class LifeCycleModule extends AbstractModule {
         for (final Method method : target.getClass().getMethods()) {
             Start start = method.getAnnotation(Start.class);
             if (start != null) {
-                registerStartSlot(new LCSlot(method, target, start.order()));
+                registerStartSlot(new LCSlot(method, target, start.order(), start.parallel()));
             }
             Dispose dispose = method.getAnnotation(Dispose.class);
             if (dispose != null) {
-                registerStopSlot(new LCSlot(method, target, dispose.order()));
+                registerStopSlot(new LCSlot(method, target, dispose.order(), false));
             }
         }
     }
