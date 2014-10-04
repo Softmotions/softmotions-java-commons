@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -41,11 +42,6 @@ public class SchedulerModule extends AbstractModule {
         bind(SchedulerInitializer.class).asEagerSingleton();
     }
 
-    @Scheduled(pattern = "* * * * *")
-    public void testScheduled() {
-        log.debug("Test scheduler!");
-    }
-
     private boolean hasScheduledMethod(Class<?> clazz) {
         for (Method method : clazz.getMethods()) {
             if (method.getAnnotation(Scheduled.class) != null) {
@@ -61,15 +57,28 @@ public class SchedulerModule extends AbstractModule {
             if (scheduled != null) {
                 if (!SchedulingPattern.validate(scheduled.pattern())) {
                     log.warn("Invalid scheduler pattern: '" + scheduled.pattern() + "' " +
-                             "for " + target.getClass().getName() + "#" + method.getName());
+                            "for " + target.getClass().getName() + "#" + method.getName());
                     continue;
                 }
 
-                scheduler.schedule(scheduled.pattern(), new Task(){
+                log.info("Register scheduled task: " +
+                        "pattern: '" + scheduled.pattern() + "', " +
+                        "method: " + target.getClass().getName() + "#" + method.getName());
+
+                scheduler.schedule(scheduled.pattern(), new Task() {
                     public void execute(TaskExecutionContext context) throws RuntimeException {
-                        // TODO: substitute parameters to method (execution context)
                         try {
-                            method.invoke(target);
+                            Class<?>[] ptypes = method.getParameterTypes();
+                            Object[] params = new Object[ptypes.length];
+                            for (int i = 0; i < ptypes.length; ++i) {
+                                Class<?> ptype = ptypes[i];
+                                if (TaskExecutionContext.class.isAssignableFrom(ptype)) {
+                                    params[i] = context;
+                                } else {
+                                    params[i] = null;
+                                }
+                            }
+                            method.invoke(target, params);
                         } catch (Exception e) {
                             log.error("", e);
                         }
