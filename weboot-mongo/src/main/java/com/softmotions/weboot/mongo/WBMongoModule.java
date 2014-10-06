@@ -12,6 +12,7 @@ import com.mongodb.DBAddress;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import com.mongodb.gridfs.GridFS;
 
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -56,6 +57,21 @@ public class WBMongoModule extends AbstractModule {
         bind(Jongo.class).toProvider(JongoProvider.class).in(Singleton.class);
         bind(Mongo.class).toProvider(MongoProvider.class).in(Singleton.class);
         bind(DB.class).toProvider(DBProvider.class).in(Singleton.class);
+        bind(GridFS.class).toProvider(GFSProvider.class).in(Singleton.class);
+    }
+
+    static class GFSProvider implements Provider<GridFS> {
+
+        private final Provider<WBMongo> mp;
+
+        @Inject
+        GFSProvider(Provider<WBMongo> mp) {
+            this.mp = mp;
+        }
+
+        public GridFS get() {
+            return new GridFS(mp.get().getDefaultDB());
+        }
     }
 
 
