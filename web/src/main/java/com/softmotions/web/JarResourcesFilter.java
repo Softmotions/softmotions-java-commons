@@ -11,9 +11,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletConfig;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
@@ -55,18 +58,31 @@ import java.util.List;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class JarResourcesServlet extends HttpServlet implements JarResourcesProvider {
+public class JarResourcesFilter implements Filter {
 
-    private static final Logger log = LoggerFactory.getLogger(JarResourcesServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(JarResourcesFilter.class);
 
     List<MappingSlot> mslots;
 
-    public void init() throws ServletException {
+    String stripPefix;
+
+    public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest sreq = (HttpServletRequest) req;
+        boolean ret = getContent(sreq, (HttpServletResponse) resp, !"HEAD".equals(sreq.getMethod()));
+        if (!ret) {
+            chain.doFilter(req, resp);
+        }
+    }
+
+    public void init(FilterConfig cfg) throws ServletException {
         mslots = new ArrayList<>();
-        ServletConfig cfg = getServletConfig();
         Enumeration<String> pnames = cfg.getInitParameterNames();
         while (pnames.hasMoreElements()) {
             String pname = pnames.nextElement();
+            if ("strip-prefix".equals(pname)) {
+                stripPefix = cfg.getInitParameter(pname);
+                continue;
+            }
             try {
                 handleJarMapping(pname, cfg.getInitParameter(pname));
             } catch (ServletException e) {
@@ -74,6 +90,9 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
             } catch (Exception e) {
                 throw new ServletException(e);
             }
+        }
+        if (stripPefix == null) {
+            stripPefix = "";
         }
     }
 
@@ -87,23 +106,10 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
         mslots.clear();
     }
 
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        getContent(req, resp, true);
-    }
-
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        getContent(req, resp, true);
-    }
-
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        getContent(req, resp, false);
-    }
-
-    void getContent(HttpServletRequest req, HttpServletResponse resp, boolean transfer) throws ServletException, IOException {
-        ContentDescriptor cd = getContentDescriptor(req.getPathInfo());
+    boolean getContent(HttpServletRequest req, HttpServletResponse resp, boolean transfer) throws ServletException, IOException {
+        ContentDescriptor cd = getContentDescriptor(req);
         if (cd == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            return false;
         }
         if (cd.getMimeType() != null) {
             resp.setContentType(cd.getMimeType());
@@ -121,31 +127,20 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                 resp.getOutputStream().flush();
             }
         }
+        return true;
     }
 
-    public ContentDescriptor getContentDescriptor(final String path) {
+    private ContentDescriptor getContentDescriptor(HttpServletRequest req) {
+        String path = req.getRequestURI().substring(stripPefix.length());
         MappingSlot ms = findMatchingSlot(path);
         if (ms == null) {
             return null;
         }
-        final URL url = ms.getResourceUrl(path);
+        URL url = ms.getResourceUrl(path);
         if (url == null) {
             return null;
         }
-        final String mtype = getServletContext().getMimeType(path);
-        return new ContentDescriptor() {
-            public URL getUrl() {
-                return url;
-            }
-
-            public String getMimeType() {
-                return mtype;
-            }
-
-            public String getRequestedPath() {
-                return path;
-            }
-        };
+        return new ContentDescriptor(url, req.getServletContext().getMimeType(path));
     }
 
     MappingSlot findMatchingSlot(String path) {
@@ -323,12 +318,9 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
                 if (clazz == null) {
                     clazz = findClass(name);
                 }
-                if (clazz != null) {
-                    if (resolve) resolveClass(clazz);
-                    return clazz;
-                }
+                if (resolve) resolveClass(clazz);
+                return clazz;
             }
-            throw new ClassNotFoundException(name);
         }
 
         public URL getResource(String name) {
@@ -342,6 +334,26 @@ public class JarResourcesServlet extends HttpServlet implements JarResourcesProv
 
         public String toString() {
             return "JarResourcesClassLoader{ " + Arrays.asList(getURLs()) + '}';
+        }
+    }
+
+    private static final class ContentDescriptor {
+
+        private final URL url;
+
+        private final String mimeType;
+
+        public URL getUrl() {
+            return url;
+        }
+
+        public String getMimeType() {
+            return mimeType;
+        }
+
+        private ContentDescriptor(URL url, String mimeType) {
+            this.url = url;
+            this.mimeType = mimeType;
         }
     }
 }
