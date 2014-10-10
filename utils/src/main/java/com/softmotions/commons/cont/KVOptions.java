@@ -63,6 +63,28 @@ public class KVOptions extends Flat3Map {
         }
     }
 
+    public long getLong(String key, long defVal) {
+        if (!containsKey(key)) {
+            return defVal;
+        }
+        try {
+            return Long.parseLong(String.valueOf(get(key)));
+        } catch (NumberFormatException e) {
+            return defVal;
+        }
+    }
+
+    public Long getLongObject(String key, Long defVal) {
+        if (!containsKey(key)) {
+            return defVal;
+        }
+        try {
+            return Long.parseLong(String.valueOf(get(key)));
+        } catch (NumberFormatException e) {
+            return defVal;
+        }
+    }
+
 
     public void loadOptions(String spec) {
         if (spec == null) {
