@@ -7,7 +7,9 @@ import com.softmotions.commons.io.Loader;
 
 import com.google.common.collect.AbstractIterator;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -189,18 +191,53 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return c;
     }
 
+    public int getActiveUsersCount(String query) {
+        if (query != null) {
+            query = query.trim().toLowerCase();
+        }
+        int c = 0;
+        synchronized (lock) {
+            for (final WSUser u : users.values()) {
+                if (((WSUserImpl) u).isMatchedQuery(query) && (u.getRoles().hasNext() || u.getGroups().hasNext())) {
+                    ++c;
+                }
+            }
+        }
+        return c;
+    }
+
     public Iterator<WSUser> getUsers(String query,
                                      final String orderProperty,
                                      final boolean desc,
                                      int skip,
                                      int limit) {
-        int i = 0;
         WSUser[] uarr;
-        if (query != null) {
-            query = query.trim().toLowerCase();
-        }
         synchronized (lock) {
             uarr = users.values().toArray(new WSUser[users.size()]);
+        }
+
+        return getUsersInternal(uarr, query, orderProperty, desc, skip, limit);
+    }
+
+    public Iterator<WSUser> getActiveUsers(String query, String orderProperty, boolean desc, int skip, int limit) {
+        WSUser[] uarr;
+        synchronized (lock) {
+            Collection<WSUser> ucol = CollectionUtils.select(users.values(), new Predicate() {
+                public boolean evaluate(Object u) {
+                    return u instanceof WSUser && ((WSUser)u).getRoles().hasNext() || ((WSUser)u).getGroups().hasNext();
+                }
+            });
+
+            uarr = ucol.toArray(new WSUser[ucol.size()]);
+        }
+
+        return getUsersInternal(uarr, query, orderProperty, desc, skip, limit);
+    }
+
+    private Iterator<WSUser> getUsersInternal(WSUser[] uarr, String query, final String orderProperty, final boolean desc, int skip, int limit) {
+        int i = 0;
+        if (query != null) {
+            query = query.trim().toLowerCase();
         }
         if (orderProperty != null) { //sort users
             try {

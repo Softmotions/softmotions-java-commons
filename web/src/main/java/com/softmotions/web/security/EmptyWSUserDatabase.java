@@ -59,7 +59,15 @@ public class EmptyWSUserDatabase implements WSUserDatabase {
         return 0;
     }
 
+    public int getActiveUsersCount(String query) {
+        return 0;
+    }
+
     public Iterator<WSUser> getUsers(String query, String orderProperty, boolean desc, int skip, int limit) {
+        return Collections.emptyIterator();
+    }
+
+    public Iterator<WSUser> getActiveUsers(String query, String orderProperty, boolean desc, int skip, int limit) {
         return Collections.emptyIterator();
     }
 

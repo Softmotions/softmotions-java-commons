@@ -92,6 +92,13 @@ public interface WSUserDatabase extends Closeable {
     int getUsersCount(String query);
 
     /**
+     * Returns number of active users (has any role/group) stored in database
+     *
+     * @param query Optional query text, can be null
+     */
+    int getActiveUsersCount(String query);
+
+    /**
      * Return the set of {@link org.apache.catalina.User}s defined in this user database.
      *
      * @param query         Optional query text, can be null
@@ -102,6 +109,18 @@ public interface WSUserDatabase extends Closeable {
      * @return
      */
     Iterator<WSUser> getUsers(String query, String orderProperty, boolean desc, int skip, int limit);
+
+    /**
+     * Return the set of active {@link org.apache.catalina.User}s (has any role/group) defined in this user database.
+     *
+     * @param query         Optional query text, can be null
+     * @param orderProperty Optional property name used to sort results, can be null
+     * @param desc          If true use DESC sorting based on specified orderProperty otherwise ASC sorting will be used
+     * @param skip          Number of records to skip
+     * @param limit         Limit number of resulting records
+     * @return
+     */
+    Iterator<WSUser> getActiveUsers(String query, String orderProperty, boolean desc, int skip, int limit);
 
     /**
      * Create and return a new {@link WSGroup} defined in this user database.

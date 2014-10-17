@@ -81,8 +81,16 @@ public abstract class AbstractWSUserDatabaseJNDIFactory extends Reference implem
             return wrapped.getUsersCount(query);
         }
 
+        public int getActiveUsersCount(String query) {
+            return wrapped.getActiveUsersCount(query);
+        }
+
         public Iterator<WSUser> getUsers(String query, String orderProperty, boolean desc, int skip, int limit) {
             return wrapped.getUsers(query, orderProperty, desc, skip, limit);
+        }
+
+        public Iterator<WSUser> getActiveUsers(String query, String orderProperty, boolean desc, int skip, int limit) {
+            return wrapped.getActiveUsers(query, orderProperty, desc, skip, limit);
         }
 
         public WSGroup createGroup(String s, String s2) {
