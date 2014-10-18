@@ -42,6 +42,11 @@ public class MBDAOSupport {
         this.sess = sess;
     }
 
+    public MBDAOSupport(Class namespace, SqlSession sess) {
+        this.namespace = namespace.getName();
+        this.sess = sess;
+    }
+
     public int insert(String stmtId, Object... params) {
         return sess.insert(toStatementId(stmtId), toParametersObj(params));
     }

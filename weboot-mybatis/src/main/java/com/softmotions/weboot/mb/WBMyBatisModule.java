@@ -6,6 +6,7 @@ import com.softmotions.weboot.lifecycle.Dispose;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
@@ -52,7 +53,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         setClassPathResource(cfgLocation);
 
         Properties props = new Properties();
-        String propsStr = xcfg.getString("mybatis");
+        String propsStr = xcfg.getString("mybatis.extra-properties");
         if (!StringUtils.isBlank(propsStr)) {
             try {
                 props.load(new StringReader(propsStr));
@@ -80,6 +81,15 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
                 props.setProperty(k, "********");
             }
         }
+
+        for (HierarchicalConfiguration mc : xcfg.configurationsAt("mybatis.extra-mappers.mapper")) {
+            String resource = mc.getString("[@resource]");
+            if (!StringUtils.isBlank(resource)) {
+                log.info("MyBatis registering extra mapper: '" + resource + "'");
+                getExtraMappers().add(resource);
+            }
+        }
+
         log.info("MyBatis environment type: " + cfg.getDBEnvironmentType());
         log.info("MyBatis properties: " + props);
         log.info("MyBatis config: " + cfgLocation);

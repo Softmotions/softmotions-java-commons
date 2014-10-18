@@ -1,5 +1,8 @@
 package com.softmotions.weboot.mb;
 
+import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.executor.ErrorContext;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -7,8 +10,11 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.type.TypeHandler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 import static org.apache.ibatis.io.Resources.getResourceAsReader;
@@ -24,9 +30,19 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
 
     private String classPathResource = DEFAULT_CONFIG_RESOURCE;
 
+    private List<String> extraMappers;
+
     private String environmentId = DEFAULT_ENVIRONMENT_ID;
 
     private Properties properties = new Properties();
+
+
+    protected List<String> getExtraMappers() {
+        if (extraMappers == null) {
+            extraMappers = new ArrayList<>();
+        }
+        return extraMappers;
+    }
 
     /**
      * Set the MyBatis configuration class path resource.
@@ -73,9 +89,12 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
         Reader reader = null;
         try {
             reader = getResourceAsReader(getResourceClassLoader(), classPathResource);
-            SqlSessionFactory sessionFactory = new SqlSessionFactoryBuilder().build(reader,
-                                                                                    environmentId,
-                                                                                    properties);
+            SqlSessionFactory sessionFactory =
+                    new ExtendedSqlSessionFactoryBuilder()
+                            .build(reader,
+                                   environmentId,
+                                   properties);
+
             bind(SqlSessionFactory.class).toInstance(sessionFactory);
 
             Configuration configuration = sessionFactory.getConfiguration();
@@ -109,6 +128,25 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
                     // close quietly
                 }
             }
+        }
+    }
+
+    private class ExtendedSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
+        public SqlSessionFactory build(Configuration config) {
+            if (extraMappers == null || extraMappers.isEmpty()) {
+                return super.build(config);
+            }
+            for (final String resource : extraMappers) {
+                try {
+                    ErrorContext.instance().resource(resource);
+                    InputStream inputStream = Resources.getResourceAsStream(resource);
+                    XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, config, resource, config.getSqlFragments());
+                    mapperParser.parse();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return super.build(config);
         }
     }
 
