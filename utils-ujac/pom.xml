@@ -19,7 +19,13 @@
             <version>${softmotions.commons.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.sf.ujac</groupId>
+            <groupId>org.beanshell</groupId>
+            <artifactId>bsh</artifactId>
+            <version>2.0b5</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+        <groupId>net.sf.ujac</groupId>
             <artifactId>ujac</artifactId>
             <version>1.0.0</version>
             <exclusions>
