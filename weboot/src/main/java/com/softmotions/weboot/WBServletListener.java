@@ -7,7 +7,6 @@ import ch.qos.logback.core.util.StatusPrinter;
 import com.softmotions.weboot.lifecycle.LifeCycleModule;
 import com.softmotions.weboot.lifecycle.LifeCycleService;
 
-import com.google.common.base.Objects;
 import com.google.common.io.Resources;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -16,6 +15,7 @@ import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +42,8 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
 
     public static final String WEBOOT_CFG_LOCATION_INITPARAM = "WEBOOT_CFG_LOCATION";
 
+    public static final String WEBOOT_APP_ID = "WEBOOT_APP_ID";
+
     public static final String WEBOOT_CFG_SCTX_KEY = "com.softmotions.weboot.CFG";
 
     private Injector injector;
@@ -62,8 +64,8 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
                                        WEBOOT_CFG_CLASS_INITPARAM);
         }
         log.info("Using WEBOOT configuration class: " + cfgClassName);
-        ClassLoader cl = Objects.firstNonNull(Thread.currentThread().getContextClassLoader(),
-                                              getClass().getClassLoader());
+        ClassLoader cl = ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
+                                                  getClass().getClassLoader());
         Class cfgClass;
         WBConfiguration cfg;
         try {
@@ -77,21 +79,37 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         }
         sctx.setAttribute(WEBOOT_CFG_SCTX_KEY, cfg);
 
-        String cfgLocation = sctx.getInitParameter(WEBOOT_CFG_LOCATION_INITPARAM);
-        if (cfgLocation == null) {
-            cfgLocation = System.getProperty(WEBOOT_CFG_LOCATION_INITPARAM);
-        }
-        if (cfgLocation == null) {
-            cfgLocation = System.getenv(WEBOOT_CFG_LOCATION_INITPARAM);
-        }
+
+        String appId = sctx.getInitParameter(WEBOOT_APP_ID);
+        appId = StringUtils.isBlank(appId) ? null : appId;
+        String cfgLocation;
+        String key;
+        StringBuilder keys = new StringBuilder();
+        do {
+            key = (appId != null ? appId : "") + WEBOOT_CFG_LOCATION_INITPARAM;
+            if (keys.length() > 0) {
+                keys.append(", ");
+            }
+            keys.append(key);
+            cfgLocation = sctx.getInitParameter(key);
+            if (cfgLocation == null) {
+                cfgLocation = System.getProperty(key);
+            }
+            if (cfgLocation == null) {
+                cfgLocation = System.getenv(key);
+            }
+            if (cfgLocation == null && appId != null) {
+                appId = null;
+                continue;
+            }
+            break;
+        } while (true);
+
         if (cfgLocation == null) {
             throw new RuntimeException("Failed to find WEBOOT configuration location " +
                                        "in [servlet context, system property, system env] " +
-                                       "under the KEY: " +
-                                       WEBOOT_CFG_LOCATION_INITPARAM);
+                                       "under the KEYS: " + key);
         }
-
-
         cfg.load(cfgLocation, sctx);
 
         //init logging
