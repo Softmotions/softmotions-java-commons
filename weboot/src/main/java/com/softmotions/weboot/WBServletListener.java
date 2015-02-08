@@ -4,6 +4,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
+import com.softmotions.commons.cont.Pair;
 import com.softmotions.weboot.lifecycle.LifeCycleModule;
 import com.softmotions.weboot.lifecycle.LifeCycleService;
 
@@ -48,21 +49,45 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
 
     private Injector injector;
 
+
+    private Pair<String, String> getEnvInitParam(ServletContext sctx, String pname) {
+        String key, ret;
+        String appId = sctx.getInitParameter(WEBOOT_APP_ID);
+        appId = StringUtils.isBlank(appId) ? null : appId.toUpperCase();
+        StringBuilder keys = new StringBuilder();
+        do {
+            key = (appId != null) ? appId + '_' + pname : pname;
+            if (keys.length() > 0) {
+                keys.append(", ");
+            }
+            keys.append(key);
+            ret = sctx.getInitParameter(key);
+            if (ret == null) {
+                ret = System.getProperty(key);
+            }
+            if (ret == null) {
+                ret = System.getenv(key);
+            }
+            if (ret == null && appId != null) {
+                appId = null;
+                continue;
+            }
+            break;
+        } while (true);
+
+        return new Pair<>(ret, keys.toString());
+    }
+
+
     public void contextInitialized(ServletContextEvent evt) {
         ServletContext sctx = evt.getServletContext();
-        String cfgClassName = sctx.getInitParameter(WEBOOT_CFG_CLASS_INITPARAM);
-        if (cfgClassName == null) {
-            cfgClassName = System.getProperty(WEBOOT_CFG_CLASS_INITPARAM);
-        }
-        if (cfgClassName == null) {
-            cfgClassName = System.getenv(WEBOOT_CFG_CLASS_INITPARAM);
-        }
-        if (cfgClassName == null) {
+        Pair<String, String> ret = getEnvInitParam(sctx, WEBOOT_CFG_CLASS_INITPARAM);
+        if (ret.getOne() == null) {
             throw new RuntimeException("Failed to find WEBOOT configuration class implementation " +
                                        "in [servlet context, system property, system env] " +
-                                       "under the KEY: " +
-                                       WEBOOT_CFG_CLASS_INITPARAM);
+                                       "under the keys: " + ret.getTwo());
         }
+        String cfgClassName = ret.getOne();
         log.info("Using WEBOOT configuration class: " + cfgClassName);
         ClassLoader cl = ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
                                                   getClass().getClassLoader());
@@ -79,37 +104,13 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         }
         sctx.setAttribute(WEBOOT_CFG_SCTX_KEY, cfg);
 
-
-        String appId = sctx.getInitParameter(WEBOOT_APP_ID);
-        appId = StringUtils.isBlank(appId) ? null : appId;
-        String cfgLocation;
-        String key;
-        StringBuilder keys = new StringBuilder();
-        do {
-            key = (appId != null ? appId : "") + WEBOOT_CFG_LOCATION_INITPARAM;
-            if (keys.length() > 0) {
-                keys.append(", ");
-            }
-            keys.append(key);
-            cfgLocation = sctx.getInitParameter(key);
-            if (cfgLocation == null) {
-                cfgLocation = System.getProperty(key);
-            }
-            if (cfgLocation == null) {
-                cfgLocation = System.getenv(key);
-            }
-            if (cfgLocation == null && appId != null) {
-                appId = null;
-                continue;
-            }
-            break;
-        } while (true);
-
-        if (cfgLocation == null) {
+        ret = getEnvInitParam(sctx, WEBOOT_CFG_LOCATION_INITPARAM);
+        if (ret.getOne() == null) {
             throw new RuntimeException("Failed to find WEBOOT configuration location " +
                                        "in [servlet context, system property, system env] " +
-                                       "under the KEYS: " + key);
+                                       "under the KEYS: " + ret.getTwo());
         }
+        String cfgLocation = ret.getOne();
         cfg.load(cfgLocation, sctx);
 
         //init logging
