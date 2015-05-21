@@ -6,7 +6,7 @@ import org.apache.tools.ant.taskdefs.condition.Condition;
 import org.apache.tools.ant.taskdefs.condition.ConditionBase;
 
 /**
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id$
  */
 public class PropertyCondition extends ConditionBase implements Condition {

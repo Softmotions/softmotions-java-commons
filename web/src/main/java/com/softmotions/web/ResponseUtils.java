@@ -5,7 +5,7 @@ import org.apache.commons.codec.net.BCodec;
 /**
  * Кодирует имя файла для HTTP хедера: Content-Disposition в правильной кодировке.
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class ResponseUtils {
 

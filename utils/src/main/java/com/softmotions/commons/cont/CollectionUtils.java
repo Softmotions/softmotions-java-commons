@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Утилитный класс для коллекций.
+ * Convenient collection methods
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id: CollectionUtils.java 6006 2007-10-10 08:24:58Z adam $
  */
 public class CollectionUtils {

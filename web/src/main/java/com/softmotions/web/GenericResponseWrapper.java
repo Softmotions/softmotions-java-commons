@@ -31,7 +31,7 @@ import java.util.Map;
  * <p/>
  * It uses the Wrapper pattern.
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class GenericResponseWrapper extends HttpServletResponseWrapper implements Serializable {
 

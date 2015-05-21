@@ -26,7 +26,7 @@ import java.util.Objects;
  * блоков кода в java программе. Что существенно облегчает отладку
  * программ на производительность.
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id: TimePointLogger.java 14910 2010-08-25 04:45:39Z adam $
  */
 

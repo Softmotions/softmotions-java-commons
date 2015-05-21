@@ -1,7 +1,7 @@
 /*
  * All Rights Reserved.
  * Copyright (c) 2005
- * Adamansky Anton V. (anton@adamansky.com).
+ * Adamansky Anton V. (adamansky@gmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import java.util.Collection;
 import java.util.EmptyStackException;
 
 /**
- * @author Adamansky Anton (anton@adamansky.com)
+ * Simple stack based on {@link java.util.ArrayList}
+ *
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public final class Stack<E> extends ArrayList<E> {
 

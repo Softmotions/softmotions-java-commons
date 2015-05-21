@@ -15,7 +15,7 @@ import java.io.IOException;
 /**
  * Разрешает все Access-Control-* заголовки.
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id$
  */
 public class AccessControlHDRFilter implements Filter {

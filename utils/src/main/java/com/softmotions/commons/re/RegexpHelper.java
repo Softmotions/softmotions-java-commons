@@ -5,17 +5,23 @@ public class RegexpHelper {
     private RegexpHelper() {
     }
 
-    public static String convertGlobToRegEx(String line) {
+    /**
+     * Convert a `glob` http://en.wikipedia.org/wiki/Glob_(programming)
+     * to the regular expression counterpart
+     *
+     * @param glob The glob to be converted
+     */
+    public static String convertGlobToRegEx(String glob) {
 
-        line = line.trim();
-        StringBuilder sb = new StringBuilder(line.length());
+        glob = glob.trim();
+        StringBuilder sb = new StringBuilder(glob.length());
 
         boolean escaping = false;
         int incurlies = 0;
         char pc = 0;
 
-        for (int i = 0, l = line.length(); i < l; ++i) {
-            char cc = line.charAt(i);
+        for (int i = 0, l = glob.length(); i < l; ++i) {
+            char cc = glob.charAt(i);
             switch (cc) {
                 case '*':
                     if (escaping) {

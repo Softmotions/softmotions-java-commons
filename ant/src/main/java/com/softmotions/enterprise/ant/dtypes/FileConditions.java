@@ -12,7 +12,7 @@ import org.apache.tools.ant.taskdefs.condition.Condition;
 import java.io.File;
 
 /**
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class FileConditions implements Condition {
 

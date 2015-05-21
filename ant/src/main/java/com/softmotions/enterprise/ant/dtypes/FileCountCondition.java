@@ -7,7 +7,7 @@ import org.apache.tools.ant.types.DataType;
 import org.apache.tools.ant.types.FileSet;
 
 /**
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id$
  */
 public class FileCountCondition extends DataType implements Condition {

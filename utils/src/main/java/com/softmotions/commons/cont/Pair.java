@@ -1,10 +1,9 @@
 package com.softmotions.commons.cont;
 
 /**
- * Просто контейнер для пары значений
+ * Simple pair of values.
  *
- * @author Adamansky Anton (anton@adamansky.com)
- * @version $Id: Pair.java 6628 2008-02-12 12:46:43Z adam $
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class Pair<One, Two> {
 

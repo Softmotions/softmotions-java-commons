@@ -11,6 +11,9 @@ public class DateHelper {
     private DateHelper() {
     }
 
+    /**
+     * Truncates the given date to the beginning of a day
+     */
     public static Date trunkDayDate(Date date) {
         if (date == null) {
             return null;
@@ -25,6 +28,9 @@ public class DateHelper {
     }
 
 
+    /**
+     * Truncates the given date to the and of a day
+     */
     public static Date trunkEndOfDay(Date date) {
         if (date == null) {
             return null;

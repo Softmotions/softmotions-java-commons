@@ -14,7 +14,7 @@ import java.io.IOException;
  * <p/>
  * Зависит от apache commons-io
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class SimpleMoveTask extends Task {
 

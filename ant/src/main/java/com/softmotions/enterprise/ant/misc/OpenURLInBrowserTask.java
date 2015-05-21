@@ -8,7 +8,9 @@ import java.awt.*;
 import java.net.URI;
 
 /**
- * @author Adamansky Anton (anton@adamansky.com)
+ * Opens the given url in the browser
+ *
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class OpenURLInBrowserTask extends Task {
 

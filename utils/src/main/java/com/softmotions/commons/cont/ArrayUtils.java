@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 
 /**
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class ArrayUtils {
 
@@ -46,13 +46,13 @@ public class ArrayUtils {
 
 
     /**
-     * Do delimeted join of generic array object. Supports java.sql.Array type
+     * Do delimited join of generic array object. Supports java.sql.Array type
      *
      * @param array     Generic array object or java.sql.Array
-     * @param delimeter Delimeter
+     * @param delimiter Delimiter
      * @return
      */
-    public static String stringJoin(Object array, String delimeter) {
+    public static String stringJoin(Object array, String delimiter) {
         if (array == null) {
             return null;
         }
@@ -73,8 +73,8 @@ public class ArrayUtils {
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0, l = Array.getLength(array); i < l; ++i) {
-            if (delimeter != null && i > 0) {
-                sb.append(delimeter);
+            if (delimiter != null && i > 0) {
+                sb.append(delimiter);
             }
             sb.append(String.valueOf(Array.get(array, i)));
         }

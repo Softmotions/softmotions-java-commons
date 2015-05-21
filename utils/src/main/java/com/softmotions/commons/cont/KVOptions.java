@@ -12,7 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 /**
- * Parsed assembly options.
+ * Fast key->value map with support of typed values and
+ * serialization/deserialization from string representation.
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */

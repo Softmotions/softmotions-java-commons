@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * String escape helper.
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id$
  */
 public final class EscapeHelper {

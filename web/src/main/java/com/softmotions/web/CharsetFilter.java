@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Устанавливаем кодировку HTTP ответа.
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id$
  */
 public class CharsetFilter implements Filter {

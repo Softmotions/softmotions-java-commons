@@ -87,7 +87,7 @@ import java.util.Random;
  * This class is free for all uses.
  *
  * @author Marc A. Mnich
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id$
  */
 

@@ -14,7 +14,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * GZIP Utils
  *
- * @author Adamansky Anton (anton@adamansky.com)
+ * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id: GZIPUtils.java 17713 2011-09-26 10:06:20Z adam $
  */
 public class GZIPUtils {

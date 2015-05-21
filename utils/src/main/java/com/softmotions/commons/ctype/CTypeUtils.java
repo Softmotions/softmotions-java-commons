@@ -34,10 +34,21 @@ public class CTypeUtils {
     }
 
 
+    /**
+     * Return true if given content type represents a file with textual data.
+     *
+     * @param ctype Content type
+     */
     public static boolean isTextualContentType(String ctype) {
         return (ctype != null && (ctype.startsWith("text/") || TXT_MTYPES.contains(ctype)));
     }
 
+    /**
+     * Return true if given content type represents an image file
+     *
+     * @param ctype
+     * @return
+     */
     public static boolean isImageContentType(String ctype) {
         return (ctype != null && ctype.startsWith("image/"));
     }
