@@ -23,10 +23,12 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -131,7 +133,13 @@ public class JarResourcesFilter implements Filter {
     }
 
     private ContentDescriptor getContentDescriptor(HttpServletRequest req) {
-        String path = req.getRequestURI().substring(stripPefix.length());
+        String uri = req.getRequestURI();
+        try {
+            uri = URLDecoder.decode(uri, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("", e);
+        }
+        String path = uri.substring(stripPefix.length());
         MappingSlot ms = findMatchingSlot(path);
         if (ms == null) {
             return null;

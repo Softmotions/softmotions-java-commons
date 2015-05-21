@@ -3,6 +3,12 @@ utils/target/
 web/target/
 weboot/target/
 web-realms/target/
+utils-ujac/target/
+weboot-liqubase/target/
+weboot-mongo/target/
+weboot-mybatis/target/
+weboot-scheduler/target/
+weboot-solr/target/
 
 .idea/workspace.xml
 .idea/libraries/*
