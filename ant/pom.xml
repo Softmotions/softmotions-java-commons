@@ -27,7 +27,7 @@
                         </goals>
                         <configuration>
                             <serverId>jaxion_repository</serverId>
-                            <url>sftp://jaxion.org/home/uis/projects/jaxion/site/repository</url>
+                            <url>sftp://jaxion.org/repository</url>
                             <fromDir>${project.build.directory}</fromDir>
                             <includes>${project.build.finalName}.jar</includes>
                             <toDir>softmotions/jars</toDir>
