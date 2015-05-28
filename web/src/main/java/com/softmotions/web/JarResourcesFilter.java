@@ -71,7 +71,7 @@ public class JarResourcesFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest sreq = (HttpServletRequest) req;
         boolean ret = getContent(sreq, (HttpServletResponse) resp, !"HEAD".equals(sreq.getMethod()));
-        if (!ret) {
+        if (!ret && !resp.isCommitted()) {
             chain.doFilter(req, resp);
         }
     }
@@ -109,7 +109,7 @@ public class JarResourcesFilter implements Filter {
     }
 
     boolean getContent(HttpServletRequest req, HttpServletResponse resp, boolean transfer) throws ServletException, IOException {
-        ContentDescriptor cd = getContentDescriptor(req);
+        ContentDescriptor cd = getContentDescriptor(req, resp);
         if (cd == null) {
             return false;
         }
@@ -129,10 +129,11 @@ public class JarResourcesFilter implements Filter {
                 resp.getOutputStream().flush();
             }
         }
+        resp.flushBuffer();
         return true;
     }
 
-    private ContentDescriptor getContentDescriptor(HttpServletRequest req) {
+    private ContentDescriptor getContentDescriptor(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String uri = req.getRequestURI();
         try {
             uri = URLDecoder.decode(uri, "UTF-8");
@@ -142,6 +143,11 @@ public class JarResourcesFilter implements Filter {
         String path = uri.substring(stripPefix.length());
         MappingSlot ms = findMatchingSlot(path);
         if (ms == null) {
+            return null;
+        }
+        path = path.substring(ms.prefix.length());
+        if (path.isEmpty()) { //redirect to the slash
+            resp.sendRedirect(ms.prefix + '/');
             return null;
         }
         URL url = ms.getResourceUrl(path);
@@ -212,8 +218,7 @@ public class JarResourcesFilter implements Filter {
 
         URL getResourceUrl(String resource) {
             URL resourceUrl;
-            resource = resource.substring(prefix.length());
-            if (resource.isEmpty()) {
+            if ("/".equals(resource)) {
                 resource = "/index.html";
             }
             String resourceTranslated = path + ((resource.charAt(0) != '/') ? ("/" + resource) : resource);
