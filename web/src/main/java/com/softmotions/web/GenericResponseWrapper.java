@@ -33,6 +33,7 @@ import java.util.Map;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class GenericResponseWrapper extends HttpServletResponseWrapper implements Serializable {
 
     private static final long serialVersionUID = -1L;
