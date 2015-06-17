@@ -14,6 +14,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.gridfs.GridFS;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.ConfigurationNode;
@@ -60,7 +61,7 @@ public class WBMongoModule extends AbstractModule {
         bind(GridFS.class).toProvider(GFSProvider.class).in(Singleton.class);
     }
 
-    static class GFSProvider implements Provider<GridFS> {
+    public static class GFSProvider implements Provider<GridFS> {
 
         private final Provider<WBMongo> mp;
 
@@ -75,7 +76,7 @@ public class WBMongoModule extends AbstractModule {
     }
 
 
-    static class DBProvider implements Provider<DB> {
+    public static class DBProvider implements Provider<DB> {
 
         private final Provider<WBMongo> mp;
 
@@ -90,7 +91,7 @@ public class WBMongoModule extends AbstractModule {
     }
 
 
-    static class MongoProvider implements Provider<Mongo> {
+    public static class MongoProvider implements Provider<Mongo> {
 
         private final Provider<WBMongo> mp;
 
@@ -105,7 +106,7 @@ public class WBMongoModule extends AbstractModule {
     }
 
 
-    static class JongoProvider implements Provider<Jongo> {
+    public static class JongoProvider implements Provider<Jongo> {
 
         private final Provider<WBMongo> mp;
 
@@ -120,16 +121,19 @@ public class WBMongoModule extends AbstractModule {
     }
 
 
-    static class WBMongoProvider implements Provider<WBMongo> {
+    public static class WBMongoProvider implements Provider<WBMongo> {
 
         private final Properties props;
 
         private volatile WBMongo wbMongo;
 
         @Inject
-        WBMongoProvider(WBConfiguration cfg) {
+        public WBMongoProvider(WBConfiguration cfg) {
+            this(cfg, cfg.xcfg());
+        }
+
+        public WBMongoProvider(WBConfiguration cfg, HierarchicalConfiguration xcfg) {
             this.props = new Properties();
-            XMLConfiguration xcfg = cfg.xcfg();
             String propsStr = xcfg.getString("mongo");
             if (!StringUtils.isBlank(propsStr)) {
                 try {
@@ -192,7 +196,7 @@ public class WBMongoModule extends AbstractModule {
     }
 
 
-    static class WBMongoImpl implements WBMongo {
+    public static class WBMongoImpl implements WBMongo {
 
         private final String defDbName;
 
