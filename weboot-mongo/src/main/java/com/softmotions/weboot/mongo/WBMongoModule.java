@@ -160,7 +160,8 @@ public class WBMongoModule extends AbstractModule {
                     props.setProperty(a.getName(), (String) a.getValue());
                 }
             }
-            Properties logProps = new Properties(props);
+            Properties logProps = new Properties();
+            logProps.putAll(props);
             for (String k : logProps.stringPropertyNames()) {
                 if (k.toLowerCase().contains("passw")) {
                     logProps.setProperty(k, "********");
