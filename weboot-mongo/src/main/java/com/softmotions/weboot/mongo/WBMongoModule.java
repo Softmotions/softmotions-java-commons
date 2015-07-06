@@ -220,9 +220,11 @@ public class WBMongoModule extends AbstractModule {
                 if (pw == null) {
                     pw = "";
                 }
-                MongoCredential.createMongoCRCredential(props.getProperty("user"),
-                                                        authDB,
-                                                        pw.toCharArray());
+                pw = pw.trim();
+                credentials.add(
+                        MongoCredential.createMongoCRCredential(props.getProperty("user"),
+                                                                authDB,
+                                                                pw.toCharArray()));
             }
             DBAddress dba = new DBAddress(connectionUrl);
             MongoClient client = new MongoClient(dba, credentials);
