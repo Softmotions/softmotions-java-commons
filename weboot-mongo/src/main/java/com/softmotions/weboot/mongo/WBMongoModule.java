@@ -166,7 +166,7 @@ public class WBMongoModule extends AbstractModule {
                     logProps.setProperty(k, "********");
                 }
             }
-            log.info("WBMongoModule properties: " + props);
+            log.info("WBMongoModule properties: " + logProps);
             if (props.getProperty("connectionUrl") == null) {
                 throw new RuntimeException("WBMongoModule: Missing required configuration property: 'connectionUrl'");
             }
