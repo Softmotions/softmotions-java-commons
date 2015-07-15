@@ -99,6 +99,7 @@ public class WBSolrModule extends AbstractModule {
 
             SubnodeConfiguration scfg = cfg.xcfg().configurationAt("solr");
             Collection<SolrDataHandler> dataHandlers = new ArrayList<>();
+            Collection<SolrDataHandler> autoImportHandlers = new ArrayList<>();
 
             for (HierarchicalConfiguration dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
                 String dhClassName = dhcfg.getString("[@class]");
@@ -111,11 +112,17 @@ public class WBSolrModule extends AbstractModule {
                 SolrDataHandler dataHandler = injector.getInstance((Class<? extends SolrDataHandler>) dhClass);
                 dataHandler.init(dhcfg);
                 dataHandlers.add(dataHandler);
+
+                if (dhcfg.getBoolean("[@autoimport]", false)) {
+                    autoImportHandlers.add(dataHandler);
+                }
             }
 
             boolean rebuild = scfg.getBoolean("[@rebuildIndex]", false);
-            if (rebuild || checkEmptyIndex(solr)) {
-                rebuildIndex(solr, dataHandlers);
+            if (rebuild || checkEmptyIndex()) {
+                rebuildIndex(dataHandlers);
+            } else {
+                initImport(autoImportHandlers);
             }
         }
 
@@ -124,15 +131,17 @@ public class WBSolrModule extends AbstractModule {
             log.info("Shutting down SOLR server");
             Binding<SolrServer> sb = injector.getExistingBinding(Key.get(SolrServer.class));
             if (sb != null) {
-                SolrServer solr = sb.getProvider().get();
-                solr.shutdown();
+                SolrServer s = sb.getProvider().get();
+                if (s != null) {
+                    s.shutdown();
+                }
             }
         }
 
         /**
          * Checks if solr index is empty
          */
-        private boolean checkEmptyIndex(SolrServer solr) throws Exception {
+        private boolean checkEmptyIndex() throws Exception {
             ModifiableSolrParams params = new ModifiableSolrParams();
 
             params.add(CommonParams.Q, "*");
@@ -144,14 +153,7 @@ public class WBSolrModule extends AbstractModule {
             return results.isEmpty();
         }
 
-        /**
-         * Rebuild index for all documents
-         */
-        private void rebuildIndex(SolrServer solr, Collection<SolrDataHandler> importHandlers) throws Exception {
-            log.info("Rebuilding SORL index");
-            solr.deleteByQuery("*:*");
-            solr.commit();
-
+        private void initImport(Collection<SolrDataHandler> importHandlers) throws Exception {
             for (SolrDataHandler dataHandler : importHandlers) {
                 if (solr instanceof HttpSolrServer) {
                     ((HttpSolrServer) solr).add(dataHandler.getData());
@@ -163,6 +165,17 @@ public class WBSolrModule extends AbstractModule {
                 }
                 solr.commit();
             }
+        }
+
+
+        /**
+         * Rebuild index for all documents
+         */
+        private void rebuildIndex(Collection<SolrDataHandler> importHandlers) throws Exception {
+            log.info("Rebuilding SORL index");
+            solr.deleteByQuery("*:*");
+            solr.commit();
+            initImport(importHandlers);
         }
     }
 }
