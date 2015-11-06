@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ant/ant.iml" filepath="$PROJECT_DIR$/ant/ant.iml" />
       <module fileurl="file://$PROJECT_DIR$/base-pom/base-pom.iml" filepath="$PROJECT_DIR$/base-pom/base-pom.iml" />
+      <module fileurl="file://$PROJECT_DIR$/features/features.iml" filepath="$PROJECT_DIR$/features/features.iml" />
       <module fileurl="file://$PROJECT_DIR$/softmotions-java-commons.iml" filepath="$PROJECT_DIR$/softmotions-java-commons.iml" />
       <module fileurl="file://$PROJECT_DIR$/weboot-scheduler/softmotions-weboot-scheduler.iml" filepath="$PROJECT_DIR$/weboot-scheduler/softmotions-weboot-scheduler.iml" />
       <module fileurl="file://$PROJECT_DIR$/utils/utils.iml" filepath="$PROJECT_DIR$/utils/utils.iml" />
