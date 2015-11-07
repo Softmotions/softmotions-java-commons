@@ -29,10 +29,15 @@
         <module name="softmotions-base-pom" />
         <module name="softmotions-pom" />
         <module name="softmotions-utils" />
+        <module name="softmotions-utils-ujac" />
         <module name="softmotions-web" />
         <module name="softmotions-web-realms" />
         <module name="softmotions-weboot" />
+        <module name="softmotions-weboot-liquibase" />
+        <module name="softmotions-weboot-mongo" />
+        <module name="softmotions-weboot-mybatis" />
         <module name="softmotions-weboot-scheduler" />
+        <module name="softmotions-weboot-solr" />
         <module name="solr" />
         <module name="utils" />
         <module name="utils-ujac" />
@@ -49,15 +54,20 @@
     <bytecodeTargetLevel>
       <module name="ant" target="1.8" />
       <module name="features" target="1.8" />
-      <module name="softmotions-ant" target="1.7" />
+      <module name="softmotions-ant" target="1.8" />
       <module name="softmotions-base-pom" target="1.7" />
       <module name="softmotions-java-commons" target="1.7" />
       <module name="softmotions-pom" target="1.7" />
-      <module name="softmotions-utils" target="1.7" />
-      <module name="softmotions-web" target="1.7" />
-      <module name="softmotions-web-realms" target="1.7" />
-      <module name="softmotions-weboot" target="1.7" />
+      <module name="softmotions-utils" target="1.8" />
+      <module name="softmotions-utils-ujac" target="1.8" />
+      <module name="softmotions-web" target="1.8" />
+      <module name="softmotions-web-realms" target="1.8" />
+      <module name="softmotions-weboot" target="1.8" />
+      <module name="softmotions-weboot-liquibase" target="1.8" />
+      <module name="softmotions-weboot-mongo" target="1.8" />
+      <module name="softmotions-weboot-mybatis" target="1.8" />
       <module name="softmotions-weboot-scheduler" target="1.8" />
+      <module name="softmotions-weboot-solr" target="1.8" />
       <module name="solr" target="1.7" />
       <module name="utils" target="1.8" />
       <module name="utils-ujac" target="1.8" />

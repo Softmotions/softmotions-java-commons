@@ -2,20 +2,20 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ant/ant.iml" filepath="$PROJECT_DIR$/ant/ant.iml" />
-      <module fileurl="file://$PROJECT_DIR$/base-pom/base-pom.iml" filepath="$PROJECT_DIR$/base-pom/base-pom.iml" />
-      <module fileurl="file://$PROJECT_DIR$/features/features.iml" filepath="$PROJECT_DIR$/features/features.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ant/softmotions-ant.iml" filepath="$PROJECT_DIR$/ant/softmotions-ant.iml" />
+      <module fileurl="file://$PROJECT_DIR$/karaf/softmotions-features/softmotions-features.iml" filepath="$PROJECT_DIR$/karaf/softmotions-features/softmotions-features.iml" />
       <module fileurl="file://$PROJECT_DIR$/softmotions-java-commons.iml" filepath="$PROJECT_DIR$/softmotions-java-commons.iml" />
+      <module fileurl="file://$PROJECT_DIR$/karaf/softmotions-karaf.iml" filepath="$PROJECT_DIR$/karaf/softmotions-karaf.iml" />
+      <module fileurl="file://$PROJECT_DIR$/utils/softmotions-utils.iml" filepath="$PROJECT_DIR$/utils/softmotions-utils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/utils-ujac/softmotions-utils-ujac.iml" filepath="$PROJECT_DIR$/utils-ujac/softmotions-utils-ujac.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web/softmotions-web.iml" filepath="$PROJECT_DIR$/web/softmotions-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web-realms/softmotions-web-realms.iml" filepath="$PROJECT_DIR$/web-realms/softmotions-web-realms.iml" />
+      <module fileurl="file://$PROJECT_DIR$/weboot/softmotions-weboot.iml" filepath="$PROJECT_DIR$/weboot/softmotions-weboot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/weboot-liqubase/softmotions-weboot-liquibase.iml" filepath="$PROJECT_DIR$/weboot-liqubase/softmotions-weboot-liquibase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/weboot-mongo/softmotions-weboot-mongo.iml" filepath="$PROJECT_DIR$/weboot-mongo/softmotions-weboot-mongo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/weboot-mybatis/softmotions-weboot-mybatis.iml" filepath="$PROJECT_DIR$/weboot-mybatis/softmotions-weboot-mybatis.iml" />
       <module fileurl="file://$PROJECT_DIR$/weboot-scheduler/softmotions-weboot-scheduler.iml" filepath="$PROJECT_DIR$/weboot-scheduler/softmotions-weboot-scheduler.iml" />
-      <module fileurl="file://$PROJECT_DIR$/utils/utils.iml" filepath="$PROJECT_DIR$/utils/utils.iml" />
-      <module fileurl="file://$PROJECT_DIR$/utils-ujac/utils-ujac.iml" filepath="$PROJECT_DIR$/utils-ujac/utils-ujac.iml" />
-      <module fileurl="file://$PROJECT_DIR$/web/web.iml" filepath="$PROJECT_DIR$/web/web.iml" />
-      <module fileurl="file://$PROJECT_DIR$/web-realms/web-realms.iml" filepath="$PROJECT_DIR$/web-realms/web-realms.iml" />
-      <module fileurl="file://$PROJECT_DIR$/weboot/weboot.iml" filepath="$PROJECT_DIR$/weboot/weboot.iml" />
-      <module fileurl="file://$PROJECT_DIR$/weboot-liqubase/weboot-liqubase.iml" filepath="$PROJECT_DIR$/weboot-liqubase/weboot-liqubase.iml" />
-      <module fileurl="file://$PROJECT_DIR$/weboot-mongo/weboot-mongo.iml" filepath="$PROJECT_DIR$/weboot-mongo/weboot-mongo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/weboot-mybatis/weboot-mybatis.iml" filepath="$PROJECT_DIR$/weboot-mybatis/weboot-mybatis.iml" />
-      <module fileurl="file://$PROJECT_DIR$/weboot-solr/weboot-solr.iml" filepath="$PROJECT_DIR$/weboot-solr/weboot-solr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/weboot-solr/softmotions-weboot-solr.iml" filepath="$PROJECT_DIR$/weboot-solr/softmotions-weboot-solr.iml" />
     </modules>
   </component>
 </project>

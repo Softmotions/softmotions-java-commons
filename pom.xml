@@ -198,7 +198,7 @@
         <module>weboot-liqubase</module>
         <module>weboot-scheduler</module>
         <module>weboot-mongo</module>
-        <module>features</module>
+        <module>karaf</module>
     </modules>
 
 </project>

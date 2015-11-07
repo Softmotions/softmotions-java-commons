@@ -12,4 +12,6 @@ weboot-solr/target/
 
 .idea/workspace.xml
 .idea/libraries/*
+*.iml
+*.ipr
 
