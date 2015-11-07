@@ -25,6 +25,14 @@
         <bundle dependency="true">mvn:com.google.guava/guava/19.0-rc2</bundle>
     </feature>
 
+    <feature name="aries-spi-fly" description="Aries SPI Fly" version="${aries.spi.fly.version}">
+        <bundle dependency="true" start-level="20">mvn:org.ow2.asm/asm-all/${asm.version}</bundle>
+        <bundle dependency="true" start-level="20">mvn:org.apache.aries/org.apache.aries.util/${aries.util.version}</bundle>
+        <bundle start-level="20">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries.spi.fly.version}</bundle>
+        <capability>
+            osgi.extender;osgi.extender=osgi.serviceloader.registrar;version:Version=1.0,osgi.extender;osgi.extender=osgi.serviceloader.processor;version:Version=1.0
+        </capability>
+    </feature>
 
     <!-- //////////////////////////// Karaf enterprise features ////////////////////////////////////// -->
 
