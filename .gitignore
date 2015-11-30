@@ -9,9 +9,11 @@ weboot-mongo/target/
 weboot-mybatis/target/
 weboot-scheduler/target/
 weboot-solr/target/
+weboot-cayenne/target/
+weboot-ds/target/
+karaf/softmotions-features/target
 
-.idea/workspace.xml
-.idea/libraries/*
+.idea/
 *.iml
 *.ipr
 

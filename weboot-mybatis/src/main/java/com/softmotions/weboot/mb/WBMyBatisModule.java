@@ -48,7 +48,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         setEnvironmentId(cfg.getDBEnvironmentType());
         String cfgLocation = xcfg.getString("mybatis[@config]");
         if (cfgLocation == null) {
-            throw new RuntimeException("Missing required 'config' attribute in <mybatis> element");
+            throw new RuntimeException("Missing required 'config' attribute in the <mybatis> element");
         }
         setClassPathResource(cfgLocation);
 

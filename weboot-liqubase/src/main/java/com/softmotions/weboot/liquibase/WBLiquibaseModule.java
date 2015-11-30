@@ -41,6 +41,7 @@ public class WBLiquibaseModule extends AbstractModule {
 
     protected void configure() {
         if (cfg.xcfg().configurationsAt("liquibase").isEmpty()) {
+            log.warn("No WBLiquibaseModule module configuration found. Skipping.");
             return;
         }
         bind(LiquibaseInitializer.class).asEagerSingleton();

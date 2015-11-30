@@ -42,15 +42,17 @@ public class LifeCycleModule extends AbstractModule {
     }
 
     private class LifecycleAnnotatedListener implements TypeListener {
+        @Override
         public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             if (hasLifecycleMethod(type.getRawType())) {
                 // Add the listener
-                encounter.register(new LifecycleListener<I>());
+                encounter.register(new LifecycleListener<>());
             }
         }
     }
 
     private class LifecycleListener<I> implements InjectionListener<I> {
+        @Override
         public void afterInjection(final I injectee) {
             registerLifecycle(injectee);
         }
@@ -95,6 +97,7 @@ public class LifeCycleModule extends AbstractModule {
         slot.method.invoke(slot.target);
     }
 
+    @Override
     protected void configure() {
         bindListener(Matchers.any(), new LifecycleAnnotatedListener());
         bind(LifeCycleModule.class).toInstance(this);

@@ -42,6 +42,7 @@ public abstract class WBConfiguration {
         if (cfgUrl == null) {
             throw new RuntimeException("Failed to find configuration: " + location);
         }
+        log.info("Using configuration: {}", cfgUrl);
         try {
             xcfg = new XMLConfiguration(cfgUrl);
         } catch (ConfigurationException e) {

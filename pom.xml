@@ -9,6 +9,9 @@
         <artifactId>softmotions-base-pom</artifactId>
         <version>1.0.0</version>
     </parent>
+    <artifactId>softmotions-java-commons</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
 
     <properties>
         <softmotions.commons.version>1.0-SNAPSHOT</softmotions.commons.version>
@@ -29,10 +32,6 @@
             <url>http://jaxion.org/mvn/</url>
         </repository>
     </repositories>
-
-    <artifactId>softmotions-java-commons</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
 
     <build>
         <pluginManagement>
@@ -95,7 +94,7 @@
             <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
-                <version>3.2.1</version>
+                <version>3.2.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
@@ -145,12 +144,12 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.7.12</version>
+                <version>1.7.13</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>log4j-over-slf4j</artifactId>
-                <version>1.7.12</version>
+                <version>1.7.13</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -164,13 +163,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.12</version>
+            <version>1.7.13</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.12</version>
+            <version>1.7.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -195,6 +194,8 @@
         <module>web-realms</module>
         <module>weboot-solr</module>
         <module>weboot-mybatis</module>
+        <module>weboot-cayenne</module>
+        <module>weboot-ds</module>
         <module>weboot-liqubase</module>
         <module>weboot-scheduler</module>
         <module>weboot-mongo</module>
