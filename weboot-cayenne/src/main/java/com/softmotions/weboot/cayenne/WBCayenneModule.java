@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 import org.apache.cayenne.configuration.CayenneRuntime;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.configuration.server.ServerRuntimeBuilder;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class WBCayenneModule extends AbstractModule {
         }
         bind(CayenneWrapper.class).toInstance(new CayenneWrapper(cfgLocation));
         bind(CayeneInitializer.class).asEagerSingleton();
-        bind(CayenneRuntime.class).toProvider(CayenneRuntimeProvider.class);
+        bind(ServerRuntime.class).toProvider(CayenneRuntimeProvider.class);
     }
 
 
@@ -54,14 +55,14 @@ public class WBCayenneModule extends AbstractModule {
 
         final String cfgLocation;
 
-        volatile CayenneRuntime runtime;
+        volatile ServerRuntime runtime;
 
         public CayenneWrapper(String cfgLocation) {
             this.cfgLocation = cfgLocation;
         }
 
         @Nonnull
-        CayenneRuntime getRuntime(DataSource dataSource) throws Exception {
+        ServerRuntime getRuntime(DataSource dataSource) throws Exception {
             if (runtime == null) {
                 synchronized (CayenneWrapper.class) {
                     if (runtime == null) {
@@ -90,7 +91,7 @@ public class WBCayenneModule extends AbstractModule {
         }
     }
 
-    public static class CayenneRuntimeProvider implements Provider<CayenneRuntime> {
+    public static class CayenneRuntimeProvider implements Provider<ServerRuntime> {
 
         final CayenneWrapper cayenneWrapper;
 
@@ -104,8 +105,8 @@ public class WBCayenneModule extends AbstractModule {
         }
 
         @Override
-        public CayenneRuntime get() {
-            CayenneRuntime runtime;
+        public ServerRuntime get() {
+            ServerRuntime runtime;
             try {
                 runtime = cayenneWrapper.getRuntime(dataSourceProvider.get());
             } catch (Exception e) {
