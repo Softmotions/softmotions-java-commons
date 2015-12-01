@@ -3,7 +3,6 @@ package com.softmotions.weboot.cayenne;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
-import org.apache.cayenne.configuration.CayenneRuntime;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.configuration.server.ServerRuntimeBuilder;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -120,12 +119,12 @@ public class WBCayenneModule extends AbstractModule {
 
     public static class CayeneInitializer {
 
-        final Provider<CayenneRuntime> runtimeProvider;
+        final Provider<ServerRuntime> runtimeProvider;
 
         final CayenneWrapper cayenneWrapper;
 
         @Inject
-        public CayeneInitializer(Provider<CayenneRuntime> runtimeProvider,
+        public CayeneInitializer(Provider<ServerRuntime> runtimeProvider,
                                  CayenneWrapper cayenneWrapper) {
             this.runtimeProvider = runtimeProvider;
             this.cayenneWrapper = cayenneWrapper;
