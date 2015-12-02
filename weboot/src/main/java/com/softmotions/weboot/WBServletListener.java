@@ -47,7 +47,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
 
     public static final String WEBOOT_CFG_SCTX_KEY = "com.softmotions.weboot.CFG";
 
-    private Injector injector;
+    protected Injector injector;
 
 
     private Pair<String, String> getEnvInitParam(ServletContext sctx, String pname) {
@@ -164,7 +164,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         this.injector = null;
     }
 
-    public final Injector getInjector() {
+    public Injector getInjector() {
         if (injector != null) {
             return injector;
         }

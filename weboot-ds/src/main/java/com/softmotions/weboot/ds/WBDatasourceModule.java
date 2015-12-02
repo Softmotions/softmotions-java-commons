@@ -6,6 +6,9 @@ import java.io.StringReader;
 import java.sql.Connection;
 import java.util.Properties;
 import javax.annotation.Nonnull;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.commons.configuration.XMLConfiguration;
@@ -74,19 +77,22 @@ public class WBDatasourceModule extends AbstractModule {
             }
         }
         log.info("WBDatasourceModule properties: " + logProps);
-        bind(DatasourceWrapper.class).toInstance(new DatasourceWrapper(dsProps));
+        bind(DatasourceWrapper.class).toInstance(new DatasourceWrapper(xcfg, dsProps));
         bind(DataSource.class).toProvider(DataSourceProvider.class);
         bind(DatasourceInitializer.class).asEagerSingleton();
     }
 
     public static class DatasourceWrapper {
 
+        final XMLConfiguration cfg;
+
         final Properties dsProps;
 
         volatile HikariDataSource dataSource;
 
-        DatasourceWrapper(Properties dsProps) {
+        DatasourceWrapper(XMLConfiguration cfg, Properties dsProps) {
             this.dsProps = dsProps;
+            this.cfg = cfg;
         }
 
         @Nonnull
@@ -112,6 +118,24 @@ public class WBDatasourceModule extends AbstractModule {
                     log.error("Failed to estabilish database connection to: "
                               + dsProps.getProperty("jdbcUrl"));
                 }
+            }
+            String jndiName = cfg.getString("datasource[@jndiName]");
+            if (jndiName != null) {
+                InitialContext initCtx = new InitialContext();
+                Context comp = (Context) initCtx.lookup("java:comp");
+                Context jdbc, env;
+                try {
+                    env = (Context) comp.lookup("env");
+                } catch (NamingException e) {
+                    env = comp.createSubcontext("env");
+                }
+                try {
+                    jdbc = (Context) env.lookup("jdbc");
+                } catch (NamingException e) {
+                    jdbc = env.createSubcontext("jdbc");
+                }
+                jdbc.rebind(jndiName, dataSource);
+                log.info("Datasource JNDI name: java:comp/env/jdbc/{}", jndiName);
             }
         }
 
