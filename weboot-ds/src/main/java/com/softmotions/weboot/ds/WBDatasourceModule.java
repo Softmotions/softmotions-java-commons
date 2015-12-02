@@ -117,6 +117,7 @@ public class WBDatasourceModule extends AbstractModule {
                 } else {
                     log.error("Failed to estabilish database connection to: "
                               + dsProps.getProperty("jdbcUrl"));
+
                 }
             }
             String jndiName = cfg.getString("datasource[@jndiName]");
