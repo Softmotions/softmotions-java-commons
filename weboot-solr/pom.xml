@@ -9,9 +9,7 @@
         <groupId>softmotions</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>softmotions-weboot-solr</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

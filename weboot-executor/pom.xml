@@ -8,22 +8,13 @@
         <groupId>softmotions</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>softmotions-weboot-scheduler</artifactId>
+    <artifactId>softmotions-weboot-executor</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-weboot</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>it.sauronsoftware.cron4j</groupId>
-            <artifactId>cron4j</artifactId>
-            <version>2.2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
         </dependency>
     </dependencies>
 

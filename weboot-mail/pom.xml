@@ -8,7 +8,7 @@
         <groupId>softmotions</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>softmotions-weboot-scheduler</artifactId>
+    <artifactId>softmotions-weboot-mail</artifactId>
 
     <dependencies>
         <dependency>
@@ -17,14 +17,14 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>it.sauronsoftware.cron4j</groupId>
-            <artifactId>cron4j</artifactId>
-            <version>2.2.5</version>
+            <groupId>softmotions</groupId>
+            <artifactId>softmotions-weboot-executor</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-mail</artifactId>
+            <version>3.6.7</version>
         </dependency>
     </dependencies>
-
 </project>

@@ -9,16 +9,13 @@
         <groupId>softmotions</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>softmotions-weboot-mybatis</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
 
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-weboot</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

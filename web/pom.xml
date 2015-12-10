@@ -2,25 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>softmotions-java-commons</artifactId>
         <groupId>softmotions</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-
     <artifactId>softmotions-web</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-utils</artifactId>
-            <version>${softmotions.commons.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-web-realms</artifactId>
-            <version>${softmotions.commons.version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -52,11 +51,6 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.2</version>
-        </dependency>-->
     </dependencies>
 
     <build>

@@ -14,7 +14,8 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <softmotions.commons.version>1.0-SNAPSHOT</softmotions.commons.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <repositories>
@@ -183,6 +184,11 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>15.0</version>
+        </dependency>
     </dependencies>
 
     <modules>
@@ -196,10 +202,15 @@
         <module>weboot-mybatis</module>
         <module>weboot-cayenne</module>
         <module>weboot-ds</module>
-        <module>weboot-liqubase</module>
+        <module>weboot-liquibase</module>
         <module>weboot-scheduler</module>
         <module>weboot-mongo</module>
+        <module>weboot-executor</module>
         <module>karaf</module>
+        <module>weboot-i18n</module>
+        <module>weboot-mail</module>
+        <module>weboot-templates</module>
+        <module>weboot-validators</module>
     </modules>
 
 </project>
