@@ -15,7 +15,7 @@
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-weboot</artifactId>
-            <version>${project.version}</version>
+            <version>${softmotion.commons.version}</version>
         </dependency>
         <dependency>
             <groupId>softmotions</groupId>

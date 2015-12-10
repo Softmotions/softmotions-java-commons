@@ -14,12 +14,12 @@
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-utils</artifactId>
-            <version>${project.version}</version>
+            <version>${softmotion.commons.version}</version>
         </dependency>
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-web-realms</artifactId>
-            <version>${project.version}</version>
+            <version>${softmotion.commons.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

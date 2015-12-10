@@ -14,7 +14,7 @@
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-web</artifactId>
-            <version>${project.version}</version>
+            <version>${softmotion.commons.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
