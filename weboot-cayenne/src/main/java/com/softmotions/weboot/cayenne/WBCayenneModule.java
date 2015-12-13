@@ -1,5 +1,6 @@
 package com.softmotions.weboot.cayenne;
 
+import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -22,10 +23,15 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.not;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.matcher.AbstractMatcher;
 import com.softmotions.weboot.WBConfiguration;
 import com.softmotions.weboot.lifecycle.Dispose;
 import com.softmotions.weboot.lifecycle.Start;
@@ -39,8 +45,15 @@ public class WBCayenneModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBCayenneModule.class);
 
-    private final WBConfiguration cfg;
+    private static final AbstractMatcher<Method> DECLARED_BY_OBJECT = new AbstractMatcher<Method>() {
+        @Override
+        public boolean matches(Method method) {
+            //noinspection ObjectEquality
+            return method.getDeclaringClass() == Object.class;
+        }
+    };
 
+    private final WBConfiguration cfg;
 
     public WBCayenneModule(WBConfiguration cfg) {
         this.cfg = cfg;
@@ -60,6 +73,12 @@ public class WBCayenneModule extends AbstractModule {
         bind(CayenneWrapper.class).toInstance(new CayenneWrapper(cfgLocation));
         bind(CayeneInitializer.class).asEagerSingleton();
         bind(ServerRuntime.class).toProvider(CayenneRuntimeProvider.class);
+
+        //@Transactional interceptor
+        TransactionalInterceptor interceptor = new TransactionalInterceptor();
+        requestInjection(interceptor);
+        bindInterceptor(any(), not(DECLARED_BY_OBJECT).and(annotatedWith(Transactional.class)), interceptor);
+        bindInterceptor(annotatedWith(Transactional.class), not(DECLARED_BY_OBJECT).and(not(annotatedWith(Transactional.class))), interceptor);
     }
 
 
@@ -242,8 +261,5 @@ public class WBCayenneModule extends AbstractModule {
             Time time = rs.getTime(index);
             return time != null ? time.toLocalTime() : null;
         }
-
     }
-
-
 }
