@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
- * Created by Konstantin Zolotukhin on 17.12.15.
+ * @author Konstantin Zolotukhin (konstantin.a.zolotukhin@gmail.com)
  */
 public class AfterValidator implements ConstraintValidator<After, Date> {
     Date date;
