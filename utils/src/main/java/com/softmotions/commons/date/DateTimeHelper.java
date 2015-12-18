@@ -9,20 +9,20 @@ import org.jetbrains.annotations.Contract;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class DateHelper {
+public class DateTimeHelper {
 
     public static final SimpleDateFormat DD_MM_YYYY_SDF = new SynchronizedSDF("dd.MM.yyyy");
 
     public static final SimpleDateFormat DD__MM__YYYY__SDF = new SynchronizedSDF("dd MMMM yyyy");
 
-    private DateHelper() {
+    private DateTimeHelper() {
     }
 
     /**
      * Truncates the given date to the beginning of a day
      */
     @Contract("null -> null")
-    public static Date trunkDayDate(Date date) {
+    public static Date toStartDay(Date date) {
         if (date == null) {
             return null;
         }
@@ -40,11 +40,11 @@ public class DateHelper {
      * Truncates the given date to the and of a day
      */
     @Contract("null -> null")
-    public static Date trunkEndOfDay(Date date) {
+    public static Date toEndOfDay(Date date) {
         if (date == null) {
             return null;
         }
-        date = trunkDayDate(date);
+        date = toStartDay(date);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
