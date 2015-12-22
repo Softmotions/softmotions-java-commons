@@ -131,7 +131,11 @@ public final class TransactionalInterceptor implements MethodInterceptor {
                     if (log.isDebugEnabled()) {
                         log.debug("Do tx.commit()");
                     }
-                    tx.commit();
+                    if (tx.isRollbackOnly()) {
+                        tx.rollback();
+                    } else {
+                        tx.commit();
+                    }
                 } catch (Throwable e) {
                     thrown2 = e;
                     jdbcEventLogger.logQueryError(e);
