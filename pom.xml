@@ -212,6 +212,7 @@
         <module>weboot-mail</module>
         <module>weboot-templates</module>
         <module>weboot-validators</module>
+        <module>weboot-jaxrs</module>
     </modules>
 
 </project>
