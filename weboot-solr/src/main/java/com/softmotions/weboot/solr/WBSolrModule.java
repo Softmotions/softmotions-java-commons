@@ -143,13 +143,10 @@ public class WBSolrModule extends AbstractModule {
          */
         private boolean checkEmptyIndex() throws Exception {
             ModifiableSolrParams params = new ModifiableSolrParams();
-
-            params.add(CommonParams.Q, "*");
+            params.add(CommonParams.Q, "*:*");
             params.add(CommonParams.ROWS, "1");
-
             QueryResponse queryResponse = solr.query(params);
             SolrDocumentList results = queryResponse.getResults();
-
             return results.isEmpty();
         }
 
