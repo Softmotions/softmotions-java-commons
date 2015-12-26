@@ -147,7 +147,9 @@ public class WBSolrModule extends AbstractModule {
             params.add(CommonParams.ROWS, "1");
             QueryResponse queryResponse = solr.query(params);
             SolrDocumentList results = queryResponse.getResults();
-            return results.isEmpty();
+            boolean empty = results.isEmpty();
+            log.info("Index is empty: {}", empty);
+            return empty;
         }
 
         private void initImport(Collection<SolrDataHandler> importHandlers) throws Exception {
