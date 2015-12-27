@@ -1,13 +1,10 @@
 package com.softmotions.weboot.solr;
 
-import com.softmotions.weboot.WBConfiguration;
-import com.softmotions.weboot.lifecycle.Dispose;
-import com.softmotions.weboot.lifecycle.Start;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Binding;
-import com.google.inject.Injector;
-import com.google.inject.Key;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -24,11 +21,13 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.softmotions.weboot.WBConfiguration;
+import com.softmotions.weboot.lifecycle.Dispose;
+import com.softmotions.weboot.lifecycle.Start;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -143,7 +142,7 @@ public class WBSolrModule extends AbstractModule {
          */
         private boolean checkEmptyIndex() throws Exception {
             ModifiableSolrParams params = new ModifiableSolrParams();
-            params.add(CommonParams.Q, "*:*");
+            params.add(CommonParams.Q, cfg.xcfg().getString("solr[@allQuery]", "*:*"));
             params.add(CommonParams.ROWS, "1");
             QueryResponse queryResponse = solr.query(params);
             SolrDocumentList results = queryResponse.getResults();
