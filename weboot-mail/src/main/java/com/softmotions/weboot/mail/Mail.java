@@ -29,10 +29,14 @@ public class Mail extends Email {
 
     private final Provider<TaskExecutor> taskExecutorProvider;
 
+    private final boolean emulation;
+
     public Mail(SendMailSessionProvider sendMailSessionProvider,
-                Provider<TaskExecutor> taskExecutorProvider) {
+                Provider<TaskExecutor> taskExecutorProvider,
+                boolean emulation) {
         this.sendMailSessionProvider = sendMailSessionProvider;
         this.taskExecutorProvider = taskExecutorProvider;
+        this.emulation = emulation;
     }
 
     @Override
@@ -288,9 +292,12 @@ public class Mail extends Email {
     }
 
     public void send() throws MailException {
+        log.info("Sending email: {}", this);
+        if (emulation) {
+            return;
+        }
         SendMailSession session = sendMailSessionProvider.createSession();
         try {
-            log.info("Sending email: {}", this);
             session.open();
             session.sendMail(this);
         } finally {

@@ -84,7 +84,7 @@ public class MailModule extends AbstractModule {
 
         @Override
         public Mail newMail() {
-            Mail mail = new Mail(smtpServer, executorProvider);
+            Mail mail = new Mail(smtpServer, executorProvider, xcfg.getBoolean("mail.emulation", false));
             String val = xcfg.getString("mail.from");
             if (!StringUtils.isBlank(val)) {
                 mail.from(val);
