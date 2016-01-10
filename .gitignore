@@ -1,16 +1,4 @@
-ant/target/
-utils/target/
-web/target/
-weboot/target/
-web-realms/target/
-utils-ujac/target/
-weboot-liqubase/target/
-weboot-mongo/target/
-weboot-mybatis/target/
-weboot-scheduler/target/
-weboot-solr/target/
-weboot-cayenne/target/
-weboot-ds/target/
+*/target/
 karaf/softmotions-features/target
 
 .idea/
