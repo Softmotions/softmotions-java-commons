@@ -14,6 +14,8 @@ public class DateTimeHelper {
     public static final SimpleDateFormat DD_MM_YYYY_SDF = new SynchronizedSDF("dd.MM.yyyy");
 
     public static final SimpleDateFormat DD__MM__YYYY__SDF = new SynchronizedSDF("dd MMMM yyyy");
+    
+    public static final SimpleDateFormat HH_mm__DD__MM__YYYY__SDF = new SynchronizedSDF("HH:mm dd MMMM yyyy");
 
     private DateTimeHelper() {
     }
