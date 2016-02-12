@@ -3,10 +3,15 @@ package com.softmotions.weboot;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class WBJVMResources {
+
+    private static final Logger log = LoggerFactory.getLogger(WBJVMResources.class);
 
     @SuppressWarnings("StaticCollection")
     private static final Map<String, Object> RESOURCES_MAP = new ConcurrentHashMap<>();
@@ -15,10 +20,12 @@ public class WBJVMResources {
     }
 
     public static void set(String name, Object val) {
+        log.info("Set resource {} {}", name, val);
         RESOURCES_MAP.put(name, val);
     }
 
     public static <T> T get(String name) {
+        //noinspection unchecked
         return (T) RESOURCES_MAP.get(name);
     }
 
