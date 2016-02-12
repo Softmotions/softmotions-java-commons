@@ -60,11 +60,11 @@ public class WBDatasourceModule extends AbstractModule {
         }
         String propsFile = cfg.substitutePath(xcfg.getString("datasource[@propertiesFile]"));
         if (!StringUtils.isBlank(propsFile)) {
-            log.info("WBDatasourceModule loading the properties file: " + propsFile);
+            log.info("WBDatasourceModule loading the properties file: {}", propsFile);
             try (FileInputStream is = new FileInputStream(propsFile)) {
                 dsProps.load(is);
             } catch (IOException e) {
-                log.error("Failed to load the properties file: " + propsFile);
+                log.error("Failed to load the properties file: {}", propsFile);
                 throw new RuntimeException(e);
             }
         }
@@ -76,7 +76,7 @@ public class WBDatasourceModule extends AbstractModule {
                 logProps.setProperty(k, "********");
             }
         }
-        log.info("WBDatasourceModule properties: " + logProps);
+        log.info("WBDatasourceModule properties: {}", logProps);
         bind(DatasourceWrapper.class).toInstance(new DatasourceWrapper(xcfg, dsProps));
         bind(DataSource.class).toProvider(DataSourceProvider.class);
         bind(DatasourceInitializer.class).asEagerSingleton();
@@ -111,15 +111,15 @@ public class WBDatasourceModule extends AbstractModule {
             dataSource = new HikariDataSource(new HikariConfig(dsProps));
             try (Connection conn = dataSource.getConnection()) {
                 if (conn.isValid(0)) {
-                    log.info("Database connection to: "
-                             + dsProps.getProperty("jdbcUrl")
-                             + " successfullly opened");
+                    log.info("Database connection to: {} successfullly opened",
+                             dsProps.getProperty("jdbcUrl"));
                 } else {
-                    log.error("Failed to estabilish database connection to: "
-                              + dsProps.getProperty("jdbcUrl"));
-
+                    log.error("Failed to estabilish database connection to: {}",
+                              dsProps.getProperty("jdbcUrl"));
                 }
             }
+
+            String jvmDsName = cfg.getString("datasource[@jvmDsName]");
             String jndiName = cfg.getString("datasource[@jndiName]");
             if (jndiName != null) {
                 InitialContext initCtx = new InitialContext();
@@ -137,6 +137,10 @@ public class WBDatasourceModule extends AbstractModule {
                 }
                 jdbc.rebind(jndiName, dataSource);
                 log.info("Datasource JNDI name: java:comp/env/jdbc/{}", jndiName);
+            }
+            if (jvmDsName != null) {
+                WBJVMDatasources.set(jvmDsName, dataSource);
+                log.info("Datasource registered in WBJVMDatasources as '{}'", jvmDsName);
             }
         }
 
