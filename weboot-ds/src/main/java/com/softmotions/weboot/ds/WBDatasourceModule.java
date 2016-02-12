@@ -23,6 +23,7 @@ import com.google.inject.ProvisionException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.softmotions.weboot.WBConfiguration;
+import com.softmotions.weboot.WBJVMResources;
 import com.softmotions.weboot.lifecycle.Dispose;
 import com.softmotions.weboot.lifecycle.Start;
 
@@ -139,7 +140,7 @@ public class WBDatasourceModule extends AbstractModule {
                 log.info("Datasource JNDI name: java:comp/env/jdbc/{}", jndiName);
             }
             if (jvmDsName != null) {
-                WBJVMDatasources.set(jvmDsName, dataSource);
+                WBJVMResources.set(jvmDsName, dataSource);
                 log.info("Datasource registered in WBJVMDatasources as '{}'", jvmDsName);
             }
         }
