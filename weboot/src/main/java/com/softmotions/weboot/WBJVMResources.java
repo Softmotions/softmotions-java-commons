@@ -36,4 +36,9 @@ public class WBJVMResources {
         }
         return val;
     }
+
+    public static void remove(String name) {
+        log.info("Remove resource {}", name);
+        RESOURCES_MAP.remove(name);
+    }
 }
