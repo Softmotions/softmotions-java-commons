@@ -42,5 +42,7 @@ public @interface Scheduled {
      *
      * For full description @see it.sauronsoftware.cron4j.SchedulingPattern
      */
-    String value();
+    String value() default "";
+
+    String patternName() default "";
 }

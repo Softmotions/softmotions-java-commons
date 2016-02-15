@@ -1,5 +1,6 @@
 package com.softmotions.weboot.scheduler;
 
+import com.softmotions.weboot.WBConfiguration;
 import it.sauronsoftware.cron4j.Scheduler;
 import it.sauronsoftware.cron4j.SchedulingPattern;
 import it.sauronsoftware.cron4j.Task;
@@ -16,10 +17,14 @@ import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 
+import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -32,8 +37,17 @@ public class SchedulerModule extends AbstractModule {
 
     private Scheduler scheduler;
 
+    private WBConfiguration cfg;
+
+    private final Map<String, String> namedTasks = new HashMap<>();
+
     public SchedulerModule() {
-        scheduler = new Scheduler();
+        this.scheduler = new Scheduler();
+    }
+
+    public SchedulerModule(WBConfiguration cfg) {
+        this.cfg = cfg;
+        this.scheduler = new Scheduler();
     }
 
     protected void configure() {
@@ -41,6 +55,21 @@ public class SchedulerModule extends AbstractModule {
         bind(SchedulerModule.class).toInstance(this);
         bind(Scheduler.class).toInstance(scheduler);
         bind(SchedulerInitializer.class).asEagerSingleton();
+
+        if ((cfg == null) || cfg.xcfg().configurationsAt("scheduler").isEmpty()) {
+            log.warn("No WBSchedluer module configuration found. Skipping.");
+            return;
+        }
+
+        XMLConfiguration xcfg = cfg.xcfg();
+        for (String task : cfg.xcfg().getStringArray("scheduler.named-tasks")) {
+            String[] s = task.split("=", 2);
+            if (s.length != 2) {
+                log.warn("Incorrect format for a named task, skipping: {}, {}", task, s.length);
+                continue;
+            }
+            namedTasks.put(s[0].trim(), s[1].trim());
+        }
     }
 
     private boolean hasScheduledMethod(Class<?> clazz) {
@@ -56,17 +85,34 @@ public class SchedulerModule extends AbstractModule {
         for (final Method method : target.getClass().getMethods()) {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
             if (scheduled != null) {
-                if (!SchedulingPattern.validate(scheduled.value())) {
-                    log.warn("Invalid scheduler pattern: '" + scheduled.value() + "' " +
-                             "for " + target.getClass().getName() + "#" + method.getName());
+                String scheduledPattern;
+                if (StringUtils.isNotBlank(scheduled.patternName())) {
+                    scheduledPattern = namedTasks.get(scheduled.patternName());
+                    if (scheduledPattern == null) {
+                        if (StringUtils.isNotBlank(scheduled.value())) {
+                            log.info("No such named pattern found in configuration: '{}'", scheduled.patternName());
+                            log.info("Falling back to a default value: '{}'", scheduled.value());
+                            scheduledPattern = scheduled.value();
+                        } else {
+                            log.warn("No such named pattern found in configuration, skipping: '{}'", scheduled.patternName());
+                            continue;
+                        }
+                    }
+                } else {
+                    scheduledPattern = scheduled.value();
+                }
+
+                if (!SchedulingPattern.validate(scheduledPattern)) {
+                    log.warn("Invalid scheduler pattern: '" + scheduledPattern + "' " +
+                            "for " + target.getClass().getName() + "#" + method.getName());
                     continue;
                 }
 
                 log.info("Register scheduled task: " +
-                         "pattern: '" + scheduled.value() + "', " +
-                         "method: " + target.getClass().getName() + "#" + method.getName());
+                        "pattern: '" + scheduledPattern + "', " +
+                        "method: " + target.getClass().getName() + "#" + method.getName());
 
-                scheduler.schedule(scheduled.value(), new Task() {
+                scheduler.schedule(scheduledPattern, new Task() {
                     public void execute(TaskExecutionContext context) throws RuntimeException {
                         try {
                             Class<?>[] ptypes = method.getParameterTypes();
