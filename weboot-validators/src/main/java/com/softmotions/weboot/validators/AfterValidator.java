@@ -27,7 +27,7 @@ public class AfterValidator implements ConstraintValidator<After, Date> {
 
     @Override
     public boolean isValid(Date value, ConstraintValidatorContext context) {
-        return value.after(date);
+        return value == null || value.after(date);
     }
 
 }
