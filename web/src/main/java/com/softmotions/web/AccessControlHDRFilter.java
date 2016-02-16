@@ -48,6 +48,7 @@ public class AccessControlHDRFilter implements Filter {
             HttpServletResponse hresp = (HttpServletResponse) resp;
             hresp.setHeader("Access-Control-Allow-Origin", value);
 
+            String origin = hreq.getHeader("Origin");
             String rheaders = hreq.getHeader("Access-Control-Request-Headers");
             if (rheaders != null) {
                 hresp.setHeader("Access-Control-Allow-Headers", rheaders);
@@ -56,7 +57,7 @@ public class AccessControlHDRFilter implements Filter {
             if (rmethod != null) {
                 hresp.setHeader("Access-Control-Allow-Methods", rmethod);
             }
-            if (exposeHeaders != null && (rheaders != null || rmethod != null)) {
+            if (exposeHeaders != null && (rheaders != null || rmethod != null || origin != null)) {
                 hresp.setHeader("Access-Control-Expose-Headers", exposeHeaders);
             }
         }
