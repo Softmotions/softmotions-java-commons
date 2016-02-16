@@ -39,12 +39,14 @@ public class SchedulerModule extends AbstractModule {
 
     private WBConfiguration cfg;
 
-    private final Map<String, String> namedTasks = new HashMap<>();
-
     public SchedulerModule() {
         this.scheduler = new Scheduler();
     }
 
+    /**
+     * Constructor for optional configuration. Configuration is used for named cron pattern
+     * @param cfg
+     */
     public SchedulerModule(WBConfiguration cfg) {
         this.cfg = cfg;
         this.scheduler = new Scheduler();
@@ -62,14 +64,6 @@ public class SchedulerModule extends AbstractModule {
         }
 
         XMLConfiguration xcfg = cfg.xcfg();
-        for (String task : cfg.xcfg().getStringArray("scheduler.named-tasks")) {
-            String[] s = task.split("=", 2);
-            if (s.length != 2) {
-                log.warn("Incorrect format for a named task, skipping: {}, {}", task, s.length);
-                continue;
-            }
-            namedTasks.put(s[0].trim(), s[1].trim());
-        }
     }
 
     private boolean hasScheduledMethod(Class<?> clazz) {
@@ -86,14 +80,26 @@ public class SchedulerModule extends AbstractModule {
             Scheduled scheduled = method.getAnnotation(Scheduled.class);
             if (scheduled != null) {
                 String scheduledPattern;
-                if (StringUtils.isNotBlank(scheduled.patternName())) {
+                if (StringUtils.isNotBlank(scheduled.patternName())) { //For named configuration
+                    Map<String, String> namedTasks = new HashMap<>();
+
+                    //
+                    for (String task : cfg.xcfg().getStringArray("scheduler.named-tasks")) {
+                        String[] s = task.split("=", 2);
+                        if (s.length != 2) {
+                            log.warn("Incorrect format for a named task, skipping: {}, {}", task, s.length);
+                            continue;
+                        }
+                        namedTasks.put(s[0].trim(), s[1].trim());
+                    }
+
                     scheduledPattern = namedTasks.get(scheduled.patternName());
                     if (scheduledPattern == null) {
-                        if (StringUtils.isNotBlank(scheduled.value())) {
+                        if (StringUtils.isNotBlank(scheduled.value())) { //try to fall back to default pattern
                             log.info("No such named pattern found in configuration: '{}'", scheduled.patternName());
                             log.info("Falling back to a default value: '{}'", scheduled.value());
                             scheduledPattern = scheduled.value();
-                        } else {
+                        } else { //
                             log.warn("No such named pattern found in configuration, skipping: '{}'", scheduled.patternName());
                             continue;
                         }

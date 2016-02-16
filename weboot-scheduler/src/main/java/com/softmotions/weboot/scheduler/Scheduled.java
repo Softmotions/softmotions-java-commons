@@ -17,7 +17,7 @@ public @interface Scheduled {
      *
      * <p>
      * A UNIX crontab-like pattern is a string split in five space separated parts.
-     * Each part is intented as:
+     * Each part is intended as:
      * </p>
      * <ol>
      * <li><strong>Minutes sub-pattern</strong>. During which minutes of the hour
@@ -44,5 +44,10 @@ public @interface Scheduled {
      */
     String value() default "";
 
+    /**
+     * String {@code "[name] = [crontab pattern]"}. <b>name<b/> must not contain '='
+     * sign, leading and trailing whitespaces are stripped from it.<b>>crontab pattern</b>
+     * must be as described above.
+     */
     String patternName() default "";
 }
