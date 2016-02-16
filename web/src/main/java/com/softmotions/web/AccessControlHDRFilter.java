@@ -24,6 +24,8 @@ public class AccessControlHDRFilter implements Filter {
 
     private boolean enabled;
 
+    private String exposeHeaders;
+
 
     @Override
     public void init(FilterConfig config) throws ServletException {
@@ -33,6 +35,9 @@ public class AccessControlHDRFilter implements Filter {
         }
         if (config.getInitParameter("disabled") != null) {
             enabled = !BooleanUtils.toBoolean(config.getInitParameter("disabled"));
+        }
+        if (config.getInitParameter("exposeHeaders") != null) {
+            exposeHeaders = config.getInitParameter("exposeHeaders");
         }
     }
 
@@ -51,9 +56,13 @@ public class AccessControlHDRFilter implements Filter {
             if (rmethod != null) {
                 hresp.setHeader("Access-Control-Allow-Methods", rmethod);
             }
+            if (exposeHeaders != null) {
+                hresp.setHeader("Access-Control-Expose-Headers", exposeHeaders);
+            }
         }
         chain.doFilter(req, resp);
     }
+
 
     @Override
     public void destroy() {
