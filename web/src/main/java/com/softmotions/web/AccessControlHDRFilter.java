@@ -56,7 +56,7 @@ public class AccessControlHDRFilter implements Filter {
             if (rmethod != null) {
                 hresp.setHeader("Access-Control-Allow-Methods", rmethod);
             }
-            if (exposeHeaders != null) {
+            if (exposeHeaders != null && (rheaders != null || rmethod != null)) {
                 hresp.setHeader("Access-Control-Expose-Headers", exposeHeaders);
             }
         }
