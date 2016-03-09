@@ -2,8 +2,10 @@ package com.softmotions.weboot.templates;
 
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
 
@@ -20,6 +22,7 @@ import org.apache.velocity.runtime.log.LogChute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.softmotions.commons.cont.CollectionUtils;
 import com.softmotions.weboot.i18n.I18n;
 
 /**
@@ -47,6 +50,12 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
         if (!templatesBase.endsWith("/")) {
             templatesBase += '/';
         }
+
+        List<String> directives =
+                xcfg.getList("templates.directives")
+                        .stream().map(String::valueOf)
+                        .collect(Collectors.toList());
+
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(TemplateServiceImpl.class.getClassLoader());
@@ -56,6 +65,12 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
             props.setProperty("velocimacro.permissions.allow.inline.local.scope", "true");
             props.setProperty("resource.loader", "bundle");
             props.setProperty("bundle.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+            if (!directives.isEmpty()) {
+                props.setProperty("userdirective", CollectionUtils.join(",", directives));
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Configuration: {}", props);
+            }
             engine = new VelocityEngine(props);
             engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, this);
             engine.init();
