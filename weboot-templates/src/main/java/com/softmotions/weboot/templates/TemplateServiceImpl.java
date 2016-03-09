@@ -182,6 +182,11 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
             this.vctx = new VelocityContext();
         }
 
+
+        public Template getVelocityTemplate() {
+            return template;
+        }
+
         @Override
         public TemplateContext put(String key, Object val) {
             vctx.put(key, val);
