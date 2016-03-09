@@ -10,10 +10,13 @@ import javax.inject.Inject;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.runtime.RuntimeServices;
+import org.apache.velocity.runtime.log.LogChute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,7 @@ import com.softmotions.weboot.i18n.I18n;
  */
 
 @ThreadSafe
-public class TemplateServiceImpl implements TemplateService {
+public class TemplateServiceImpl implements TemplateService, LogChute {
 
     private static final Logger log = LoggerFactory.getLogger(TemplateServiceImpl.class);
 
@@ -33,6 +36,8 @@ public class TemplateServiceImpl implements TemplateService {
     private final I18n i18n;
 
     private String templatesBase;
+
+    private static final ThreadLocal<Boolean> SUPPRESS_NOTFOUND_ERROR = new ThreadLocal<>();
 
 
     @Inject
@@ -52,6 +57,7 @@ public class TemplateServiceImpl implements TemplateService {
             props.setProperty("resource.loader", "bundle");
             props.setProperty("bundle.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
             engine = new VelocityEngine(props);
+            engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, this);
             engine.init();
         } finally {
             Thread.currentThread().setContextClassLoader(old);
@@ -66,9 +72,13 @@ public class TemplateServiceImpl implements TemplateService {
         try {
             Template template;
             try {
+                SUPPRESS_NOTFOUND_ERROR.set(Boolean.TRUE);
                 template = engine.getTemplate(getTemplateLocation(templateName, locale.getLanguage()));
             } catch (ResourceNotFoundException e) {
+                SUPPRESS_NOTFOUND_ERROR.set(Boolean.FALSE);
                 template = engine.getTemplate(getTemplateLocation(templateName, null));
+            } finally {
+                SUPPRESS_NOTFOUND_ERROR.set(Boolean.FALSE);
             }
             return new TemplateContextImpl(template);
         } catch (ResourceNotFoundException e) {
@@ -84,6 +94,63 @@ public class TemplateServiceImpl implements TemplateService {
             return templatesBase + template + ".vm";
         }
         return templatesBase + template + '_' + lng.toLowerCase() + ".vm";
+    }
+
+
+    @Override
+    public void init(RuntimeServices rs) throws Exception {
+    }
+
+    @Override
+    public void log(int level, String message) {
+        log(level, message, null);
+    }
+
+    @Override
+    public void log(int level, String message, Throwable t) {
+        if (message != null
+            && SUPPRESS_NOTFOUND_ERROR.get() == Boolean.TRUE
+            && message.indexOf("ResourceManager : unable to find resource") == 0) {
+            return;
+        }
+        switch (level) {
+            case LogChute.WARN_ID:
+                log.warn(message, t);
+                break;
+            case LogChute.INFO_ID:
+                log.info(message, t);
+                break;
+            case LogChute.DEBUG_ID:
+                log.debug(message, t);
+                break;
+            case LogChute.TRACE_ID:
+                log.trace(message, t);
+                break;
+            case LogChute.ERROR_ID:
+                log.error(message, t);
+                break;
+            default:
+                log.warn(message, t);
+                break;
+        }
+    }
+
+    @Override
+    public boolean isLevelEnabled(int level) {
+        switch (level) {
+            case LogChute.WARN_ID:
+                return log.isWarnEnabled();
+            case LogChute.INFO_ID:
+                return log.isInfoEnabled();
+            case LogChute.DEBUG_ID:
+                return log.isDebugEnabled();
+            case LogChute.TRACE_ID:
+                return log.isTraceEnabled();
+            case LogChute.ERROR_ID:
+                return log.isErrorEnabled();
+            default:
+                return false;
+        }
     }
 
     /**
