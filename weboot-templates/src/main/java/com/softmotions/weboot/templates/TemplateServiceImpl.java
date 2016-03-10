@@ -217,7 +217,7 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
             try {
                 StringWriter sw = new StringWriter();
                 template.merge(vctx, sw);
-                return sw.toString();
+                return sw.toString().trim();
             } catch (ResourceNotFoundException | ParseErrorException | MethodInvocationException e) {
                 throw new TemplateServiceException("Error renderign template", e);
             } finally {
