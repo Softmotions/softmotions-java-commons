@@ -1,19 +1,13 @@
 package com.softmotions.weboot;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
-import com.softmotions.commons.cont.Pair;
-import com.softmotions.weboot.lifecycle.LifeCycleModule;
-import com.softmotions.weboot.lifecycle.LifeCycleService;
-
-import com.google.common.io.Resources;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.google.inject.servlet.GuiceServletContextListener;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -21,14 +15,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
+
+import com.google.common.io.Resources;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.Stage;
+import com.google.inject.servlet.GuiceServletContextListener;
+import com.softmotions.commons.cont.Pair;
+import com.softmotions.weboot.lifecycle.LifeCycleModule;
+import com.softmotions.weboot.lifecycle.LifeCycleService;
 
 /**
  * Weboot engine startup listener.
@@ -79,6 +79,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
     }
 
 
+    @Override
     public void contextInitialized(ServletContextEvent evt) {
         ServletContext sctx = evt.getServletContext();
         Pair<String, String> ret = getEnvInitParam(sctx, WEBOOT_CFG_CLASS_INITPARAM);
@@ -88,7 +89,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
                                        "under the keys: " + ret.getTwo());
         }
         String cfgClassName = ret.getOne();
-        log.info("Using WEBOOT configuration class: " + cfgClassName);
+        log.info("Using WEBOOT configuration class: {}", cfgClassName);
         ClassLoader cl = ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
                                                   getClass().getClassLoader());
         Class cfgClass;
@@ -159,11 +160,13 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         return url;
     }
 
+    @Override
     public void contextDestroyed(ServletContextEvent evt) {
         super.contextDestroyed(evt);
         this.injector = null;
     }
 
+    @Override
     public Injector getInjector() {
         if (injector != null) {
             return injector;
@@ -172,17 +175,21 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         modules.add(new LifeCycleModule());
         modules.addAll(getStartupModules());
         injector = Guice.createInjector(Stage.PRODUCTION, modules);
+        WBJVMResources.set(WBServletListener.class.getSimpleName() + ".Injector", injector);
         return injector;
     }
 
+    @Override
     public void start() {
         getInjector().getInstance(LifeCycleService.class).start();
     }
 
+    @Override
     public void stop() {
         getInjector().getInstance(LifeCycleService.class).stop();
     }
 
+    @Override
     public boolean isStarted() {
         return getInjector().getInstance(LifeCycleService.class).isStarted();
     }
