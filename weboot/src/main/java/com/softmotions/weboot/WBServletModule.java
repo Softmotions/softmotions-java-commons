@@ -34,12 +34,14 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
         return cfg;
     }
 
+    @Override
     protected void configureServlets() {
         log.info("Configuring WB modules and servlets");
         ServletContext sc = getServletContext();
         if (sc == null) {
             return;
         }
+        //noinspection unchecked
         cfg = (C) sc.getAttribute(WBServletListener.WEBOOT_CFG_SCTX_KEY);
         if (cfg == null) {
             throw new RuntimeException("Application configuration is not registered in the servlet context, " +
@@ -61,10 +63,10 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
             try {
                 Class mclass = cl.loadClass(mclassName);
                 if (!Module.class.isAssignableFrom(mclass)) {
-                    log.warn("Module class: " + mclassName + " is not Guice module, skipped");
+                    log.warn("Module class: {} is not Guice module, skipped", mclassName);
                     continue;
                 }
-                log.info("Installing '" + mclassName + "' Guice module");
+                log.info("Installing '{}' Guice module", mclassName);
                 Object minst = null;
 
                 for (Constructor c : mclass.getConstructors()) {
@@ -72,6 +74,7 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                     if (ptypes.length != 1) {
                         continue;
                     }
+                    //noinspection unchecked
                     if (ptypes[0].isAssignableFrom(cfg.getClass())) {
                         try {
                             minst = c.newInstance(cfg);

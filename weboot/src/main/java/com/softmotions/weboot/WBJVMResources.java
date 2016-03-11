@@ -20,7 +20,7 @@ public class WBJVMResources {
     }
 
     public static void set(String name, Object val) {
-        log.info("Set resource {} {}", name, val);
+        log.info("Set resource {}", name);
         RESOURCES_MAP.put(name, val);
     }
 
@@ -32,7 +32,7 @@ public class WBJVMResources {
     public static <T> T getOrFail(String name) {
         T val = get(name);
         if (val == null) {
-            throw new RuntimeException("Unknown resource: " + name);
+            throw new WBJVMResourcesNotFound("Unknown resource: " + name);
         }
         return val;
     }

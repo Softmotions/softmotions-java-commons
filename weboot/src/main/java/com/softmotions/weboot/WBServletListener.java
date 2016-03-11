@@ -175,7 +175,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         modules.add(new LifeCycleModule());
         modules.addAll(getStartupModules());
         injector = Guice.createInjector(Stage.PRODUCTION, modules);
-        WBJVMResources.set(WBServletListener.class.getSimpleName() + ".Injector", injector);
+        WBJVMResources.set("com.softmotions.weboot.WBServletListener.Injector", injector);
         return injector;
     }
 
