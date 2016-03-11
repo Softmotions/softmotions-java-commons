@@ -10,6 +10,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
 
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -56,6 +57,8 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
                         .stream().map(String::valueOf)
                         .collect(Collectors.toList());
 
+        String loader = xcfg.getString("templates.loader");
+
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(TemplateServiceImpl.class.getClassLoader());
@@ -63,8 +66,17 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
             props.setProperty("input.encoding", "UTF-8");
             props.setProperty("output.encoding", "UTF-8");
             props.setProperty("velocimacro.permissions.allow.inline.local.scope", "true");
-            props.setProperty("resource.loader", "bundle");
-            props.setProperty("bundle.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+
+            String loaders = "";
+            if (!StringUtils.isBlank(loader)) {
+                props.setProperty("custom.resource.loader.class", loader.trim());
+                loaders = "custom,";
+            }
+            // Use bundle loader as last
+            loaders += "bundle";
+            props.setProperty("resource.loader", loaders);
+            props.setProperty("bundle.resource.loader.class",
+                              "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
             if (!directives.isEmpty()) {
                 props.setProperty("userdirective", CollectionUtils.join(",", directives));
             }
