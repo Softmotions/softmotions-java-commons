@@ -66,6 +66,9 @@ public final class TransactionalInterceptor implements MethodInterceptor {
         Throwable thrown = null;
         Throwable thrown2 = null;
         Transaction tx = txFactory.createTransaction();
+        if (log.isDebugEnabled()) {
+            log.debug("Created tx: {}", tx);
+        }
         BaseTransaction.bindThreadTransaction(tx);
         try {
             if (log.isDebugEnabled()) {
@@ -98,47 +101,61 @@ public final class TransactionalInterceptor implements MethodInterceptor {
             if (log.isDebugEnabled()) {
                 log.debug("Perform {}", (tx.isRollbackOnly() ? "rollback" : "commit"));
             }
-            if (tx.isRollbackOnly()) {
-                if (octx != null) {
+            tx = BaseTransaction.getThreadTransaction();
+            if (log.isDebugEnabled()) {
+                log.debug("finishing tx: {}", tx);
+            }
+            if (tx != null) {
+                if (tx.isRollbackOnly()) {
                     try {
-                        octx.rollbackChanges();
+                        if (octx != null) {
+                            octx.rollbackChanges();
+                        }
                     } catch (Throwable e) {
                         thrown2 = e;
                         jdbcEventLogger.logQueryError(e);
+                    } finally {
+                        if (log.isDebugEnabled()) {
+                            log.debug("BaseTransaction.bindThreadTransaction(null)");
+                        }
+                        BaseTransaction.bindThreadTransaction(null);
                     }
-                }
-                BaseTransaction.bindThreadTransaction(null);
-                try {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Do tx.rollback()");
-                    }
-                    tx.rollback();
-                } catch (Throwable e) {
-                    thrown2 = e;
-                    jdbcEventLogger.logQueryError(e);
-                }
-            } else {
-                if (octx != null) {
                     try {
-                        octx.commitChanges();
-                    } catch (Throwable e) {
-                        thrown2 = e;
-                        jdbcEventLogger.logQueryError(e);
-                    }
-                }
-                BaseTransaction.bindThreadTransaction(null);
-                try {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Do tx.commit()");
-                    }
-                    if (tx.isRollbackOnly()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Do tx.rollback() tx: {}", tx);
+                        }
                         tx.rollback();
-                    } else {
-                        tx.commit();
+                    } catch (Throwable e) {
+                        thrown2 = e;
+                        jdbcEventLogger.logQueryError(e);
                     }
-                } catch (Throwable e) {
-                    thrown2 = e;
-                    jdbcEventLogger.logQueryError(e);
+                } else {
+                    try {
+                        if (octx != null) {
+                            octx.commitChanges();
+                        }
+                    } catch (Throwable e) {
+                        thrown2 = e;
+                        jdbcEventLogger.logQueryError(e);
+                    } finally {
+                        if (log.isDebugEnabled()) {
+                            log.debug("BaseTransaction.bindThreadTransaction(null)");
+                        }
+                        BaseTransaction.bindThreadTransaction(null);
+                    }
+                    try {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Do tx.commit() tx: {}", tx);
+                        }
+                        if (tx.isRollbackOnly()) {
+                            tx.rollback();
+                        } else {
+                            tx.commit();
+                        }
+                    } catch (Throwable e) {
+                        thrown2 = e;
+                        jdbcEventLogger.logQueryError(e);
+                    }
                 }
             }
             if (thrown == null && thrown2 != null) {
