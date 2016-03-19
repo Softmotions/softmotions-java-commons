@@ -102,11 +102,11 @@ public class JsonUtils {
             Map.Entry e = (Map.Entry) oe;
             String key = (String) e.getKey();
             Object val = e.getValue();
-            if (val == null) {
-                o.putNull(key);
+            if (keys != null && keys.length > 0 && ArrayUtils.indexOf(keys, key) == -1) {
                 continue;
             }
-            if (keys != null && keys.length > 0 && ArrayUtils.indexOf(keys, key) == -1) {
+            if (val == null) {
+                o.putNull(key);
                 continue;
             }
             if (val instanceof String) {
