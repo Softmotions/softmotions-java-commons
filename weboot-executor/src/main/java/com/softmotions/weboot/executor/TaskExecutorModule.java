@@ -1,22 +1,24 @@
 package com.softmotions.weboot.executor;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import com.google.inject.AbstractModule;
+import com.softmotions.weboot.WBConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.AbstractModule;
-import com.softmotions.weboot.WBConfiguration;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -46,9 +48,22 @@ public class TaskExecutorModule extends AbstractModule implements TaskExecutor {
         }
 
         log.info("Using {} threads for tasks executor", threads);
+        BlockingQueue<Runnable> workQueue;
+        Integer queueSize = xcfg.getInteger("executor.queue-size", null);
+        if (queueSize == null || queueSize < 0) {
+            log.info("Using unbounded queue for tasks executor");
+            workQueue = new LinkedTransferQueue<>();
+        } else if (queueSize == 0) {
+            log.info("Using tasks executor without queue");
+            workQueue = new SynchronousQueue<>();
+        } else {
+            log.info("Using bounded queue (size = {}) for tasks executor", queueSize);
+            workQueue = new ArrayBlockingQueue<>(queueSize);
+        }
+
         executor = new ThreadPoolExecutor(0, threads,
                                           60L, TimeUnit.SECONDS,
-                                          new SynchronousQueue<>());
+                                          workQueue);
         bind(TaskExecutor.class).toInstance(this);
     }
 
@@ -114,7 +129,9 @@ public class TaskExecutorModule extends AbstractModule implements TaskExecutor {
     }
 
     @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks,
+                           long timeout,
+                           TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         return executor.invokeAny(tasks, timeout, unit);
     }
 
