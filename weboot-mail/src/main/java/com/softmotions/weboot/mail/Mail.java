@@ -16,7 +16,6 @@ import jodd.mail.SendMailSession;
 import jodd.mail.SendMailSessionProvider;
 
 import com.google.inject.Provider;
-import com.softmotions.commons.cont.Stack;
 import com.softmotions.weboot.executor.TaskExecutor;
 
 /**
@@ -294,11 +293,11 @@ public class Mail extends Email {
             addText(text, "UTF-8");
         }
         send();
-        service.onMailSent(this);
     }
 
     public void send() throws MailException {
         log.info("Sending email: {}", this);
+        service.onMailSent(this);
         if (emulation) {
             return;
         }
@@ -312,10 +311,18 @@ public class Mail extends Email {
     }
 
     public void sendAsync() {
+        if (emulation) {
+            send();
+            return;
+        }
         sendAsync(null);
     }
 
     public void sendAsync(String text) {
+        if (emulation) {
+            send(text);
+            return;
+        }
         TaskExecutor executor = taskExecutorProvider.get();
         executor.execute(() -> {
             try {
