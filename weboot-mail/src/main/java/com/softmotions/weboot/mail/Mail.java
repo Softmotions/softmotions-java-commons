@@ -16,6 +16,7 @@ import jodd.mail.SendMailSession;
 import jodd.mail.SendMailSessionProvider;
 
 import com.google.inject.Provider;
+import com.softmotions.commons.cont.Stack;
 import com.softmotions.weboot.executor.TaskExecutor;
 
 /**
@@ -31,12 +32,16 @@ public class Mail extends Email {
 
     private final boolean emulation;
 
-    public Mail(SendMailSessionProvider sendMailSessionProvider,
+    private final MailModule.MailServiceImpl service;
+
+    public Mail(MailModule.MailServiceImpl service,
+                SendMailSessionProvider sendMailSessionProvider,
                 Provider<TaskExecutor> taskExecutorProvider,
                 boolean emulation) {
         this.sendMailSessionProvider = sendMailSessionProvider;
         this.taskExecutorProvider = taskExecutorProvider;
         this.emulation = emulation;
+        this.service = service;
     }
 
     @Override
@@ -289,6 +294,7 @@ public class Mail extends Email {
             addText(text, "UTF-8");
         }
         send();
+        service.onMailSent(this);
     }
 
     public void send() throws MailException {

@@ -1,5 +1,7 @@
 package com.softmotions.weboot.mail;
 
+import java.util.List;
+
 import jodd.mail.SendMailSessionProvider;
 
 /**
@@ -15,4 +17,10 @@ public interface MailService extends SendMailSessionProvider {
      * Mail from address initially set from app env configuration.
      */
     Mail newMail();
+
+    /**
+     * Return history of sent emails.
+     * @return
+     */
+    List<Mail> getHistory();
 }

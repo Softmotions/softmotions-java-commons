@@ -1,5 +1,8 @@
 package com.softmotions.weboot.mail;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.softmotions.commons.cont.Stack;
 import com.softmotions.weboot.WBConfiguration;
 import com.softmotions.weboot.executor.TaskExecutor;
 
@@ -67,6 +71,10 @@ public class MailModule extends AbstractModule {
 
         final SmtpServer smtpServer;
 
+        final Stack<Mail> history = new Stack<>();
+
+        final Object lock = new Object();
+
         @Inject
         MailServiceImpl(XMLConfiguration xcfg,
                         Provider<TaskExecutor> executorProvider,
@@ -77,6 +85,19 @@ public class MailModule extends AbstractModule {
             this.smtpServer = smtpServer;
         }
 
+        void onMailSent(Mail mail) {
+            int numHist = xcfg.getInt("mail.keep-history", 0);
+            if (numHist < 1) {
+                return;
+            }
+            synchronized (lock) {
+                while (history.size() > numHist) {
+                    history.remove(0);
+                }
+                history.push(mail);
+            }
+        }
+
         @Override
         public SendMailSession createSession() {
             return smtpServer.createSession();
@@ -84,7 +105,9 @@ public class MailModule extends AbstractModule {
 
         @Override
         public Mail newMail() {
-            Mail mail = new Mail(smtpServer, executorProvider, xcfg.getBoolean("mail.emulation", false));
+            Mail mail = new Mail(this,
+                                 smtpServer, executorProvider,
+                                 xcfg.getBoolean("mail.emulation", false));
             String val = xcfg.getString("mail.from");
             if (!StringUtils.isBlank(val)) {
                 mail.from(val);
@@ -98,6 +121,13 @@ public class MailModule extends AbstractModule {
                 mail.bcc(val);
             }
             return mail;
+        }
+
+        @Override
+        public List<Mail> getHistory() {
+            synchronized (lock) {
+                return Collections.unmodifiableList(history);
+            }
         }
     }
 }
