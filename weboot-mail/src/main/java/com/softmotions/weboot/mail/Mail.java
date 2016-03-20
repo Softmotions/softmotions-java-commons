@@ -311,10 +311,6 @@ public class Mail extends Email {
     }
 
     public void sendAsync() {
-        if (emulation) {
-            send();
-            return;
-        }
         sendAsync(null);
     }
 
