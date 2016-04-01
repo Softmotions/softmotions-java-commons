@@ -6,6 +6,7 @@ import java.util.Iterator;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import com.softmotions.commons.ebus.EBus;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -79,13 +80,17 @@ public class WBSolrModule extends AbstractModule {
 
         final SolrServer solr;
 
+        final EBus ebus;
+
         @Inject
         public SolrServerInitializer(Injector injector,
                                      WBConfiguration cfg,
-                                     SolrServer solr) {
+                                     SolrServer solr,
+                                     EBus ebus) {
             this.injector = injector;
             this.cfg = cfg;
             this.solr = solr;
+            this.ebus = ebus;
         }
 
         @Start(order = Integer.MAX_VALUE, parallel = true)
@@ -123,6 +128,7 @@ public class WBSolrModule extends AbstractModule {
             } else {
                 initImport(autoImportHandlers);
             }
+            ebus.fire(new WBSolrInitialisedEvent());
         }
 
         @Dispose(order = Integer.MAX_VALUE)
@@ -176,4 +182,6 @@ public class WBSolrModule extends AbstractModule {
             initImport(importHandlers);
         }
     }
+
+    public static class WBSolrInitialisedEvent {}
 }
