@@ -183,7 +183,10 @@ public class WBSolrModule extends AbstractModule {
         }
 
         private void setStarted(boolean b) {
-            this.started.set(b);
+            synchronized (started) {
+                this.started.set(b);
+                started.notifyAll();
+            }
         }
 
         public AtomicBoolean getStarted() {
