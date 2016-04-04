@@ -3,10 +3,10 @@ package com.softmotions.weboot.solr;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import com.softmotions.commons.ebus.EBus;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -72,7 +72,7 @@ public class WBSolrModule extends AbstractModule {
         bind(SolrServerInitializer.class).asEagerSingleton();
     }
 
-    protected static class SolrServerInitializer {
+    public static class SolrServerInitializer {
 
         final Injector injector;
 
@@ -80,17 +80,17 @@ public class WBSolrModule extends AbstractModule {
 
         final SolrServer solr;
 
-        final EBus ebus;
+        final AtomicBoolean started;
 
         @Inject
         public SolrServerInitializer(Injector injector,
                                      WBConfiguration cfg,
-                                     SolrServer solr,
-                                     EBus ebus) {
+                                     SolrServer solr) {
             this.injector = injector;
             this.cfg = cfg;
             this.solr = solr;
-            this.ebus = ebus;
+
+            this.started = new AtomicBoolean(false);
         }
 
         @Start(order = Integer.MAX_VALUE, parallel = true)
@@ -128,7 +128,7 @@ public class WBSolrModule extends AbstractModule {
             } else {
                 initImport(autoImportHandlers);
             }
-            ebus.fire(new WBSolrInitialisedEvent());
+            setStarted(true);
         }
 
         @Dispose(order = Integer.MAX_VALUE)
@@ -181,7 +181,13 @@ public class WBSolrModule extends AbstractModule {
             solr.commit();
             initImport(importHandlers);
         }
-    }
 
-    public static class WBSolrInitialisedEvent {}
+        private void setStarted(boolean b) {
+            this.started.set(b);
+        }
+
+        public AtomicBoolean getStarted() {
+            return started;
+        }
+    }
 }
