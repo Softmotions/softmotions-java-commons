@@ -3,6 +3,7 @@ package com.softmotions.weboot.solr;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -71,13 +72,15 @@ public class WBSolrModule extends AbstractModule {
         bind(SolrServerInitializer.class).asEagerSingleton();
     }
 
-    protected static class SolrServerInitializer {
+    public static class SolrServerInitializer {
 
         final Injector injector;
 
         final WBConfiguration cfg;
 
         final SolrServer solr;
+
+        final AtomicBoolean started;
 
         @Inject
         public SolrServerInitializer(Injector injector,
@@ -86,6 +89,8 @@ public class WBSolrModule extends AbstractModule {
             this.injector = injector;
             this.cfg = cfg;
             this.solr = solr;
+
+            this.started = new AtomicBoolean(false);
         }
 
         @Start(order = Integer.MAX_VALUE, parallel = true)
@@ -123,6 +128,7 @@ public class WBSolrModule extends AbstractModule {
             } else {
                 initImport(autoImportHandlers);
             }
+            setStarted(true);
         }
 
         @Dispose(order = Integer.MAX_VALUE)
@@ -174,6 +180,17 @@ public class WBSolrModule extends AbstractModule {
             solr.deleteByQuery("*:*");
             solr.commit();
             initImport(importHandlers);
+        }
+
+        private void setStarted(boolean b) {
+            synchronized (started) {
+                this.started.set(b);
+                started.notifyAll();
+            }
+        }
+
+        public AtomicBoolean getStarted() {
+            return started;
         }
     }
 }
