@@ -6,7 +6,7 @@
     <parent>
         <artifactId>softmotions-java-commons</artifactId>
         <groupId>softmotions</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-web</artifactId>
 
@@ -16,12 +16,12 @@
             <artifactId>softmotions-utils</artifactId>
             <version>${softmotion.commons.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-web-realms</artifactId>
             <version>${softmotion.commons.version}</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>

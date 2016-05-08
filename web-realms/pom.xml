@@ -22,6 +22,23 @@
             <artifactId>oauth2-oidc-sdk</artifactId>
             <version>3.4.1</version>
         </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>softmotions</groupId>
+            <artifactId>softmotions-utils</artifactId>
+            <version>${softmotion.commons.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -22,10 +22,10 @@ import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import com.softmotions.weboot.WBConfiguration;
-import com.softmotions.weboot.WBJVMResources;
-import com.softmotions.weboot.lifecycle.Dispose;
-import com.softmotions.weboot.lifecycle.Start;
+import com.softmotions.commons.JVMResources;
+import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.lifecycle.Dispose;
+import com.softmotions.commons.lifecycle.Start;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -34,9 +34,9 @@ public class WBDatasourceModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBDatasourceModule.class);
 
-    private final WBConfiguration cfg;
+    private final ServicesConfiguration cfg;
 
-    public WBDatasourceModule(WBConfiguration cfg) {
+    public WBDatasourceModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
     }
 
@@ -128,19 +128,19 @@ public class WBDatasourceModule extends AbstractModule {
                 Context jdbc, env;
                 try {
                     env = (Context) comp.lookup("env");
-                } catch (NamingException e) {
+                } catch (NamingException ignored) {
                     env = comp.createSubcontext("env");
                 }
                 try {
                     jdbc = (Context) env.lookup("jdbc");
-                } catch (NamingException e) {
+                } catch (NamingException ignored) {
                     jdbc = env.createSubcontext("jdbc");
                 }
                 jdbc.rebind(jndiName, dataSource);
                 log.info("Datasource JNDI name: java:comp/env/jdbc/{}", jndiName);
             }
             if (jvmDsName != null) {
-                WBJVMResources.set(jvmDsName, dataSource);
+                JVMResources.set(jvmDsName, dataSource);
                 log.info("Datasource registered in WBJVMDatasources as '{}'", jvmDsName);
             }
         }

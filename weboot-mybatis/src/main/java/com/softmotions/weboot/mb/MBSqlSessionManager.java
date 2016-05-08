@@ -1,5 +1,6 @@
 package com.softmotions.weboot.mb;
 
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.Configuration;
@@ -187,6 +188,18 @@ public class MBSqlSessionManager implements SqlSessionFactory, SqlSession {
 
     public <T> T getMapper(Class<T> type) {
         return getConfiguration().getMapper(type, this);
+    }
+
+    public <T> Cursor<T> selectCursor(String s) {
+        return sqlSessionProxy.selectCursor(s);
+    }
+
+    public <T> Cursor<T> selectCursor(String s, Object o) {
+        return sqlSessionProxy.selectCursor(s, o);
+    }
+
+    public <T> Cursor<T> selectCursor(String s, Object o, RowBounds rowBounds) {
+        return sqlSessionProxy.selectCursor(s, o, rowBounds);
     }
 
     public Connection getConnection() {

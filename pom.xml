@@ -11,12 +11,12 @@
     </parent>
     <artifactId>softmotions-java-commons</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <softmotion.commons.version>1.0-SNAPSHOT</softmotion.commons.version>
+        <softmotion.commons.version>1.1-SNAPSHOT</softmotion.commons.version>
     </properties>
 
     <repositories>
@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.6.3</version>
+                <version>2.7.4</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -198,7 +198,7 @@
         <module>utils-ujac</module>
         <module>web</module>
         <module>weboot</module>
-        <module>web-realms</module>
+        <!--<module>web-realms</module>-->
         <module>weboot-solr</module>
         <module>weboot-mybatis</module>
         <module>weboot-cayenne</module>

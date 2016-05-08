@@ -7,7 +7,7 @@
     <parent>
         <artifactId>softmotions-java-commons</artifactId>
         <groupId>softmotions</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-weboot-mongo</artifactId>
 
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.2</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

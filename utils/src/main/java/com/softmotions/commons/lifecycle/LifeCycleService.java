@@ -1,4 +1,4 @@
-package com.softmotions.weboot.lifecycle;
+package com.softmotions.commons.lifecycle;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)

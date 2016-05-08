@@ -49,6 +49,7 @@ public class WBMongoModule extends AbstractModule {
         this.cfg = cfg;
     }
 
+    @Override
     protected void configure() {
         XMLConfiguration xcfg = cfg.xcfg();
         if (xcfg.configurationsAt("mongo").isEmpty()) {
@@ -70,6 +71,7 @@ public class WBMongoModule extends AbstractModule {
             this.mp = mp;
         }
 
+        @Override
         public GridFS get() {
             return new GridFS(mp.get().getDefaultDB());
         }
@@ -85,6 +87,7 @@ public class WBMongoModule extends AbstractModule {
             this.mp = mp;
         }
 
+        @Override
         public DB get() {
             return mp.get().getDefaultDB();
         }
@@ -100,6 +103,7 @@ public class WBMongoModule extends AbstractModule {
             this.mp = mp;
         }
 
+        @Override
         public Mongo get() {
             return mp.get().getMongo();
         }
@@ -115,6 +119,7 @@ public class WBMongoModule extends AbstractModule {
             this.mp = mp;
         }
 
+        @Override
         public Jongo get() {
             return mp.get().getJongo();
         }
@@ -146,11 +151,11 @@ public class WBMongoModule extends AbstractModule {
             }
             String propsFile = cfg.substitutePath(xcfg.getString("mongo[@propsFile]"));
             if (!StringUtils.isBlank(propsFile)) {
-                log.info("WBMongoModule loading the properties file: " + propsFile);
+                log.info("WBMongoModule loading the properties file: {}", propsFile);
                 try (FileInputStream is = new FileInputStream(propsFile)) {
                     props.load(is);
                 } catch (IOException e) {
-                    log.error("Failed to load the properties file: " + propsFile);
+                    log.error("Failed to load the properties file: {}", propsFile);
                     throw new RuntimeException(e);
                 }
             }
@@ -167,12 +172,13 @@ public class WBMongoModule extends AbstractModule {
                     logProps.setProperty(k, "********");
                 }
             }
-            log.info("WBMongoModule properties: " + logProps);
+            log.info("WBMongoModule properties: {}", logProps);
             if (props.getProperty("connectionUrl") == null) {
                 throw new RuntimeException("WBMongoModule: Missing required configuration property: 'connectionUrl'");
             }
         }
 
+        @Override
         public WBMongo get() {
             if (wbMongo != null) {
                 return wbMongo;
@@ -201,7 +207,7 @@ public class WBMongoModule extends AbstractModule {
 
         private final String defDbName;
 
-        private final Mongo mongo;
+        private final MongoClient mongo;
 
         private final Mapper mapper;
 
@@ -236,21 +242,25 @@ public class WBMongoModule extends AbstractModule {
             this.mapper = new JacksonMapper.Builder().build();
         }
 
+        @Override
         @Nonnull
         public Mongo getMongo() {
             return mongo;
         }
 
+        @Override
         @Nonnull
         public Jongo getJongo(String dbName) {
             return new Jongo(mongo.getDB(dbName), mapper);
         }
 
+        @Override
         @Nonnull
         public Jongo getJongo() {
             return new Jongo(getDefaultDB(), mapper);
         }
 
+        @Override
         @Nonnull
         public DB getDefaultDB() {
             return mongo.getDB(defDbName);

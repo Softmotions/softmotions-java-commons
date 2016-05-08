@@ -1,4 +1,4 @@
-package com.softmotions.weboot.lifecycle;
+package com.softmotions.commons.lifecycle;
 
 import java.lang.reflect.Method;
 
@@ -18,6 +18,7 @@ class LCSlot implements Comparable<LCSlot> {
         this.parallel = parallel;
     }
 
+    @Override
     public int compareTo(LCSlot o) {
         return order - o.order;
     }

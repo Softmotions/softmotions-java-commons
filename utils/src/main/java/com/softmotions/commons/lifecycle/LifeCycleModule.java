@@ -1,4 +1,4 @@
-package com.softmotions.weboot.lifecycle;
+package com.softmotions.commons.lifecycle;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -74,7 +74,7 @@ public class LifeCycleModule extends AbstractModule {
     void registerStartSlot(LCSlot slot) {
         boolean s = started;
         if (s) {
-            log.warn("Startable instantiated after the application has been started: " + slot.target.toString());
+            log.warn("Startable instantiated after the application has been started: {}", slot.target.toString());
             try {
                 invokeTarget(slot);
             } catch (Exception e) {

@@ -26,9 +26,10 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.softmotions.commons.JVMResources;
 import com.softmotions.commons.cont.Pair;
-import com.softmotions.weboot.lifecycle.LifeCycleModule;
-import com.softmotions.weboot.lifecycle.LifeCycleService;
+import com.softmotions.commons.lifecycle.LifeCycleModule;
+import com.softmotions.commons.lifecycle.LifeCycleService;
 
 /**
  * Weboot engine startup listener.
@@ -175,7 +176,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         modules.add(new LifeCycleModule());
         modules.addAll(getStartupModules());
         injector = Guice.createInjector(Stage.PRODUCTION, modules);
-        WBJVMResources.set("com.softmotions.weboot.WBServletListener.Injector", injector);
+        JVMResources.set("com.softmotions.weboot.WBServletListener.Injector", injector);
         return injector;
     }
 

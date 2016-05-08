@@ -1,24 +1,5 @@
 package com.softmotions.web;
 
-import com.softmotions.commons.cl.ClassLoaderUtils;
-import com.softmotions.commons.ctype.CTypeUtils;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +14,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.softmotions.commons.cl.ClassLoaderUtils;
+import com.softmotions.commons.ctype.CTypeUtils;
 
 /**
  * Servlet provides access to the set of resources
@@ -68,6 +68,7 @@ public class JarResourcesFilter implements Filter {
 
     String stripPefix;
 
+    @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest sreq = (HttpServletRequest) req;
         boolean ret = getContent(sreq, (HttpServletResponse) resp, !"HEAD".equals(sreq.getMethod()));
@@ -76,6 +77,7 @@ public class JarResourcesFilter implements Filter {
         }
     }
 
+    @Override
     public void init(FilterConfig cfg) throws ServletException {
         mslots = new ArrayList<>();
         Enumeration<String> pnames = cfg.getInitParameterNames();
@@ -98,11 +100,12 @@ public class JarResourcesFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
         for (MappingSlot ms : mslots) {
             try {
                 ms.close();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
         mslots.clear();
@@ -213,7 +216,7 @@ public class JarResourcesFilter implements Filter {
                 }
             }
             this.prefix = prefix;
-            log.info("Registered JAR resources mapping: " + prefix + " => " + spec);
+            log.info("Registered JAR resources mapping: {} => {}", prefix, spec);
         }
 
         URL getResourceUrl(String resource) {
@@ -251,7 +254,7 @@ public class JarResourcesFilter implements Filter {
             synchronized (lock) {
                 if (jarFile != null) {
                     try {
-                        log.info("Reloading jar file: " + jarFile.toURI());
+                        log.info("Reloading jar file: {}", jarFile.toURI());
                         lastLoadMtime = jarFile.lastModified();
                         loader = new JarResourcesClassLoader(jarFile.toURI().toURL(), baseLoader);
                         loaderRef = loader;
@@ -281,7 +284,7 @@ public class JarResourcesFilter implements Filter {
                     }
                     if (watch) {
                         try {
-                            log.info("Start watching jar file: " + baseJar);
+                            log.info("Start watching jar file: {}", baseJar);
                             jarFile = new File(baseJar.toURI());
                             lastLoadMtime = jarFile.lastModified();
                         } catch (URISyntaxException e) {
@@ -310,6 +313,7 @@ public class JarResourcesFilter implements Filter {
         }
 
 
+        @Override
         public void close() throws IOException {
             if (loader != null) {
                 loader.close();
@@ -324,6 +328,7 @@ public class JarResourcesFilter implements Filter {
             super(new URL[]{url}, parent);
         }
 
+        @Override
         protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
             Class clazz;
             synchronized (getClassLoadingLock(name)) {
@@ -336,10 +341,12 @@ public class JarResourcesFilter implements Filter {
             }
         }
 
+        @Override
         public URL getResource(String name) {
             return findResource(name);
         }
 
+        @Override
         public void close() throws IOException {
             ClassLoaderUtils.destroyClassLoader(this);
             super.close();

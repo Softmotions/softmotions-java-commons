@@ -1,11 +1,5 @@
 package com.softmotions.weboot.executor;
 
-import com.google.inject.AbstractModule;
-import com.softmotions.weboot.WBConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -20,6 +14,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.configuration.XMLConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.inject.AbstractModule;
+import com.softmotions.commons.ServicesConfiguration;
+
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
@@ -27,17 +28,17 @@ public class TaskExecutorModule extends AbstractModule implements TaskExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(TaskExecutorModule.class);
 
-    final WBConfiguration env;
+    final ServicesConfiguration cfg;
 
     ExecutorService executor;
 
-    public TaskExecutorModule(WBConfiguration env) {
-        this.env = env;
+    public TaskExecutorModule(ServicesConfiguration cfg) {
+        this.cfg = cfg;
     }
 
     @Override
     protected void configure() {
-        XMLConfiguration xcfg = env.xcfg();
+        XMLConfiguration xcfg = cfg.xcfg();
 
         int threads;
         if ("allcores".equalsIgnoreCase(xcfg.getString("executor.threads-num"))) {

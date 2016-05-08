@@ -32,9 +32,9 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.matcher.AbstractMatcher;
-import com.softmotions.weboot.WBConfiguration;
-import com.softmotions.weboot.lifecycle.Dispose;
-import com.softmotions.weboot.lifecycle.Start;
+import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.lifecycle.Dispose;
+import com.softmotions.commons.lifecycle.Start;
 
 /**
  * Apache cayenne module
@@ -53,9 +53,9 @@ public class WBCayenneModule extends AbstractModule {
         }
     };
 
-    private final WBConfiguration cfg;
+    private final ServicesConfiguration cfg;
 
-    public WBCayenneModule(WBConfiguration cfg) {
+    public WBCayenneModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
     }
 

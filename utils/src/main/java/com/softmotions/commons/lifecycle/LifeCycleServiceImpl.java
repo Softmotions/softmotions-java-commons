@@ -1,4 +1,13 @@
-package com.softmotions.weboot.lifecycle;
+package com.softmotions.commons.lifecycle;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Binding;
 import com.google.inject.Inject;
@@ -9,15 +18,6 @@ import com.google.inject.Scopes;
 import com.google.inject.internal.ProviderMethod;
 import com.google.inject.spi.DefaultBindingScopingVisitor;
 import com.google.inject.spi.ProviderInstanceBinding;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -36,16 +36,19 @@ public class LifeCycleServiceImpl implements LifeCycleService {
         this.lc = lc;
     }
 
+    @Override
     public void start() {
         ExecutorService parallelExec = null;
         log.info("Starting");
         for (final Binding binding : injector.getBindings().values()) {
             binding.acceptScopingVisitor(new DefaultBindingScopingVisitor() {
+                @Override
                 public Object visitEagerSingleton() {
                     injector.getInstance(binding.getKey());
                     return null;
                 }
 
+                @Override
                 public Object visitScope(Scope scope) {
                     if (scope.equals(Scopes.SINGLETON)) {
                         Object target = injector.getInstance(binding.getKey());
@@ -98,17 +101,16 @@ public class LifeCycleServiceImpl implements LifeCycleService {
     }
 
     private void invokeTargetParallel(ExecutorService exec, final LCSlot s) {
-        exec.execute(new Runnable() {
-            public void run() {
-                try {
-                    lc.invokeTarget(s);
-                } catch (Exception e) {
-                    log.error("", e);
-                }
+        exec.execute(() -> {
+            try {
+                lc.invokeTarget(s);
+            } catch (Exception e) {
+                log.error("", e);
             }
         });
     }
 
+    @Override
     public void stop() {
         log.info("Shutdown");
         List<LCSlot> stopList;
@@ -132,6 +134,7 @@ public class LifeCycleServiceImpl implements LifeCycleService {
         }
     }
 
+    @Override
     public boolean isStarted() {
         return lc.started;
     }

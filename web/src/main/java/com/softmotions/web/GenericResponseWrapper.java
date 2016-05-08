@@ -1,14 +1,5 @@
 package com.softmotions.web;
 
-import org.apache.commons.io.output.WriterOutputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -21,6 +12,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+
+import org.apache.commons.io.output.WriterOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -75,6 +75,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Gets the outputstream.
      */
+    @Override
     public ServletOutputStream getOutputStream() {
         if (outstr == null) {
             outstr = new FilterServletOutputStream(new WriterOutputStream(outwr, getCharacterEncoding()));
@@ -85,6 +86,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Gets the print writer.
      */
+    @Override
     public PrintWriter getWriter() throws IOException {
         if (outwr == null) {
             outwr = new PrintWriter(new OutputStreamWriter(outstr, getCharacterEncoding()));
@@ -95,6 +97,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Sets the status code for this response.
      */
+    @Override
     public void setStatus(final int code) {
         statusCode = code;
         if (delegate) {
@@ -110,6 +113,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      * @param string the error message
      * @throws IOException
      */
+    @Override
     public void sendError(int i, String string) throws IOException {
         statusCode = i;
         if (delegate) {
@@ -124,6 +128,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      * @param i the status code
      * @throws IOException
      */
+    @Override
     public void sendError(int i) throws IOException {
         statusCode = i;
         if (delegate) {
@@ -138,6 +143,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      * @param string the URL to redirect to
      * @throws IOException
      */
+    @Override
     public void sendRedirect(String string) throws IOException {
         statusCode = HttpServletResponse.SC_MOVED_TEMPORARILY;
         if (delegate) {
@@ -148,6 +154,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Sets the status code for this response.
      */
+    @Override
     public void setStatus(final int code, final String msg) {
         statusCode = code;
         log.warn("Discarding message because this method is deprecated.");
@@ -159,6 +166,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Returns the status code for this response.
      */
+    @Override
     public int getStatus() {
         return statusCode;
     }
@@ -166,6 +174,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Sets the content length.
      */
+    @Override
     public void setContentLength(final int length) {
         this.contentLength = length;
         if (delegate) {
@@ -183,6 +192,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Sets the content type.
      */
+    @Override
     public void setContentType(final String type) {
         this.contentType = type;
         if (delegate) {
@@ -193,6 +203,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Gets the content type.
      */
+    @Override
     public String getContentType() {
         return contentType;
     }
@@ -200,6 +211,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Adds a header, even if one already exists, in accordance with the spec
      */
+    @Override
     public void addHeader(final String name, final String value) {
         final String[] header = new String[]{name, value};
         if (headers == null) {
@@ -214,9 +226,9 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
         }
         Integer count = (Integer) headerTracker.get(name.toLowerCase());
         if (count == null) {
-            count = new Integer(1);
+            count = 1;
         } else {
-            count = new Integer(count.intValue() + 1);
+            count = count.intValue() + 1;
         }
         headerTracker.put(name.toLowerCase(), count);
     }
@@ -225,6 +237,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
      * Sets a header overwriting any previous values for the header if
      * it existed.
      */
+    @Override
     public void setHeader(final String name, final String value) {
         if (delegate) {
             super.setHeader(name, value);
@@ -236,14 +249,14 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
             headers = new ArrayList();
         }
         Integer count = (Integer) headerTracker.get(name);
-        if (count != null && count.intValue() > 0) {
+        if (count != null && count > 0) {
             for (int i = headers.size() - 1; i >= 0; i--) {
                 String[] header = (String[]) headers.get(i);
                 String hName = header[0];
                 if (hName.equalsIgnoreCase(name)) {
                     if (count > 1) {
                         headers.remove(i);
-                        count = count.intValue() - 1;
+                        count -= 1;
                         headerTracker.put(name.toLowerCase(), count);
                     } else {
                         ((String[]) headers.get(i))[1] = value;
@@ -266,6 +279,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Adds a cookie.
      */
+    @Override
     public void addCookie(final Cookie cookie) {
         if (cookies == null) {
             cookies = new ArrayList();
@@ -286,6 +300,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Flushes buffer and commits response to client.
      */
+    @Override
     public void flushBuffer() throws IOException {
         flush();
         if (delegate) {
@@ -296,6 +311,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Resets the response.
      */
+    @Override
     public void reset() {
         if (delegate) {
             super.reset();
@@ -314,6 +330,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
     /**
      * Resets the buffers.
      */
+    @Override
     public void resetBuffer() {
         if (delegate) {
             super.resetBuffer();
@@ -346,6 +363,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
         /**
          * Writes to the stream.
          */
+        @Override
         public void write(final int b) throws IOException {
             stream.write(b);
         }
@@ -353,6 +371,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
         /**
          * Writes to the stream.
          */
+        @Override
         public void write(final byte[] b) throws IOException {
             stream.write(b);
         }
@@ -360,18 +379,22 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper implement
         /**
          * Writes to the stream.
          */
+        @Override
         public void write(final byte[] b, final int off, final int len) throws IOException {
             stream.write(b, off, len);
         }
 
+        @Override
         public void flush() throws IOException {
             stream.flush();
         }
 
+        @Override
         public boolean isReady() {
             return true;
         }
 
+        @Override
         public void setWriteListener(WriteListener writeListener) {
             try {
                 writeListener.onWritePossible();

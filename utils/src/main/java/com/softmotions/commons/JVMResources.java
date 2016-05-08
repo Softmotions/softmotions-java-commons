@@ -1,4 +1,4 @@
-package com.softmotions.weboot;
+package com.softmotions.commons;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,14 +9,14 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class WBJVMResources {
+public class JVMResources {
 
-    private static final Logger log = LoggerFactory.getLogger(WBJVMResources.class);
+    private static final Logger log = LoggerFactory.getLogger(JVMResources.class);
 
     @SuppressWarnings("StaticCollection")
     private static final Map<String, Object> RESOURCES_MAP = new ConcurrentHashMap<>();
 
-    private WBJVMResources() {
+    private JVMResources() {
     }
 
     public static void set(String name, Object val) {
@@ -32,7 +32,7 @@ public class WBJVMResources {
     public static <T> T getOrFail(String name) {
         T val = get(name);
         if (val == null) {
-            throw new WBJVMResourcesNotFound("Unknown resource: " + name);
+            throw new JVMResourcesNotFound("Unknown resource: " + name);
         }
         return val;
     }
