@@ -1,10 +1,12 @@
 package com.softmotions.weboot.mb;
 
-import com.softmotions.weboot.WBConfiguration;
-import com.softmotions.weboot.lifecycle.Dispose;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.Properties;
+import javax.sql.DataSource;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -15,13 +17,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.Properties;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.lifecycle.Dispose;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -30,12 +29,13 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBMyBatisModule.class);
 
-    final WBConfiguration cfg;
+    private final ServicesConfiguration cfg;
 
-    public WBMyBatisModule(WBConfiguration cfg) {
+    public WBMyBatisModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
     }
 
+    @Override
     protected void configure() {
         if (cfg.xcfg().configurationsAt("mybatis").isEmpty()) {
             return;
@@ -43,9 +43,11 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         super.configure();
     }
 
+    @Override
     protected void initialize() {
         XMLConfiguration xcfg = cfg.xcfg();
-        setEnvironmentId(cfg.getDBEnvironmentType());
+        String dbenv = xcfg.getString("mybatis[@dbenv]", "development");
+        setEnvironmentId(dbenv);
         String cfgLocation = xcfg.getString("mybatis[@config]");
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <mybatis> element");
@@ -66,11 +68,11 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
 
         String propsFile = cfg.substitutePath(xcfg.getString("mybatis[@propsFile]"));
         if (!StringUtils.isBlank(propsFile)) {
-            log.info("MyBatis loading the properties file: " + propsFile);
+            log.info("MyBatis loading the properties file: {}", propsFile);
             try (FileInputStream is = new FileInputStream(propsFile)) {
                 props.load(is);
             } catch (IOException e) {
-                log.error("Failed to load the properties file: " + propsFile);
+                log.error("Failed to load the properties file: {}", propsFile);
                 throw new RuntimeException(e);
             }
         }
@@ -85,14 +87,14 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         for (HierarchicalConfiguration mc : xcfg.configurationsAt("mybatis.extra-mappers.mapper")) {
             String resource = mc.getString("[@resource]");
             if (!StringUtils.isBlank(resource)) {
-                log.info("MyBatis registering extra mapper: '" + resource + "'");
+                log.info("MyBatis registering extra mapper: '{}'", resource);
                 getExtraMappers().add(resource);
             }
         }
 
-        log.info("MyBatis environment type: " + cfg.getDBEnvironmentType());
-        log.info("MyBatis properties: " + props);
-        log.info("MyBatis config: " + cfgLocation);
+        log.info("MyBatis environment type: {}", dbenv);
+        log.info("MyBatis properties: {}", props);
+        log.info("MyBatis config: {}", cfgLocation);
 
         if (xcfg.getBoolean("mybatis[@bindDatasource]", false)) {
             bind(DataSource.class).toProvider(DataSourceProvider.class);
@@ -120,11 +122,11 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
 
         final Provider<DataSource> dsProvider;
 
-        final WBConfiguration cfg;
+        final ServicesConfiguration cfg;
 
         @Inject
         public MyBatisInitializer(Provider<DataSource> dsProvider,
-                                  WBConfiguration cfg) {
+                                  ServicesConfiguration cfg) {
             this.dsProvider = dsProvider;
             this.cfg = cfg;
         }
@@ -135,7 +137,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             DataSource ds = dsProvider.get();
             String shutdownSql = cfg.xcfg().getString("mybatis[@shutdownSQL]");
             if (ds != null && !StringUtils.isBlank(shutdownSql)) {
-                log.info("Executing shutdown SQL: '" + shutdownSql + '\'');
+                log.info("Executing shutdown SQL: '{}" + '\'', shutdownSql);
                 try (Connection c = ds.getConnection()) {
                     try (Statement stmt = c.createStatement()) {
                         stmt.execute(shutdownSql);
@@ -148,7 +150,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
                 PooledDataSource pds = (PooledDataSource) ds;
                 pds.forceCloseAll();
             } else {
-                log.warn("Unknown datasource found: " + ds.getClass().getName() + " it will not be closed");
+                log.warn("Unknown datasource found: {} it will not be closed", ds.getClass().getName());
             }
         }
     }

@@ -7,8 +7,9 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import com.softmotions.weboot.WBConfiguration;
-import com.softmotions.weboot.lifecycle.Start;
+
+import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.lifecycle.Start;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -33,12 +34,13 @@ public class WBLiquibaseModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBLiquibaseModule.class);
 
-    private final WBConfiguration cfg;
+    private final ServicesConfiguration cfg;
 
-    public WBLiquibaseModule(WBConfiguration cfg) {
+    public WBLiquibaseModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
     }
 
+    @Override
     protected void configure() {
         if (cfg.xcfg().configurationsAt("liquibase").isEmpty()) {
             log.warn("No WBLiquibaseModule module configuration found. Skipping.");
@@ -53,7 +55,7 @@ public class WBLiquibaseModule extends AbstractModule {
         DataSource ds;
 
         @Inject
-        WBConfiguration cfg;
+        ServicesConfiguration cfg;
 
         @Start(order = 10)
         public void start() {
@@ -67,7 +69,7 @@ public class WBLiquibaseModule extends AbstractModule {
             if (changelogResource == null) {
                 throw new RuntimeException("Missing required attribute 'changelog' in <liquibase> configuration tag");
             }
-            log.info("Using changelog: " + changelogResource);
+            log.info("Using changelog: {}", changelogResource);
 
             try (Connection connection = ds.getConnection()) {
                 Database database = DatabaseFactory.getInstance()
@@ -99,7 +101,7 @@ public class WBLiquibaseModule extends AbstractModule {
                     switch (cn) {
                         case "update":
                             String contexts = getSingleStringAttribute(c, "contexts");
-                            log.info("Executing Liquibase.Update, contexts=" + contexts);
+                            log.info("Executing Liquibase.Update, contexts={}", contexts);
                             liquibase.update(contexts);
                             break;
                         case "dropAll":

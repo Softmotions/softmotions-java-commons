@@ -17,8 +17,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.cont.Stack;
-import com.softmotions.weboot.WBConfiguration;
 import com.softmotions.weboot.executor.TaskExecutor;
 
 /**
@@ -31,17 +31,17 @@ public class MailModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(MailModule.class);
 
-    final WBConfiguration env;
+    private final ServicesConfiguration cfg;
 
     SmtpServer smtpServer;
 
-    public MailModule(WBConfiguration env) {
-        this.env = env;
+    public MailModule(ServicesConfiguration cfg) {
+        this.cfg = cfg;
     }
 
     @Override
     protected void configure() {
-        XMLConfiguration xcfg = env.xcfg();
+        XMLConfiguration xcfg = cfg.xcfg();
         SubnodeConfiguration mailCfg = xcfg.configurationAt("mail");
         if (mailCfg == null) {
             log.warn("No <mail> configuration found");

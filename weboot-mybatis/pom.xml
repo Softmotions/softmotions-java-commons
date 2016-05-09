@@ -14,10 +14,9 @@
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
-            <artifactId>softmotions-weboot</artifactId>
+            <artifactId>softmotions-utils</artifactId>
             <version>${softmotion.commons.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>

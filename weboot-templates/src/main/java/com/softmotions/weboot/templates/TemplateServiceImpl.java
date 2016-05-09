@@ -54,8 +54,8 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
 
         List<String> directives =
                 xcfg.getList("templates.directives")
-                        .stream().map(String::valueOf)
-                        .collect(Collectors.toList());
+                    .stream().map(String::valueOf)
+                    .collect(Collectors.toList());
 
         String loader = xcfg.getString("templates.loader");
 
@@ -218,8 +218,8 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
         @Override
         public String[] keys() {
             return Arrays.stream(vctx.getKeys())
-                    .map(String::valueOf)
-                    .toArray(String[]::new);
+                         .map(String::valueOf)
+                         .toArray(String[]::new);
         }
 
         @Override

@@ -28,9 +28,9 @@ public class TaskExecutorModule extends AbstractModule implements TaskExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(TaskExecutorModule.class);
 
-    final ServicesConfiguration cfg;
+    private final ServicesConfiguration cfg;
 
-    ExecutorService executor;
+    private ExecutorService executor;
 
     public TaskExecutorModule(ServicesConfiguration cfg) {
         this.cfg = cfg;

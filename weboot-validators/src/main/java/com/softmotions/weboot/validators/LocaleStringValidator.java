@@ -36,7 +36,7 @@ public class LocaleStringValidator implements ConstraintValidator<LocaleString, 
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
                     "{com.softmotions.commons.validator.LocaleStringValidator.message}")
-                    .addConstraintViolation();
+                   .addConstraintViolation();
         }
 
         return isValid;

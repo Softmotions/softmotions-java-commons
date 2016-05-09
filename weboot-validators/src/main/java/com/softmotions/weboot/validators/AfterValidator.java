@@ -19,7 +19,7 @@ public class AfterValidator implements ConstraintValidator<After, Date> {
         DateFormat dateFormat = new SimpleDateFormat(constraintAnnotation.dateFormat());
         try {
             this.date = dateFormat.parse(constraintAnnotation.date());
-        } catch (ParseException e) {
+        } catch (ParseException ignored) {
             throw new ConstraintDefinitionException("Cannot parse date '" + constraintAnnotation.date() + "' with pattern '"
                                                     + constraintAnnotation.dateFormat() + "'");
         }

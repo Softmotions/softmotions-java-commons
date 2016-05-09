@@ -1,18 +1,12 @@
 package com.softmotions.weboot.mongo;
 
-import com.softmotions.weboot.WBConfiguration;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.mongodb.Bytes;
-import com.mongodb.DB;
-import com.mongodb.DBAddress;
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.gridfs.GridFS;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import javax.annotation.Nonnull;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -26,13 +20,18 @@ import org.jongo.marshall.jackson.JacksonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.mongodb.Bytes;
+import com.mongodb.DB;
+import com.mongodb.DBAddress;
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.gridfs.GridFS;
+import com.softmotions.commons.ServicesConfiguration;
 
 /**
  * Weboot mongodb module.
@@ -43,9 +42,9 @@ public class WBMongoModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBMongoModule.class);
 
-    private final WBConfiguration cfg;
+    private final ServicesConfiguration cfg;
 
-    public WBMongoModule(WBConfiguration cfg) {
+    public WBMongoModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
     }
 
@@ -133,11 +132,11 @@ public class WBMongoModule extends AbstractModule {
         private volatile WBMongo wbMongo;
 
         @Inject
-        public WBMongoProvider(WBConfiguration cfg) {
+        public WBMongoProvider(ServicesConfiguration cfg) {
             this(cfg, cfg.xcfg());
         }
 
-        public WBMongoProvider(WBConfiguration cfg, HierarchicalConfiguration xcfg) {
+        public WBMongoProvider(ServicesConfiguration cfg, HierarchicalConfiguration xcfg) {
             this.props = new Properties();
             String propsStr = xcfg.getString("mongo");
             if (!StringUtils.isBlank(propsStr)) {

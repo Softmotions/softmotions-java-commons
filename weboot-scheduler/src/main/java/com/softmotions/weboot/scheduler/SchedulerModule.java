@@ -1,12 +1,17 @@
 package com.softmotions.weboot.scheduler;
 
-import com.softmotions.weboot.WBConfiguration;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import it.sauronsoftware.cron4j.Scheduler;
 import it.sauronsoftware.cron4j.SchedulingPattern;
 import it.sauronsoftware.cron4j.Task;
 import it.sauronsoftware.cron4j.TaskExecutionContext;
-import com.softmotions.weboot.lifecycle.Dispose;
-import com.softmotions.weboot.lifecycle.Start;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -16,15 +21,9 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
-
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.lifecycle.Dispose;
+import com.softmotions.commons.lifecycle.Start;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -37,7 +36,7 @@ public class SchedulerModule extends AbstractModule {
 
     private Scheduler scheduler;
 
-    private WBConfiguration cfg;
+    private ServicesConfiguration cfg;
 
     public SchedulerModule() {
         this.scheduler = new Scheduler();
@@ -45,25 +44,24 @@ public class SchedulerModule extends AbstractModule {
 
     /**
      * Constructor for optional configuration. Configuration is used for named cron pattern
+     *
      * @param cfg
      */
-    public SchedulerModule(WBConfiguration cfg) {
+    public SchedulerModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
         this.scheduler = new Scheduler();
     }
 
+    @Override
     protected void configure() {
         bindListener(Matchers.any(), new ScheduledAnnotatedListener());
         bind(SchedulerModule.class).toInstance(this);
         bind(Scheduler.class).toInstance(scheduler);
         bind(SchedulerInitializer.class).asEagerSingleton();
-
         if ((cfg == null) || cfg.xcfg().configurationsAt("scheduler").isEmpty()) {
             log.warn("No WBSchedluer module configuration found. Skipping.");
             return;
         }
-
-        XMLConfiguration xcfg = cfg.xcfg();
     }
 
     private boolean hasScheduledMethod(Class<?> clazz) {
@@ -109,16 +107,16 @@ public class SchedulerModule extends AbstractModule {
                 }
 
                 if (!SchedulingPattern.validate(scheduledPattern)) {
-                    log.warn("Invalid scheduler pattern: '" + scheduledPattern + "' " +
-                            "for " + target.getClass().getName() + "#" + method.getName());
+                    log.warn("Invalid scheduler pattern: '{}' for {}#{}",
+                             scheduledPattern, target.getClass().getName(), method.getName());
                     continue;
                 }
 
-                log.info("Register scheduled task: " +
-                        "pattern: '" + scheduledPattern + "', " +
-                        "method: " + target.getClass().getName() + "#" + method.getName());
+                log.info("Register scheduled task: pattern: '{}', method: {}#{}",
+                         scheduledPattern, target.getClass().getName(), method.getName());
 
                 scheduler.schedule(scheduledPattern, new Task() {
+                    @Override
                     public void execute(TaskExecutionContext context) throws RuntimeException {
                         try {
                             Class<?>[] ptypes = method.getParameterTypes();
@@ -142,6 +140,7 @@ public class SchedulerModule extends AbstractModule {
     }
 
     private class ScheduledAnnotatedListener implements TypeListener {
+        @Override
         public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
             if (hasScheduledMethod(type.getRawType())) {
                 encounter.register(new ScheduledListener<I>());
@@ -150,6 +149,7 @@ public class SchedulerModule extends AbstractModule {
     }
 
     private class ScheduledListener<I> implements InjectionListener<I> {
+        @Override
         public void afterInjection(final I injectee) {
             registerScheduled(injectee);
         }
