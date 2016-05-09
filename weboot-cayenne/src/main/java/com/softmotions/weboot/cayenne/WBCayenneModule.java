@@ -1,25 +1,19 @@
 package com.softmotions.weboot.cayenne;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.CallableStatement;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
-import org.apache.cayenne.access.types.ExtendedType;
-import org.apache.cayenne.configuration.Constants;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.configuration.server.ServerRuntimeBuilder;
-import org.apache.cayenne.di.Binder;
-import org.apache.cayenne.di.Module;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +64,7 @@ public class WBCayenneModule extends AbstractModule {
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <cayenne> element");
         }
-        bind(CayenneWrapper.class).toInstance(new CayenneWrapper(cfgLocation));
+        bind(CayenneWrapper.class).toInstance(new CayenneWrapper(cfg, cfgLocation));
         bind(CayeneInitializer.class).asEagerSingleton();
         bind(ServerRuntime.class).toProvider(CayenneRuntimeProvider.class);
 
@@ -82,14 +76,18 @@ public class WBCayenneModule extends AbstractModule {
     }
 
 
+    @SuppressWarnings("UnnecessaryFullyQualifiedName")
     public static class CayenneWrapper {
 
-        final String cfgLocation;
+        private final String cfgLocation;
 
-        volatile ServerRuntime runtime;
+        private final ServicesConfiguration cfg;
 
-        public CayenneWrapper(String cfgLocation) {
+        private volatile ServerRuntime runtime;
+
+        public CayenneWrapper(ServicesConfiguration cfg, String cfgLocation) {
             this.cfgLocation = cfgLocation;
+            this.cfg = cfg;
         }
 
         @Nonnull
@@ -106,11 +104,56 @@ public class WBCayenneModule extends AbstractModule {
 
         void start(DataSource dataSource) throws Exception {
             log.info("WBCayenneModule starting cayenne runtime. Config: {}", cfgLocation);
+
+            XMLConfiguration xcfg = cfg.xcfg();
+            ClassLoader cl = ObjectUtils.firstNonNull(
+                    Thread.currentThread().getContextClassLoader(),
+                    getClass().getClassLoader());
+            List<HierarchicalConfiguration> mconfigs = xcfg.configurationsAt("cayenne.modules.module");
+            List<org.apache.cayenne.di.Module> modules = new ArrayList<>(mconfigs.size());
+            for (final HierarchicalConfiguration mcfg : mconfigs) {
+                String mclassName = mcfg.getString("[@class]");
+                if (StringUtils.isBlank(mclassName)) {
+                    continue;
+                }
+                try {
+                    Class mclass = cl.loadClass(mclassName);
+                    if (!org.apache.cayenne.di.Module.class.isAssignableFrom(mclass)) {
+                        log.warn("Module class: {} is not Cayenne module, skipped", mclassName);
+                        continue;
+                    }
+                    log.info("Installing '{}' Cayenne module", mclassName);
+                    Object module = null;
+                    for (Constructor c : mclass.getConstructors()) {
+                        Class[] ptypes = c.getParameterTypes();
+                        if (ptypes.length != 1) {
+                            continue;
+                        }
+                        //noinspection unchecked
+                        if (ptypes[0].isAssignableFrom(cfg.getClass())) {
+                            try {
+                                module = c.newInstance(cfg);
+                            } catch (InvocationTargetException e) {
+                                log.error("", e);
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                    if (module == null) {
+                        module = mclass.newInstance();
+                    }
+                    modules.add((org.apache.cayenne.di.Module) module);
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException("Failed to activate Cayenne module: " + mclassName, e);
+                }
+            }
+
             runtime = new ServerRuntimeBuilder()
                     .addConfigs(cfgLocation)
-                    .addModule(new CayenneJava8Module())
+                    .addModules(modules)
                     .dataSource(dataSource)
                     .build();
+
             log.info("WBCayenneModule cayenne runtime configured");
         }
 
@@ -125,9 +168,9 @@ public class WBCayenneModule extends AbstractModule {
 
     public static class CayenneRuntimeProvider implements Provider<ServerRuntime> {
 
-        final CayenneWrapper cayenneWrapper;
+        private final CayenneWrapper cayenneWrapper;
 
-        final Provider<DataSource> dataSourceProvider;
+        private final Provider<DataSource> dataSourceProvider;
 
         @Inject
         public CayenneRuntimeProvider(CayenneWrapper cayenneWrapper,
@@ -152,9 +195,9 @@ public class WBCayenneModule extends AbstractModule {
 
     public static class CayeneInitializer {
 
-        final Provider<ServerRuntime> runtimeProvider;
+        private final Provider<ServerRuntime> runtimeProvider;
 
-        final CayenneWrapper cayenneWrapper;
+        private final CayenneWrapper cayenneWrapper;
 
         @Inject
         public CayeneInitializer(Provider<ServerRuntime> runtimeProvider,
@@ -171,95 +214,6 @@ public class WBCayenneModule extends AbstractModule {
         @Dispose(order = 15)
         public void shutdown() throws Exception {
             cayenneWrapper.shutdown();
-        }
-    }
-
-
-    public static class CayenneJava8Module implements Module {
-
-        @Override
-        public void configure(Binder binder) {
-            binder
-                    .bindList(Constants.SERVER_DEFAULT_TYPES_LIST)
-                    .add(new LocalDateType())
-                    .add(new LocalTimeType())
-                    .add(new LocalDateTimeType());
-        }
-    }
-
-    public static class LocalDateTimeType implements ExtendedType {
-
-        @Override
-        public String getClassName() {
-            return LocalDateTime.class.getName();
-        }
-
-        @Override
-        public void setJdbcObject(PreparedStatement statement, Object value, int pos, int type, int scale) throws Exception {
-            statement.setTimestamp(pos, Timestamp.valueOf((LocalDateTime) value));
-        }
-
-        @Override
-        public LocalDateTime materializeObject(ResultSet rs, int index, int type) throws Exception {
-            Timestamp timestamp = rs.getTimestamp(index);
-            return timestamp != null ? timestamp.toLocalDateTime() : null;
-        }
-
-        @Override
-        public Object materializeObject(CallableStatement rs, int index, int type) throws Exception {
-            Timestamp timestamp = rs.getTimestamp(index);
-            return timestamp != null ? timestamp.toLocalDateTime() : null;
-        }
-    }
-
-
-    public static class LocalDateType implements ExtendedType {
-
-        @Override
-        public String getClassName() {
-            return LocalDate.class.getName();
-        }
-
-        @Override
-        public void setJdbcObject(PreparedStatement statement, Object value, int pos, int type, int scale) throws Exception {
-            statement.setDate(pos, Date.valueOf((LocalDate) value));
-        }
-
-        @Override
-        public LocalDate materializeObject(ResultSet rs, int index, int type) throws Exception {
-            Date date = rs.getDate(index);
-            return date != null ? date.toLocalDate() : null;
-        }
-
-        @Override
-        public LocalDate materializeObject(CallableStatement rs, int index, int type) throws Exception {
-            Date date = rs.getDate(index);
-            return date != null ? date.toLocalDate() : null;
-        }
-    }
-
-    public static class LocalTimeType implements ExtendedType {
-
-        @Override
-        public String getClassName() {
-            return LocalTime.class.getName();
-        }
-
-        @Override
-        public void setJdbcObject(PreparedStatement statement, Object value, int pos, int type, int scale) throws Exception {
-            statement.setTime(pos, Time.valueOf((LocalTime) value));
-        }
-
-        @Override
-        public LocalTime materializeObject(ResultSet rs, int index, int type) throws Exception {
-            Time time = rs.getTime(index);
-            return time != null ? time.toLocalTime() : null;
-        }
-
-        @Override
-        public Object materializeObject(CallableStatement rs, int index, int type) throws Exception {
-            Time time = rs.getTime(index);
-            return time != null ? time.toLocalTime() : null;
         }
     }
 }
