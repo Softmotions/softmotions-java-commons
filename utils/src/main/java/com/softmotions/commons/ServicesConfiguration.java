@@ -20,13 +20,15 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 
 import com.google.common.io.Resources;
+import com.google.inject.Binder;
+import com.google.inject.Module;
 import com.softmotions.commons.io.DirUtils;
 import com.softmotions.commons.io.Loader;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class ServicesConfiguration {
+public class ServicesConfiguration implements Module {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -166,5 +168,11 @@ public class ServicesConfiguration {
                 }
             }
         }
+    }
+
+
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(ServicesConfiguration.class).toInstance(this);
     }
 }

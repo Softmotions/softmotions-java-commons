@@ -19,6 +19,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
+import com.softmotions.commons.ServicesConfiguration;
+
 /**
  * Weboot engine servlet module.
  *
@@ -49,6 +51,7 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
         }
         XMLConfiguration xcfg = cfg.xcfg();
         bind(WBConfiguration.class).toInstance(cfg);
+        bind(ServicesConfiguration.class).toInstance(cfg);
 
         ClassLoader cl = ObjectUtils.firstNonNull(
                 Thread.currentThread().getContextClassLoader(),
