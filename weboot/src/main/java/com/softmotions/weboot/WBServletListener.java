@@ -1,26 +1,16 @@
 package com.softmotions.weboot;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
-
-import com.google.common.io.Resources;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -114,51 +104,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         }
         String cfgLocation = ret.getOne();
         cfg.load(cfgLocation, sctx);
-
-        //init logging
-        String lref = cfg.xcfg().getString("logging[@ref]");
-        if (!StringUtils.isBlank(lref)) {
-            String pdir = FilenameUtils.getPath(cfgLocation);
-            String lcfg = pdir + lref;
-            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-            URL url = ref2Url(lcfg);
-            try {
-                JoranConfigurator configurator = new JoranConfigurator();
-                configurator.setContext(context);
-                context.reset();
-                configurator.doConfigure(url);
-            } catch (JoranException ignored) {
-                // StatusPrinter will handle this
-            }
-            log.info("Successfully configured application logging from: {}", url);
-            StatusPrinter.printInCaseOfErrorsOrWarnings(context);
-        }
-
         super.contextInitialized(evt);
-    }
-
-    private static URL ref2Url(String ref) {
-        URL url = null;
-        try {
-            url = Resources.getResource(ref);
-        } catch (IllegalArgumentException ignored) {
-        }
-        if (url == null) {
-            try {
-                File file = new File(ref);
-                if (file.exists()) {
-                    url = new File(ref).toURI().toURL();
-                }
-            } catch (MalformedURLException ignored) {
-            }
-        }
-        if (url == null) {
-            try {
-                url = new URL(ref);
-            } catch (MalformedURLException ignored) {
-            }
-        }
-        return url;
     }
 
     @Override
