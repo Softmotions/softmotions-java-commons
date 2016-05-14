@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
@@ -35,6 +36,7 @@ import com.softmotions.commons.lifecycle.Start;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("UnnecessaryFullyQualifiedName")
 public class WBCayenneModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBCayenneModule.class);
@@ -49,8 +51,17 @@ public class WBCayenneModule extends AbstractModule {
 
     private final ServicesConfiguration cfg;
 
+    private final List<org.apache.cayenne.di.Module> extraCayenneModules;
+
+
+    public WBCayenneModule(ServicesConfiguration cfg, List<org.apache.cayenne.di.Module> extraCayenneModules) {
+        this.cfg = cfg;
+        this.extraCayenneModules = new ArrayList<>(extraCayenneModules);
+    }
+
     public WBCayenneModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
+        this.extraCayenneModules = Collections.emptyList();
     }
 
     @Override
@@ -64,7 +75,7 @@ public class WBCayenneModule extends AbstractModule {
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <cayenne> element");
         }
-        bind(CayenneWrapper.class).toInstance(new CayenneWrapper(cfg, cfgLocation));
+        bind(CayenneWrapper.class).toInstance(new CayenneWrapper(cfg, cfgLocation, extraCayenneModules));
         bind(CayeneInitializer.class).asEagerSingleton();
         bind(ServerRuntime.class).toProvider(CayenneRuntimeProvider.class);
 
@@ -83,10 +94,16 @@ public class WBCayenneModule extends AbstractModule {
 
         private final ServicesConfiguration cfg;
 
+        private final List<org.apache.cayenne.di.Module> extraCayenneModules;
+
         private volatile ServerRuntime runtime;
 
-        public CayenneWrapper(ServicesConfiguration cfg, String cfgLocation) {
+
+        public CayenneWrapper(ServicesConfiguration cfg,
+                              String cfgLocation,
+                              List<org.apache.cayenne.di.Module> extraCayenneModules) {
             this.cfgLocation = cfgLocation;
+            this.extraCayenneModules = extraCayenneModules;
             this.cfg = cfg;
         }
 
@@ -151,6 +168,7 @@ public class WBCayenneModule extends AbstractModule {
             runtime = new ServerRuntimeBuilder()
                     .addConfigs(cfgLocation)
                     .addModules(modules)
+                    .addModules(extraCayenneModules)
                     .dataSource(dataSource)
                     .build();
 
