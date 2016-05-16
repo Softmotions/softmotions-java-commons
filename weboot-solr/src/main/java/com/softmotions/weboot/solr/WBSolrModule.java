@@ -26,9 +26,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.lifecycle.Dispose;
+import com.softmotions.commons.lifecycle.Start;
 import com.softmotions.weboot.WBConfiguration;
-import com.softmotions.weboot.lifecycle.Dispose;
-import com.softmotions.weboot.lifecycle.Start;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -38,9 +39,9 @@ public class WBSolrModule extends AbstractModule {
 
     protected static final Logger log = LoggerFactory.getLogger(WBSolrModule.class);
 
-    private WBConfiguration cfg;
+    private ServicesConfiguration cfg;
 
-    public WBSolrModule(WBConfiguration cfg) {
+    public WBSolrModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
     }
 

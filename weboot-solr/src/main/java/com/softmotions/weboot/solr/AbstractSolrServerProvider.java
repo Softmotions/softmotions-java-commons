@@ -1,12 +1,12 @@
 package com.softmotions.weboot.solr;
 
-import com.softmotions.weboot.WBConfiguration;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.solr.client.solrj.SolrServer;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.softmotions.weboot.WBConfiguration;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
