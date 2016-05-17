@@ -36,20 +36,52 @@ inline fun <reified T : Any> sqlScalarSelect(sql: String): SQLSelect<T?> {
     return SQLSelect.scalarQuery(T::class.java, sql)
 }
 
+inline fun <reified T : Any> sqlScalarSelectOne(octx: ObjectContext, sql: String): T? {
+    return SQLSelect.scalarQuery(T::class.java, sql).selectOne(octx)
+}
+
+inline fun <reified T : Any> sqlScalarSelectFirst(octx: ObjectContext, sql: String): T? {
+    return SQLSelect.scalarQuery(T::class.java, sql).selectFirst(octx)
+}
+
 inline fun <reified T : Any> sqlObjectSelect(sql: String): SQLSelect<T?> {
     return SQLSelect.query(T::class.java, sql)
+}
+
+inline fun <reified T : Any> sqlObjectSelectOne(octx: ObjectContext, sql: String): T? {
+    return SQLSelect.query(T::class.java, sql).selectOne(octx)
+}
+
+inline fun <reified T : Any> sqlObjectSelectFirst(octx: ObjectContext, sql: String): T? {
+    return SQLSelect.query(T::class.java, sql).selectFirst(octx)
 }
 
 fun sqlDataRowSelect(sql: String): SQLSelect<DataRow?> {
     return SQLSelect.dataRowQuery(sql)
 }
 
+fun sqlDataRowSelectOne(octx: ObjectContext, sql: String): DataRow? {
+    return SQLSelect.dataRowQuery(sql).selectOne(octx)
+}
+
+fun sqlDataRowSelectFirst(octx: ObjectContext, sql: String): DataRow? {
+    return SQLSelect.dataRowQuery(sql).selectFirst(octx)
+}
+
 inline fun <reified T : Any> selectById(id: Any): SelectById<T?> {
     return SelectById.query(T::class.java, id)
 }
 
+inline fun <reified T : Any> selectOneById(octx: ObjectContext, id: Any): T? {
+    return SelectById.query(T::class.java, id).selectOne(octx)
+}
+
 inline fun <reified T : Any> selectDataRowById(id: Any): SelectById<DataRow?> {
     return SelectById.dataRowQuery(T::class.java, id)
+}
+
+inline fun <reified T : Any> selectOneDataRowById(octx: ObjectContext, id: Any): DataRow? {
+    return SelectById.dataRowQuery(T::class.java, id).selectOne(octx)
 }
 
 
