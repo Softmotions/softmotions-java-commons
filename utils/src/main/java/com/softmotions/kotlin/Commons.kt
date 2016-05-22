@@ -25,6 +25,10 @@ data class TimeSpec(val time: Long, val unit: TimeUnit = TimeUnit.MILLISECONDS) 
         val ONE_HOUR: TimeSpec = TimeSpec(1, TimeUnit.HOURS)
     }
 
+    fun toMillis(): Long {
+        return unit.toMillis(time)
+    }
+
     operator fun compareTo(u: Long): Int {
         return unit.toMillis(time).compareTo(u)
     }
