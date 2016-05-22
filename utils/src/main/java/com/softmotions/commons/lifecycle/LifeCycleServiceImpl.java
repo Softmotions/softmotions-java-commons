@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import com.google.inject.spi.ProviderInstanceBinding;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class LifeCycleServiceImpl implements LifeCycleService {
 
     private static final Logger log = LoggerFactory.getLogger(LifeCycleServiceImpl.class);
@@ -38,6 +40,10 @@ public class LifeCycleServiceImpl implements LifeCycleService {
 
     @Override
     public void start() {
+        start(true);
+    }
+
+    public void start(boolean failFast) {
         ExecutorService parallelExec = null;
         log.info("Starting");
         for (final Binding binding : injector.getBindings().values()) {
@@ -67,6 +73,7 @@ public class LifeCycleServiceImpl implements LifeCycleService {
             });
         }
 
+        AtomicReference<Exception> lastErrorRef = new AtomicReference<>();
         List<LCSlot> startList;
         synchronized (lc.lock) {
             if (lc.started) {
@@ -78,37 +85,52 @@ public class LifeCycleServiceImpl implements LifeCycleService {
             lc.startSet.clear();
         }
         Collections.sort(startList);
-        for (final LCSlot s : startList) {
-            if (!s.parallel) {
-                try {
-                    lc.invokeTarget(s);
-                } catch (Exception e) {
-                    log.error("", e);
-                }
-            } else {
-                if (parallelExec == null) {
-                    parallelExec = Executors.newFixedThreadPool(
-                            Math.max(1, Runtime.getRuntime().availableProcessors() - 1)
-                    );
-                }
-                invokeTargetParallel(parallelExec, s);
-            }
-        }
 
-        if (parallelExec != null) {
-            parallelExec.shutdown();
+        try {
+            for (final LCSlot s : startList) {
+
+                if (failFast && lastErrorRef.get() != null) {
+                    break;
+                }
+                if (!s.parallel) {
+                    try {
+                        lc.invokeTarget(s);
+                    } catch (Exception e) {
+                        lastErrorRef.set(e);
+                        log.error("", e);
+                    }
+                } else {
+                    if (parallelExec == null) {
+                        parallelExec = Executors.newFixedThreadPool(
+                                Math.max(1, Runtime.getRuntime().availableProcessors() - 1)
+                        );
+                    }
+                    parallelExec.execute(() -> {
+                        try {
+                            lc.invokeTarget(s);
+                        } catch (Exception e) {
+                            lastErrorRef.set(e);
+                            log.error("", e);
+                        }
+                    });
+                }
+            }
+
+        } finally {
+            Exception lastError = lastErrorRef.get();
+            if (parallelExec != null) {
+                if (failFast && lastError != null) {
+                    parallelExec.shutdownNow();
+                } else {
+                    parallelExec.shutdown();
+                }
+            }
+            if (failFast && lastError != null) {
+                throw new RuntimeException(lastError);
+            }
         }
     }
 
-    private void invokeTargetParallel(ExecutorService exec, final LCSlot s) {
-        exec.execute(() -> {
-            try {
-                lc.invokeTarget(s);
-            } catch (Exception e) {
-                log.error("", e);
-            }
-        });
-    }
 
     @Override
     public void stop() {
