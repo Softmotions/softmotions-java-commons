@@ -29,6 +29,10 @@ data class TimeSpec(val time: Long, val unit: TimeUnit = TimeUnit.MILLISECONDS) 
         return unit.toMillis(time)
     }
 
+    fun toNanos(): Long {
+        return unit.toNanos(time)
+    }
+
     operator fun compareTo(u: Long): Int {
         return unit.toMillis(time).compareTo(u)
     }
