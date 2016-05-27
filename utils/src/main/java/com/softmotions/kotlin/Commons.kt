@@ -9,6 +9,10 @@ import java.util.concurrent.TimeUnit
 
 inline fun <reified T : Any> loggerFor() = LoggerFactory.getLogger(T::class.java);
 
+///////////////////////////////////////////////////////////////////////////
+//                            Time units                                 //
+///////////////////////////////////////////////////////////////////////////
+
 data class TimeSpec(val time: Long, val unit: TimeUnit = TimeUnit.MILLISECONDS) {
 
     companion object {
@@ -49,3 +53,165 @@ data class TimeSpec(val time: Long, val unit: TimeUnit = TimeUnit.MILLISECONDS) 
         }
     }
 }
+
+///////////////////////////////////////////////////////////////////////////
+//                              Storage units                            //
+///////////////////////////////////////////////////////////////////////////
+
+enum class StorageUnit {
+
+    BYTE {
+
+        override fun toBytes(value: Long): Long {
+            return value
+        }
+
+        override fun toKilobytes(value: Long): Long {
+            return value / C1
+        }
+
+        override fun toMegabytes(value: Long): Long {
+            return value / C2
+        }
+
+        override fun toGigabytes(value: Long): Long {
+            return value / C3
+        }
+    },
+
+    KILOBYTE {
+        override fun toBytes(value: Long): Long {
+            return value * C1
+        }
+
+        override fun toKilobytes(value: Long): Long {
+            return value
+        }
+
+        override fun toMegabytes(value: Long): Long {
+            return value / C1
+        }
+
+        override fun toGigabytes(value: Long): Long {
+            return value / C2
+        }
+    },
+
+    MEGABYTE {
+
+        override fun toBytes(value: Long): Long {
+            return value * C2
+        }
+
+        override fun toKilobytes(value: Long): Long {
+            return value * C1
+        }
+
+        override fun toMegabytes(value: Long): Long {
+            return value
+        }
+
+        override fun toGigabytes(value: Long): Long {
+            return value / C1
+        }
+    },
+
+    GIGABYTE {
+
+        override fun toBytes(value: Long): Long {
+            return value * C3
+        }
+
+        override fun toKilobytes(value: Long): Long {
+            return value * C2
+        }
+
+        override fun toMegabytes(value: Long): Long {
+            return value * C1
+        }
+
+        override fun toGigabytes(value: Long): Long {
+            return value
+        }
+    };
+
+    companion object {
+
+        private val C0 = 0L
+        private val C1 = C0 * 1024L
+        private val C2 = C1 * 1024L
+        private val C3 = C2 * 1024L
+
+        fun parseLong(value: Long): StorageSpec {
+            return StorageSpec(value, StorageUnit.BYTE)
+        }
+
+        fun parseString(value: String): StorageSpec {
+            // 1Mb 1M 1GB 1G 1K 1Kb 1KB
+            val v = value.toUpperCase()
+            if (v.endsWith('M')) {
+                return StorageSpec(v.substring(0, v.length - 1).toLong(), StorageUnit.MEGABYTE)
+            } else if (v.endsWith('K')) {
+                return StorageSpec(v.substring(0, v.length - 1).toLong(), StorageUnit.KILOBYTE)
+            } else if (v.endsWith('G')) {
+                return StorageSpec(v.substring(0, v.length - 1).toLong(), StorageUnit.GIGABYTE)
+            }
+            if (v.endsWith("MB")) {
+                return StorageSpec(v.substring(0, v.length - 2).toLong(), StorageUnit.MEGABYTE)
+            } else if (v.endsWith("KB")) {
+                return StorageSpec(v.substring(0, v.length - 2).toLong(), StorageUnit.KILOBYTE)
+            } else if (v.endsWith("GB")) {
+                return StorageSpec(v.substring(0, v.length - 2).toLong(), StorageUnit.GIGABYTE)
+            }
+            return StorageSpec(value.toLong(), StorageUnit.BYTE)
+        }
+    }
+
+    abstract fun toBytes(value: Long): Long;
+    abstract fun toKilobytes(value: Long): Long;
+    abstract fun toMegabytes(value: Long): Long;
+    abstract fun toGigabytes(value: Long): Long;
+}
+
+data class StorageSpec(val value: Long, val unit: StorageUnit = StorageUnit.BYTE) {
+
+    companion object {
+        val ONE_BYTE = StorageSpec(1L, StorageUnit.BYTE)
+        val ONE_KILOBYTE = StorageSpec(1L, StorageUnit.KILOBYTE)
+        val TEN_KILOBYTES = StorageSpec(10L, StorageUnit.KILOBYTE)
+        val HALF_MEGABYTE = StorageSpec(512L, StorageUnit.KILOBYTE)
+        val ONE_MEGABYTE = StorageSpec(1L, StorageUnit.MEGABYTE)
+        val TEN_MEGABYTES = StorageSpec(10L, StorageUnit.MEGABYTE)
+        val FIFTY_MEGABYTES = StorageSpec(50L, StorageUnit.MEGABYTE)
+        val HANDRED_MEGABYTES = StorageSpec(100L, StorageUnit.MEGABYTE)
+        val HALF_GIGABYTE = StorageSpec(512L, StorageUnit.MEGABYTE)
+        val ONE_GIGABYTE = StorageSpec(1L, StorageUnit.GIGABYTE)
+    }
+
+    fun toBytes(): Long {
+        return unit.toBytes(value)
+    }
+
+    fun toKilobytes(): Long {
+        return unit.toKilobytes(value)
+    }
+
+    fun toMegabytes(): Long {
+        return unit.toMegabytes(value)
+    }
+
+    fun toGigabytes(): Long {
+        return unit.toGigabytes(value)
+    }
+}
+
+fun Long.toStorageUnitBytes(): StorageSpec = StorageSpec(this, StorageUnit.BYTE)
+fun Long.toKilobytes(): StorageSpec = StorageSpec(this, StorageUnit.KILOBYTE)
+fun Long.toMegabytes(): StorageSpec = StorageSpec(this, StorageUnit.MEGABYTE)
+fun Long.toGigabytes(): StorageSpec = StorageSpec(this, StorageUnit.GIGABYTE)
+
+fun Int.toStorageUnitBytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.BYTE)
+fun Int.toKilobytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.KILOBYTE)
+fun Int.toMegabytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.MEGABYTE)
+fun Int.toGigabytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.GIGABYTE)
+
