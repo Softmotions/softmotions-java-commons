@@ -1,6 +1,8 @@
 package com.softmotions.kotlin
 
 import org.slf4j.LoggerFactory
+import java.io.StringReader
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -224,3 +226,63 @@ fun Int.toKilobytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.KILO
 fun Int.toMegabytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.MEGABYTE)
 fun Int.toGigabytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.GIGABYTE)
 
+
+///////////////////////////////////////////////////////////////////////////
+//                         Properties                                    //
+///////////////////////////////////////////////////////////////////////////
+
+@Suppress("UNCHECKED_CAST")
+fun Properties.toMap(): Map<String, String> {
+    val p = this
+    return object : MutableMap<String, String> {
+
+        override val entries: MutableSet<MutableMap.MutableEntry<String, String>>
+            get() = p.entries as MutableSet<MutableMap.MutableEntry<String, String>>
+
+        override val keys: MutableSet<String>
+            get() = p.keys as MutableSet<String>
+
+        override val size: Int
+            get() = p.size
+
+        override val values: MutableCollection<String>
+            get() = p.values as MutableCollection<String>
+
+        override fun containsKey(key: String): Boolean {
+            return p.containsKey(key)
+        }
+
+        override fun containsValue(value: String): Boolean {
+            return p.containsValue(value)
+        }
+
+        override fun get(key: String): String? {
+            return p.getProperty(key)
+        }
+
+        override fun isEmpty(): Boolean {
+            return p.isEmpty
+        }
+
+        override fun clear() {
+            p.clear()
+        }
+
+        override fun put(key: String, value: String): String? {
+            return p.setProperty(key, value) as String?
+        }
+
+        override fun putAll(from: Map<out String, String>) {
+            p.putAll(from)
+        }
+
+        override fun remove(key: String): String? {
+            return p.remove(key) as String?
+        }
+    }
+}
+
+fun Properties.fromString(v: String): Properties {
+    this.load(StringReader(v))
+    return this
+}
