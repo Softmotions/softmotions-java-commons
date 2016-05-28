@@ -54,6 +54,15 @@ data class TimeSpec(val time: Long, val unit: TimeUnit = TimeUnit.MILLISECONDS) 
     }
 }
 
+fun Long.toMilliseconds(): TimeSpec = TimeSpec(this, TimeUnit.MILLISECONDS)
+fun Int.toMilliseconds(): TimeSpec = TimeSpec(this.toLong(), TimeUnit.MILLISECONDS)
+fun Long.toSeconds(): TimeSpec = TimeSpec(this, TimeUnit.SECONDS)
+fun Int.toSeconds(): TimeSpec = TimeSpec(this.toLong(), TimeUnit.SECONDS)
+fun Long.toMinutes(): TimeSpec = TimeSpec(this, TimeUnit.MINUTES)
+fun Int.toMinutes(): TimeSpec = TimeSpec(this.toLong(), TimeUnit.MINUTES)
+fun Long.toHours(): TimeSpec = TimeSpec(this, TimeUnit.HOURS)
+fun Int.toHours(): TimeSpec = TimeSpec(this.toLong(), TimeUnit.HOURS)
+
 ///////////////////////////////////////////////////////////////////////////
 //                              Storage units                            //
 ///////////////////////////////////////////////////////////////////////////
