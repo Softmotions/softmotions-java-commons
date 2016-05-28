@@ -234,26 +234,23 @@ fun Int.toGigabytes(): StorageSpec = StorageSpec(this.toLong(), StorageUnit.GIGA
 @Suppress("UNCHECKED_CAST")
 fun Properties.toMap(): Map<String, String> {
     val p = this
-    return object : MutableMap<String, String> {
-
-        override val entries: MutableSet<MutableMap.MutableEntry<String, String>>
-            get() = p.entries as MutableSet<MutableMap.MutableEntry<String, String>>
-
-        override val keys: MutableSet<String>
-            get() = p.keys as MutableSet<String>
-
+    val pm = this as Map<String, String>
+    return object : Map<String, String> {
+        override val entries: Set<Map.Entry<String, String>>
+            get() = pm.entries
+        override val keys: Set<String>
+            get() = pm.keys
         override val size: Int
-            get() = p.size
-
-        override val values: MutableCollection<String>
-            get() = p.values as MutableCollection<String>
+            get() = pm.size
+        override val values: Collection<String>
+            get() = pm.values
 
         override fun containsKey(key: String): Boolean {
-            return p.containsKey(key)
+            return pm.containsKey(key)
         }
 
         override fun containsValue(value: String): Boolean {
-            return p.containsValue(value)
+            return pm.containsValue(value)
         }
 
         override fun get(key: String): String? {
@@ -261,23 +258,7 @@ fun Properties.toMap(): Map<String, String> {
         }
 
         override fun isEmpty(): Boolean {
-            return p.isEmpty
-        }
-
-        override fun clear() {
-            p.clear()
-        }
-
-        override fun put(key: String, value: String): String? {
-            return p.setProperty(key, value) as String?
-        }
-
-        override fun putAll(from: Map<out String, String>) {
-            p.putAll(from)
-        }
-
-        override fun remove(key: String): String? {
-            return p.remove(key) as String?
+            return pm.isEmpty()
         }
     }
 }
