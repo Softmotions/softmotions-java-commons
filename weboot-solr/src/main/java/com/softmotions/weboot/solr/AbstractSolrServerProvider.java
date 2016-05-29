@@ -3,7 +3,7 @@ package com.softmotions.weboot.solr;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.solr.client.solrj.SolrServer;
 
 import com.softmotions.weboot.WBConfiguration;

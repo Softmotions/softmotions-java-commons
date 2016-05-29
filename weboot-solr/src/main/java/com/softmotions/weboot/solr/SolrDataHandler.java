@@ -1,6 +1,6 @@
 package com.softmotions.weboot.solr;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration2.Configuration;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.util.Iterator;

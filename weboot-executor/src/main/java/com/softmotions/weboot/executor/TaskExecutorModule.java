@@ -14,7 +14,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +39,7 @@ public class TaskExecutorModule extends AbstractModule implements TaskExecutor {
 
     @Override
     protected void configure() {
-        XMLConfiguration xcfg = cfg.xcfg();
-
+        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
         int threads;
         if ("allcores".equalsIgnoreCase(xcfg.getString("executor.threads-num"))) {
             threads = Runtime.getRuntime().availableProcessors();

@@ -11,8 +11,8 @@ import javax.sql.DataSource;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.configuration.server.ServerRuntimeBuilder;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -70,8 +70,7 @@ public class WBCayenneModule extends AbstractModule {
             log.warn("No WBCayenneModule module configuration found. Skipping.");
             return;
         }
-        XMLConfiguration xcfg = cfg.xcfg();
-        String cfgLocation = xcfg.getString("cayenne[@config]");
+        String cfgLocation = cfg.xcfg().getString("cayenne.config");
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <cayenne> element");
         }
@@ -122,14 +121,13 @@ public class WBCayenneModule extends AbstractModule {
         void start(DataSource dataSource) throws Exception {
             log.info("WBCayenneModule starting cayenne runtime. Config: {}", cfgLocation);
 
-            XMLConfiguration xcfg = cfg.xcfg();
             ClassLoader cl = ObjectUtils.firstNonNull(
                     Thread.currentThread().getContextClassLoader(),
                     getClass().getClassLoader());
-            List<HierarchicalConfiguration> mconfigs = xcfg.configurationsAt("cayenne.modules.module");
+            List<HierarchicalConfiguration<ImmutableNode>> mconfigs = cfg.xcfg().configurationsAt("cayenne.modules.module");
             List<org.apache.cayenne.di.Module> modules = new ArrayList<>(mconfigs.size());
-            for (final HierarchicalConfiguration mcfg : mconfigs) {
-                String mclassName = mcfg.getString("[@class]");
+            for (final HierarchicalConfiguration<ImmutableNode> mcfg : mconfigs) {
+                String mclassName = mcfg.getString("class");
                 if (StringUtils.isBlank(mclassName)) {
                     continue;
                 }

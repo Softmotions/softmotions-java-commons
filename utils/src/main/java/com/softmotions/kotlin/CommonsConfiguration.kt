@@ -1,6 +1,7 @@
 package com.softmotions.kotlin
 
-import org.apache.commons.configuration.AbstractConfiguration
+import org.apache.commons.configuration2.AbstractConfiguration
+
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)

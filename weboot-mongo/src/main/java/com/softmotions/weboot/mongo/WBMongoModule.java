@@ -8,10 +8,8 @@ import java.util.List;
 import java.util.Properties;
 import javax.annotation.Nonnull;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.SubnodeConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.configuration.tree.ConfigurationNode;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jongo.Jongo;
@@ -50,8 +48,7 @@ public class WBMongoModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        XMLConfiguration xcfg = cfg.xcfg();
-        if (xcfg.configurationsAt("mongo").isEmpty()) {
+        if (cfg.xcfg().configurationsAt("mongo").isEmpty()) {
             return;
         }
         bind(WBMongo.class).toProvider(WBMongoProvider.class).in(Singleton.class);
@@ -136,19 +133,19 @@ public class WBMongoModule extends AbstractModule {
             this(cfg, cfg.xcfg());
         }
 
-        public WBMongoProvider(ServicesConfiguration cfg, HierarchicalConfiguration xcfg) {
+        public WBMongoProvider(ServicesConfiguration cfg, HierarchicalConfiguration<ImmutableNode> xcfg) {
             this.props = new Properties();
-            String propsStr = xcfg.getString("mongo");
+            String propsStr = xcfg.getString("mongo.properties");
             if (!StringUtils.isBlank(propsStr)) {
                 try {
                     props.load(new StringReader(propsStr));
                 } catch (IOException e) {
-                    String msg = "Failed to load <mongo> properties";
+                    String msg = "Failed to load <mongo/properties> properties";
                     log.error(msg, e);
                     throw new RuntimeException(msg, e);
                 }
             }
-            String propsFile = cfg.substitutePath(xcfg.getString("mongo[@propsFile]"));
+            String propsFile = cfg.substitutePath(xcfg.getString("mongo.propsFile"));
             if (!StringUtils.isBlank(propsFile)) {
                 log.info("WBMongoModule loading the properties file: {}", propsFile);
                 try (FileInputStream is = new FileInputStream(propsFile)) {
@@ -158,12 +155,7 @@ public class WBMongoModule extends AbstractModule {
                     throw new RuntimeException(e);
                 }
             }
-            SubnodeConfiguration mcfg = xcfg.configurationAt("mongo");
-            for (ConfigurationNode a : mcfg.getRootNode().getAttributes()) {
-                if (!props.containsKey(a.getName())) {
-                    props.setProperty(a.getName(), (String) a.getValue());
-                }
-            }
+
             Properties logProps = new Properties();
             logProps.putAll(props);
             for (String k : logProps.stringPropertyNames()) {

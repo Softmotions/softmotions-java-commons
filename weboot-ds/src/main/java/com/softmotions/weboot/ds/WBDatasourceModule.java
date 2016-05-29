@@ -11,7 +11,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +43,12 @@ public class WBDatasourceModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        if (cfg.xcfg().configurationsAt("datasource").isEmpty()) {
+        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
+        if (xcfg.configurationsAt("datasource").isEmpty()) {
             log.warn("No WBDatasourceModule module configuration found. Skipping.");
             return;
         }
-        XMLConfiguration xcfg = cfg.xcfg();
-        String propsStr = xcfg.getString("datasource");
-
+        String propsStr = xcfg.getString("datasource.properties");
         Properties dsProps = new Properties();
         if (!StringUtils.isBlank(propsStr)) {
             try {
@@ -59,7 +59,7 @@ public class WBDatasourceModule extends AbstractModule {
                 throw new RuntimeException(msg, e);
             }
         }
-        String propsFile = cfg.substitutePath(xcfg.getString("datasource[@propertiesFile]"));
+        String propsFile = cfg.substitutePath(xcfg.getString("datasource.propertiesFile"));
         if (!StringUtils.isBlank(propsFile)) {
             log.info("WBDatasourceModule loading the properties file: {}", propsFile);
             try (FileInputStream is = new FileInputStream(propsFile)) {
@@ -85,13 +85,13 @@ public class WBDatasourceModule extends AbstractModule {
 
     public static class DatasourceWrapper {
 
-        final XMLConfiguration cfg;
+        final HierarchicalConfiguration<ImmutableNode> cfg;
 
         final Properties dsProps;
 
         volatile HikariDataSource dataSource;
 
-        DatasourceWrapper(XMLConfiguration cfg, Properties dsProps) {
+        DatasourceWrapper(HierarchicalConfiguration<ImmutableNode> cfg, Properties dsProps) {
             this.dsProps = dsProps;
             this.cfg = cfg;
         }
@@ -120,8 +120,8 @@ public class WBDatasourceModule extends AbstractModule {
                 }
             }
 
-            String jvmDsName = cfg.getString("datasource[@jvmDsName]");
-            String jndiName = cfg.getString("datasource[@jndiName]");
+            String jvmDsName = cfg.getString("datasource.jvmDsName");
+            String jndiName = cfg.getString("datasource.jndiName");
             if (jndiName != null) {
                 InitialContext initCtx = new InitialContext();
                 Context comp = (Context) initCtx.lookup("java:comp");

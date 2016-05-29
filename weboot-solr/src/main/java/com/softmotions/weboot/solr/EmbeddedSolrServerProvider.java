@@ -1,9 +1,7 @@
 package com.softmotions.weboot.solr;
 
-import com.softmotions.commons.io.Loader;
-import com.softmotions.weboot.WBConfiguration;
-
-import com.google.inject.Singleton;
+import java.io.InputStream;
+import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrServer;
@@ -20,8 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
-import javax.inject.Inject;
-import java.io.InputStream;
+import com.google.inject.Singleton;
+import com.softmotions.commons.io.Loader;
+import com.softmotions.weboot.WBConfiguration;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -39,7 +38,7 @@ public class EmbeddedSolrServerProvider extends AbstractSolrServerProvider {
 
     public SolrServer get() {
 
-        String coreName = scfg.getString("[@name]");
+        String coreName = scfg.getString("name");
         if (StringUtils.isBlank(coreName)) {
             throw new RuntimeException("Missing required '@name' parameter for EmbeddedSolrServerProvider");
         }

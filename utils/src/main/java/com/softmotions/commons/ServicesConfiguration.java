@@ -6,8 +6,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +50,6 @@ public class ServicesConfiguration implements Module {
         load(location);
     }
 
-
     protected void load(String location) {
         URL cfgUrl = Loader.getResourceAsUrl(location, getClass());
         if (cfgUrl == null) {
@@ -53,7 +57,15 @@ public class ServicesConfiguration implements Module {
         }
         log.info("Using configuration: {}", cfgUrl);
         try {
-            xcfg = new XMLConfiguration(cfgUrl);
+            Parameters params = new Parameters();
+            xcfg = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
+                    .configure(
+                            params.xml()
+                                  .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                                  .setURL(cfgUrl)
+                                  .setValidating(false))
+                    .getConfiguration();
+
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -71,7 +83,7 @@ public class ServicesConfiguration implements Module {
         }
 
         //init logging
-        String lref = xcfg().getString("logging[@ref]");
+        String lref = xcfg().getString("logging-ref");
         if (!StringUtils.isBlank(lref)) {
             String pdir = FilenameUtils.getPath(location);
             String lcfg = pdir + lref;
@@ -114,7 +126,7 @@ public class ServicesConfiguration implements Module {
         return url;
     }
 
-    public XMLConfiguration xcfg() {
+    public HierarchicalConfiguration<ImmutableNode> xcfg() {
         return xcfg;
     }
 

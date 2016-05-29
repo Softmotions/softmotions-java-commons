@@ -8,8 +8,8 @@ import java.sql.Statement;
 import java.util.Properties;
 import javax.sql.DataSource;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.mapping.Environment;
@@ -45,10 +45,10 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
 
     @Override
     protected void initialize() {
-        XMLConfiguration xcfg = cfg.xcfg();
-        String dbenv = xcfg.getString("mybatis[@dbenv]", "development");
+        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
+        String dbenv = xcfg.getString("mybatis.dbenv", "development");
         setEnvironmentId(dbenv);
-        String cfgLocation = xcfg.getString("mybatis[@config]");
+        String cfgLocation = xcfg.getString("mybatis.config");
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <mybatis> element");
         }
@@ -66,7 +66,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             }
         }
 
-        String propsFile = cfg.substitutePath(xcfg.getString("mybatis[@propsFile]"));
+        String propsFile = cfg.substitutePath(xcfg.getString("mybatis.propsFile"));
         if (!StringUtils.isBlank(propsFile)) {
             log.info("MyBatis loading the properties file: {}", propsFile);
             try (FileInputStream is = new FileInputStream(propsFile)) {
@@ -85,7 +85,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         }
 
         for (HierarchicalConfiguration mc : xcfg.configurationsAt("mybatis.extra-mappers.mapper")) {
-            String resource = mc.getString("[@resource]");
+            String resource = mc.getString("resource");
             if (!StringUtils.isBlank(resource)) {
                 log.info("MyBatis registering extra mapper: '{}'", resource);
                 getExtraMappers().add(resource);
@@ -96,7 +96,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         log.info("MyBatis properties: {}", props);
         log.info("MyBatis config: {}", cfgLocation);
 
-        if (xcfg.getBoolean("mybatis[@bindDatasource]", false)) {
+        if (xcfg.getBoolean("mybatis.bindDatasource", false)) {
             bind(DataSource.class).toProvider(DataSourceProvider.class);
         }
         bind(MyBatisInitializer.class).asEagerSingleton();
@@ -135,7 +135,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         public void shutdown() {
             log.info("Shutting down MyBatis datasource");
             DataSource ds = dsProvider.get();
-            String shutdownSql = cfg.xcfg().getString("mybatis[@shutdownSQL]");
+            String shutdownSql = cfg.xcfg().getString("mybatis.shutdownSQL");
             if (ds != null && !StringUtils.isBlank(shutdownSql)) {
                 log.info("Executing shutdown SQL: '{}" + '\'', shutdownSql);
                 try (Connection c = ds.getConnection()) {

@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.SubnodeConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.solr.client.solrj.SolrServer;
@@ -47,7 +47,8 @@ public class WBSolrModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        if (cfg.xcfg().configurationsAt("solr").isEmpty()) {
+        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
+        if (xcfg.configurationsAt("solr").isEmpty()) {
             return;
         }
         ClassLoader cl = ObjectUtils.firstNonNull(
@@ -55,10 +56,8 @@ public class WBSolrModule extends AbstractModule {
                 getClass().getClassLoader()
         );
 
-        XMLConfiguration xcfg = cfg.xcfg();
-        HierarchicalConfiguration scfg = (HierarchicalConfiguration) xcfg.subset("solr");
-
-        String providerClassName = scfg.getString("provider[@class]");
+        Configuration scfg = xcfg.subset("solr");
+        String providerClassName = scfg.getString("provider.class");
         if (StringUtils.isBlank(providerClassName)) {
             throw new RuntimeException("Missing required parameter '@class' for solr server provider");
         }
@@ -102,12 +101,12 @@ public class WBSolrModule extends AbstractModule {
                     getClass().getClassLoader()
             );
 
-            SubnodeConfiguration scfg = cfg.xcfg().configurationAt("solr");
+            HierarchicalConfiguration<ImmutableNode> scfg = cfg.xcfg().configurationAt("solr");
             Collection<SolrDataHandler> dataHandlers = new ArrayList<>();
             Collection<SolrDataHandler> autoImportHandlers = new ArrayList<>();
 
-            for (HierarchicalConfiguration dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
-                String dhClassName = dhcfg.getString("[@class]");
+            for (HierarchicalConfiguration<ImmutableNode> dhcfg : scfg.configurationsAt("data-handlers.data-handler")) {
+                String dhClassName = dhcfg.getString("class");
                 Class<?> dhClass = cl.loadClass(dhClassName);
 
                 if (!SolrDataHandler.class.isAssignableFrom(dhClass)) {
@@ -118,12 +117,12 @@ public class WBSolrModule extends AbstractModule {
                 dataHandler.init(dhcfg);
                 dataHandlers.add(dataHandler);
 
-                if (dhcfg.getBoolean("[@autoimport]", false)) {
+                if (dhcfg.getBoolean("autoimport", false)) {
                     autoImportHandlers.add(dataHandler);
                 }
             }
 
-            boolean rebuild = scfg.getBoolean("[@rebuildIndex]", false);
+            boolean rebuild = scfg.getBoolean("rebuildIndex", false);
             if (rebuild || checkEmptyIndex()) {
                 rebuildIndex(dataHandlers);
             } else {
@@ -149,7 +148,7 @@ public class WBSolrModule extends AbstractModule {
          */
         private boolean checkEmptyIndex() throws Exception {
             ModifiableSolrParams params = new ModifiableSolrParams();
-            params.add(CommonParams.Q, cfg.xcfg().getString("solr[@allQuery]", "*:*"));
+            params.add(CommonParams.Q, cfg.xcfg().getString("solr.allQuery", "*:*"));
             params.add(CommonParams.ROWS, "1");
             QueryResponse queryResponse = solr.query(params);
             SolrDocumentList results = queryResponse.getResults();

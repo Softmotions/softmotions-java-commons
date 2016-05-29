@@ -3,8 +3,8 @@ package com.softmotions.weboot.mail;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +41,7 @@ public class MailModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        XMLConfiguration xcfg = cfg.xcfg();
-        SubnodeConfiguration mailCfg = xcfg.configurationAt("mail");
+        HierarchicalConfiguration<ImmutableNode> mailCfg = cfg.xcfg().configurationAt("mail");
         if (mailCfg == null) {
             log.warn("No <mail> configuration found");
             return;
@@ -65,7 +64,7 @@ public class MailModule extends AbstractModule {
 
     static class MailServiceImpl implements MailService {
 
-        final XMLConfiguration xcfg;
+        final HierarchicalConfiguration<ImmutableNode> xcfg;
 
         final Provider<TaskExecutor> executorProvider;
 
@@ -76,7 +75,7 @@ public class MailModule extends AbstractModule {
         final Object lock = new Object();
 
         @Inject
-        MailServiceImpl(XMLConfiguration xcfg,
+        MailServiceImpl(HierarchicalConfiguration<ImmutableNode> xcfg,
                         Provider<TaskExecutor> executorProvider,
                         @Named("com.softmotions.weboot.mail.MailModule")
                         SmtpServer smtpServer) {

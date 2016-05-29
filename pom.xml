@@ -11,12 +11,12 @@
     </parent>
     <artifactId>softmotions-java-commons</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <softmotion.commons.version>1.1-SNAPSHOT</softmotion.commons.version>
+        <softmotion.commons.version>1.2-SNAPSHOT</softmotion.commons.version>
         <kotlin.version>1.0.2</kotlin.version>
     </properties>
 
@@ -120,6 +120,11 @@
                 <groupId>commons-configuration</groupId>
                 <artifactId>commons-configuration</artifactId>
                 <version>1.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-configuration2</artifactId>
+                <version>2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
 
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -45,7 +46,7 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
 
 
     @Inject
-    public TemplateServiceImpl(I18n i18n, XMLConfiguration xcfg) {
+    public TemplateServiceImpl(I18n i18n, HierarchicalConfiguration<ImmutableNode> xcfg) {
         this.i18n = i18n;
         this.templatesBase = xcfg.getString("templates.base", "/");
         if (!templatesBase.endsWith("/")) {

@@ -1,24 +1,23 @@
 package com.softmotions.weboot;
 
-import com.google.inject.Module;
-import com.google.inject.Singleton;
-import com.google.inject.servlet.ServletModule;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.Filter;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
 
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Map;
-
+import com.google.inject.Module;
+import com.google.inject.Singleton;
+import com.google.inject.servlet.ServletModule;
 import com.softmotions.commons.ServicesConfiguration;
 
 /**
@@ -49,7 +48,6 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
             throw new RuntimeException("Application configuration is not registered in the servlet context, " +
                                        "key: " + WBServletListener.WEBOOT_CFG_SCTX_KEY);
         }
-        XMLConfiguration xcfg = cfg.xcfg();
         bind(WBConfiguration.class).toInstance(cfg);
         bind(ServicesConfiguration.class).toInstance(cfg);
 
@@ -57,9 +55,9 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                 Thread.currentThread().getContextClassLoader(),
                 getClass().getClassLoader()
         );
-        List<HierarchicalConfiguration> mconfigs = xcfg.configurationsAt("modules.module");
+        List<HierarchicalConfiguration<ImmutableNode>> mconfigs = cfg.xcfg().configurationsAt("modules.module");
         for (final HierarchicalConfiguration mcfg : mconfigs) {
-            String mclassName = mcfg.getString("[@class]");
+            String mclassName = mcfg.getString("class");
             if (StringUtils.isBlank(mclassName)) {
                 continue;
             }
