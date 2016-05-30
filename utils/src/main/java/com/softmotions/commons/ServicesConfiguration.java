@@ -37,7 +37,7 @@ public class ServicesConfiguration implements Module {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected XMLConfiguration xcfg;
+    protected HierarchicalConfiguration<ImmutableNode> xcfg;
 
     protected File tmpdir;
 
@@ -48,6 +48,16 @@ public class ServicesConfiguration implements Module {
 
     public ServicesConfiguration(String location) {
         load(location);
+    }
+
+    public ServicesConfiguration(String location,
+                                 HierarchicalConfiguration<ImmutableNode> xcfg) {
+        load(location, xcfg);
+    }
+
+    protected void load(String location, HierarchicalConfiguration<ImmutableNode> xcfg) {
+        this.xcfg = xcfg;
+        init(location);
     }
 
     protected void load(String location) {
@@ -65,11 +75,13 @@ public class ServicesConfiguration implements Module {
                                   .setURL(cfgUrl)
                                   .setValidating(false))
                     .getConfiguration();
-
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         }
+        init(location);
+    }
 
+    protected void init(String location) {
         String dir = xcfg.getString("tmpdir");
         if (StringUtils.isBlank(dir)) {
             dir = System.getProperty("java.io.tmpdir");

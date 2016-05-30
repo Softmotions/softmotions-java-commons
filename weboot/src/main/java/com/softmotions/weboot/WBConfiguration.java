@@ -3,6 +3,9 @@ package com.softmotions.weboot;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
+
 import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.lifecycle.Dispose;
 
@@ -19,6 +22,11 @@ public abstract class WBConfiguration extends ServicesConfiguration {
     public void load(String location, ServletContext sctx) {
         this.servletContext = sctx;
         load(location);
+    }
+
+    public void load(String location, HierarchicalConfiguration<ImmutableNode> xcfg, ServletContext sctx) {
+        this.servletContext = sctx;
+        load(location, xcfg);
     }
 
     public ServletContext getServletContext() {
