@@ -42,6 +42,8 @@ public class ServicesConfiguration implements Module {
 
     protected File tmpdir;
 
+    private boolean usedCustomLoggingConfig;
+
     protected volatile File sessionTmpDir;
 
     public ServicesConfiguration() {
@@ -88,6 +90,10 @@ public class ServicesConfiguration implements Module {
         init(location);
     }
 
+    public boolean isUsedCustomLoggingConfig() {
+        return usedCustomLoggingConfig;
+    }
+
     protected void init(String location) {
         //init logging
         String lref = xcfg().getString("logging-ref");
@@ -104,6 +110,7 @@ public class ServicesConfiguration implements Module {
             } catch (JoranException ignored) {
                 // StatusPrinter will handle this
             }
+            usedCustomLoggingConfig = true;
             log.info("Successfully configured application logging from: {}", url);
             StatusPrinter.printInCaseOfErrorsOrWarnings(context);
         }
