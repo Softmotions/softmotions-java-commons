@@ -84,7 +84,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             }
         }
 
-        for (HierarchicalConfiguration mc : xcfg.configurationsAt("mybatis.extra-mappers.mapper")) {
+        for (HierarchicalConfiguration<ImmutableNode> mc : xcfg.configurationsAt("mybatis.extra-mappers.mapper")) {
             String resource = mc.getString("resource");
             if (!StringUtils.isBlank(resource)) {
                 log.info("MyBatis registering extra mapper: '{}'", resource);

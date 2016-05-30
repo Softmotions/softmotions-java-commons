@@ -1,9 +1,11 @@
 package com.softmotions.weboot.liquibase;
 
 import java.sql.Connection;
+import java.util.Iterator;
 import java.util.List;
 import javax.sql.DataSource;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.slf4j.Logger;
@@ -85,7 +87,7 @@ public class WBLiquibaseModule extends AbstractModule {
 
                 List<HierarchicalConfiguration<ImmutableNode>> hcList =
                         lbCfg.configurationsAt("liquibase.changelog-parameters.parameter");
-                for (final HierarchicalConfiguration hc : hcList) {
+                for (final HierarchicalConfiguration<ImmutableNode> hc : hcList) {
                     String name = hc.getString("name");
                     String value = hc.getString("value");
                     if (name != null) {
@@ -93,12 +95,12 @@ public class WBLiquibaseModule extends AbstractModule {
                     }
                 }
 
-                if (lbCfg.containsKey("dropAll")) {
+                if (lbCfg.containsKey("update.dropAll")) {
                     log.info("Executing Liqubase.DropAll");
                     liquibase.dropAll();
                 }
 
-                if (lbCfg.containsKey("update")) {
+                if (lbCfg.containsKey("update.contexts")) {
                     String contexts = lbCfg.getString("update.contexts");
                     log.info("Executing Liquibase.Update, contexts={}", contexts);
                     liquibase.update(contexts);

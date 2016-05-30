@@ -56,10 +56,10 @@ public class WBSolrModule extends AbstractModule {
                 getClass().getClassLoader()
         );
 
-        Configuration scfg = xcfg.subset("solr");
+        Configuration scfg = xcfg.configurationAt("solr");
         String providerClassName = scfg.getString("provider.class");
         if (StringUtils.isBlank(providerClassName)) {
-            throw new RuntimeException("Missing required parameter '@class' for solr server provider");
+            throw new RuntimeException("Missing required parameter 'class' for solr server provider");
         }
         Class<? extends Provider<? extends SolrServer>> providerClass;
         try {

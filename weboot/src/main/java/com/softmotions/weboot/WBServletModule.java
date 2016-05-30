@@ -56,8 +56,8 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                 getClass().getClassLoader()
         );
         List<HierarchicalConfiguration<ImmutableNode>> mconfigs = cfg.xcfg().configurationsAt("modules.module");
-        for (final HierarchicalConfiguration mcfg : mconfigs) {
-            String mclassName = mcfg.getString("class");
+        for (final HierarchicalConfiguration<ImmutableNode> mcfg : mconfigs) {
+            String mclassName = mcfg.getString(".");
             if (StringUtils.isBlank(mclassName)) {
                 continue;
             }

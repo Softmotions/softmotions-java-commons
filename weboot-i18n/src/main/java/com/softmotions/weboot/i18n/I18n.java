@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
 
@@ -66,7 +67,7 @@ public class I18n {
     private Map<Locale, ResourceBundle> bundleCache;
 
     @Inject
-    public I18n(HierarchicalConfiguration xcfg) {
+    public I18n(HierarchicalConfiguration<ImmutableNode> xcfg) {
         List<Object> blist = xcfg.getList("messages.bundle");
         ArrayList<String> rnames = new ArrayList<>();
         for (Object v : blist) {

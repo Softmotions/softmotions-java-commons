@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
@@ -66,6 +67,12 @@ public class ServicesConfiguration implements Module {
             throw new RuntimeException("Failed to find configuration: " + location);
         }
         log.info("Using configuration: {}", cfgUrl);
+
+        if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+            LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
+            ctx.getLogger("ROOT").setLevel(Level.ERROR);
+        }
+
         try {
             Parameters params = new Parameters();
             xcfg = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
@@ -82,21 +89,9 @@ public class ServicesConfiguration implements Module {
     }
 
     protected void init(String location) {
-        String dir = xcfg.getString("tmpdir");
-        if (StringUtils.isBlank(dir)) {
-            dir = System.getProperty("java.io.tmpdir");
-        }
-        tmpdir = new File(dir);
-        log.info("Using TMP dir: {}", tmpdir.getAbsolutePath());
-        try {
-            DirUtils.ensureDir(tmpdir, true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
         //init logging
         String lref = xcfg().getString("logging-ref");
-        if (!StringUtils.isBlank(lref)) {
+        if (!StringUtils.isBlank(lref) && LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
             String pdir = FilenameUtils.getPath(location);
             String lcfg = pdir + lref;
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -111,6 +106,18 @@ public class ServicesConfiguration implements Module {
             }
             log.info("Successfully configured application logging from: {}", url);
             StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+        }
+
+        String dir = xcfg.getString("tmpdir");
+        if (StringUtils.isBlank(dir)) {
+            dir = System.getProperty("java.io.tmpdir");
+        }
+        tmpdir = new File(dir);
+        log.info("Using TMP dir: {}", tmpdir.getAbsolutePath());
+        try {
+            DirUtils.ensureDir(tmpdir, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
