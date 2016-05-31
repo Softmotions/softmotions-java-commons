@@ -37,6 +37,8 @@ public class FileUploadUtils {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
+                } else {
+                    return fname;
                 }
             }
         }
