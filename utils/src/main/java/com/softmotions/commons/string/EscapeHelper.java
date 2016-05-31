@@ -1,10 +1,16 @@
 package com.softmotions.commons.string;
 
-import org.apache.commons.lang3.StringUtils;
-
+import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * String escape helper.
@@ -14,6 +20,35 @@ import java.util.Map;
  */
 public final class EscapeHelper {
 
+    private static final String[] URL_FIND = {"%28", "%29", "+", "%27", "%21", "%7E"};
+    private static final String[] URL_REPL = {"(", ")", "%20", "'", "!", "~"};
+
+    @Nonnull
+    public static String encodeURLComponent(String val) {
+        String ret;
+        try {
+            ret = StringUtils.replaceEach(URLEncoder.encode(val, "UTF-8"), URL_FIND, URL_REPL);
+        } catch (IOException e) {
+            ret = val;
+        }
+        return ret;
+    }
+
+    @Nullable
+    public static String decodeURIComponent(String val) {
+        if (val == null) {
+            return null;
+        }
+        String result;
+        try {
+            result = URLDecoder.decode(val, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            result = val;
+        }
+        return result;
+    }
+
+    @Nonnull
     public static String toUnicodeEscape(Object val) {
         String src = String.valueOf(val);
         int length = src.length();
@@ -27,7 +62,6 @@ public final class EscapeHelper {
     }
 
     private static void toUnsignedString(int i, int shift, StringBuilder sb) {
-
         char[] buf = new char[32];
         int charPos = 32;
         int radix = 1 << shift;
@@ -47,7 +81,6 @@ public final class EscapeHelper {
     }
 
     private static final char[] digits = {
-
             '0', '1', '2', '3', '4', '5',
             '6', '7', '8', '9', 'a', 'b',
             'c', 'd', 'e', 'f', 'g', 'h',
@@ -56,6 +89,7 @@ public final class EscapeHelper {
             'u', 'v', 'w', 'x', 'y', 'z'
     };
 
+    @Nonnull
     public static String escapeVelocity(Object val) {
         String src = String.valueOf(val);
         if (src.contains(".")) return StringUtils.replace(src, ".", "_");
@@ -73,6 +107,7 @@ public final class EscapeHelper {
         XML_ENTRY_MAP.put(39, "apos");
     }
 
+    @Nullable
     public static String escapeXML(String str) {
         if (str == null) {
             return null;
@@ -100,6 +135,7 @@ public final class EscapeHelper {
      * @param input the input which contains native characters like umlauts etc
      * @return the input in which native characters are replaced through ASCII code
      */
+    @Nullable
     public static String nativeToAscii(String input) {
         if (input == null) {
             return null;
@@ -128,6 +164,7 @@ public final class EscapeHelper {
      * @param input the input which contains native characters like umlauts etc
      * @return the input in which native characters are replaced through ASCII code
      */
+    @Nullable
     public static String asciiToNative(String input) {
         if (input == null) {
             return null;
@@ -167,14 +204,12 @@ public final class EscapeHelper {
     }
 
 
+    @Nonnull
     public static String escapeJSON(String input) {
-
         if (input == null) {
             return "null";
         }
-
-        StringWriter sw = (input.length() > 0) ? new StringWriter(input.length()) : new StringWriter();
-
+        StringWriter sw = (!input.isEmpty()) ? new StringWriter(input.length()) : new StringWriter();
         int length = input.length();
         for (int i = 0; i < length; i++) {
             char c = input.charAt(i);

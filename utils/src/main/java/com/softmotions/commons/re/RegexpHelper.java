@@ -1,5 +1,7 @@
 package com.softmotions.commons.re;
 
+import javax.annotation.Nonnull;
+
 public class RegexpHelper {
 
     private RegexpHelper() {
@@ -11,8 +13,8 @@ public class RegexpHelper {
      *
      * @param glob The glob to be converted
      */
+    @Nonnull
     public static String convertGlobToRegEx(String glob) {
-
         glob = glob.trim();
         StringBuilder sb = new StringBuilder(glob.length());
 

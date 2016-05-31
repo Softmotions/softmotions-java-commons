@@ -12,14 +12,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>softmotions</groupId>
+            <artifactId>softmotions-weboot-i18n</artifactId>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
             <version>1.0.0.Final</version>
         </dependency>
         <dependency>
-            <groupId>softmotions</groupId>
-            <artifactId>softmotions-weboot-i18n</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
         </dependency>
     </dependencies>
 

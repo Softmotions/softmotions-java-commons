@@ -1,5 +1,8 @@
 package com.softmotions.kotlin
 
+import com.softmotions.commons.string.EscapeHelper
+import org.apache.commons.codec.binary.Base64
+import org.apache.commons.codec.net.BCodec
 import org.slf4j.LoggerFactory
 import java.io.StringReader
 import java.util.*
@@ -10,6 +13,16 @@ import java.util.concurrent.TimeUnit
  */
 
 inline fun <reified T : Any> loggerFor() = LoggerFactory.getLogger(T::class.java);
+
+///////////////////////////////////////////////////////////////////////////
+//                           String misc                                 //
+///////////////////////////////////////////////////////////////////////////
+
+fun String.toURLComponent(): String = EscapeHelper.encodeURLComponent(this)
+
+fun String.toBase64(): String = Base64.encodeBase64String(toByteArray())
+
+fun String.toBCode(): String = BCodec().encode(this)
 
 ///////////////////////////////////////////////////////////////////////////
 //                            Time units                                 //
