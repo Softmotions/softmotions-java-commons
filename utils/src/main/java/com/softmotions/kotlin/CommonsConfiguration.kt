@@ -1,37 +1,16 @@
 package com.softmotions.kotlin
 
-import org.apache.commons.configuration2.AbstractConfiguration
+import org.apache.commons.configuration2.HierarchicalConfiguration
+import org.apache.commons.configuration2.tree.ImmutableNode
+import java.util.*
 
 
-/**
- * @author Adamansky Anton (adamansky@gmail.com)
- */
-
-fun AbstractConfiguration.getBooleanKt(name: String, def: Boolean): Boolean {
-    return AbstractConfigurationKtAdapter.getBoolean(this, name, def)
+fun HierarchicalConfiguration<ImmutableNode>.toMap(): MutableMap<String, String> {
+    val ret = HashMap<String, String>()
+    val keysIt = this.keys
+    while (keysIt.hasNext()) {
+        val key = keysIt.next()
+        ret.put(key, this.getString(key, null))
+    }
+    return ret
 }
-
-fun AbstractConfiguration.getIntKt(name: String, def: Int): Int {
-    return AbstractConfigurationKtAdapter.getInt(this, name, def)
-}
-
-fun AbstractConfiguration.getLongKt(name: String, def: Long): Long {
-    return AbstractConfigurationKtAdapter.getLong(this, name, def)
-}
-
-fun AbstractConfiguration.getShortKt(name: String, def: Short): Short {
-    return AbstractConfigurationKtAdapter.getShort(this, name, def)
-}
-
-fun AbstractConfiguration.getByteKt(name: String, def: Byte): Byte {
-    return AbstractConfigurationKtAdapter.getByte(this, name, def)
-}
-
-fun AbstractConfiguration.getFloatKt(name: String, def: Float): Float {
-    return AbstractConfigurationKtAdapter.getFloat(this, name, def)
-}
-
-fun AbstractConfiguration.getDoubleKt(name: String, def: Double): Double {
-    return AbstractConfigurationKtAdapter.getDouble(this, name, def)
-}
-
