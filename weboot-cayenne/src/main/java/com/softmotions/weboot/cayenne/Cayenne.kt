@@ -14,11 +14,11 @@ inline fun <reified T : Any> ObjectContext.new(): T {
 
 inline fun <reified T : Any> objectSelect(exprStr: String? = null, expr: Expression? = null): ObjectSelect<T?> {
     if (exprStr != null) {
-        return ObjectSelect.query(T::class.java, ExpressionFactory.exp(exprStr))
+        return ObjectSelect.query<T>(T::class.java, ExpressionFactory.exp(exprStr))
     } else if (expr != null) {
-        return ObjectSelect.query(T::class.java, expr)
+        return ObjectSelect.query<T>(T::class.java, expr)
     } else {
-        return ObjectSelect.query(T::class.java)
+        return ObjectSelect.query<T>(T::class.java)
     }
 }
 
@@ -33,27 +33,27 @@ inline fun <reified T : Any> objectDataRowSelect(exprStr: String? = null, expr: 
 }
 
 inline fun <reified T : Any> sqlScalarSelect(sql: String): SQLSelect<T?> {
-    return SQLSelect.scalarQuery(T::class.java, sql)
+    return SQLSelect.scalarQuery<T>(T::class.java, sql)
 }
 
 inline fun <reified T : Any> sqlScalarSelectOne(octx: ObjectContext, sql: String): T? {
-    return SQLSelect.scalarQuery(T::class.java, sql).selectOne(octx)
+    return SQLSelect.scalarQuery<T>(T::class.java, sql).selectOne(octx)
 }
 
 inline fun <reified T : Any> sqlScalarSelectFirst(octx: ObjectContext, sql: String): T? {
-    return SQLSelect.scalarQuery(T::class.java, sql).selectFirst(octx)
+    return SQLSelect.scalarQuery<T>(T::class.java, sql).selectFirst(octx)
 }
 
 inline fun <reified T : Any> sqlObjectSelect(sql: String): SQLSelect<T?> {
-    return SQLSelect.query(T::class.java, sql)
+    return SQLSelect.query<T>(T::class.java, sql)
 }
 
 inline fun <reified T : Any> sqlObjectSelectOne(octx: ObjectContext, sql: String): T? {
-    return SQLSelect.query(T::class.java, sql).selectOne(octx)
+    return SQLSelect.query<T>(T::class.java, sql).selectOne(octx)
 }
 
 inline fun <reified T : Any> sqlObjectSelectFirst(octx: ObjectContext, sql: String): T? {
-    return SQLSelect.query(T::class.java, sql).selectFirst(octx)
+    return SQLSelect.query<T>(T::class.java, sql).selectFirst(octx)
 }
 
 fun sqlDataRowSelect(sql: String): SQLSelect<DataRow?> {
@@ -69,11 +69,11 @@ fun sqlDataRowSelectFirst(octx: ObjectContext, sql: String): DataRow? {
 }
 
 inline fun <reified T : Any> selectById(id: Any): SelectById<T?> {
-    return SelectById.query(T::class.java, id)
+    return SelectById.query<T>(T::class.java, id)
 }
 
 inline fun <reified T : Any> selectOneById(octx: ObjectContext, id: Any): T? {
-    return SelectById.query(T::class.java, id).selectOne(octx)
+    return SelectById.query<T>(T::class.java, id).selectOne(octx)
 }
 
 inline fun <reified T : Any> selectDataRowById(id: Any): SelectById<DataRow?> {
