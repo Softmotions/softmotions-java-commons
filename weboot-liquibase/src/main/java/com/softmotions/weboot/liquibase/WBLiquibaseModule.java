@@ -102,10 +102,12 @@ public class WBLiquibaseModule extends AbstractModule {
 
                 if (lbCfg.containsKey("update.contexts")) {
                     String contexts = lbCfg.getString("update.contexts");
-                    log.info("Executing Liquibase.Update, contexts={}", contexts);
+                    log.info("Executing Liquibase update, contexts={}", contexts);
                     liquibase.update(contexts);
+                } else if (lbCfg.containsKey("update")) {
+                    log.info("Executing Liquibase update");
+                    liquibase.update("");
                 }
-
             } catch (Exception e) {
                 log.error("Failed to initiate WBLiquibaseModule", e);
                 throw new RuntimeException(e);
