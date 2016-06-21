@@ -36,13 +36,14 @@ public class EmbeddedSolrServerProvider extends AbstractSolrServerProvider {
         super(cfg);
     }
 
+    @Override
     public SolrServer get() {
 
         String coreName = scfg.getString("name");
         if (StringUtils.isBlank(coreName)) {
             throw new RuntimeException("Missing required '@name' parameter for EmbeddedSolrServerProvider");
         }
-        String solrHome = cfg.substitutePath(scfg.getString("instance-dir"));
+        String solrHome = scfg.getString("instance-dir");
         if (StringUtils.isBlank(solrHome)) {
             throw new RuntimeException("Missing required 'instance-dir' parameter for EmbeddedSolrServerProvider");
         }

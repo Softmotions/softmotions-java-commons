@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<configuration>
+    <logging-ref>logging.xml</logging-ref>
+    <hello>kitty</hello>
+    <env1>{env:HOME}</env1>
+    <sys1>{sys:user.home}</sys1>
+    <cwd>{cwd}</cwd>
+    <home>{home}</home>
+    <tmp>{tmp}</tmp>
+    <zzz>{zzz}</zzz>
+</configuration>

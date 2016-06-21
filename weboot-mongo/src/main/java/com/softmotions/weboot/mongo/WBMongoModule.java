@@ -145,7 +145,7 @@ public class WBMongoModule extends AbstractModule {
                     throw new RuntimeException(msg, e);
                 }
             }
-            String propsFile = cfg.substitutePath(xcfg.getString("mongo.propsFile"));
+            String propsFile = xcfg.getString("mongo.propsFile");
             if (!StringUtils.isBlank(propsFile)) {
                 log.info("WBMongoModule loading the properties file: {}", propsFile);
                 try (FileInputStream is = new FileInputStream(propsFile)) {

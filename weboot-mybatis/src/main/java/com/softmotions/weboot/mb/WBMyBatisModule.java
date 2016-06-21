@@ -66,7 +66,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             }
         }
 
-        String propsFile = cfg.substitutePath(xcfg.getString("mybatis.propsFile"));
+        String propsFile = xcfg.getString("mybatis.propsFile");
         if (!StringUtils.isBlank(propsFile)) {
             log.info("MyBatis loading the properties file: {}", propsFile);
             try (FileInputStream is = new FileInputStream(propsFile)) {

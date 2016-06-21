@@ -34,18 +34,28 @@ public abstract class WBConfiguration extends ServicesConfiguration {
     }
 
     @Override
+    protected String substituteConfigKey(String key) {
+        String s = super.substituteConfigKey(key);
+        if (s == null) {
+            if ("webapp".equals(key)) {
+                s = getServletContext().getRealPath("/");
+                if (s != null) {
+                    if (s.endsWith("/")) {
+                        s = s.substring(0, s.length() - 1);
+                    }
+                }
+            }
+        }
+        return s;
+    }
+
+    @Override
     public String substitutePath(String path) {
         path = super.substitutePath(path);
         if (path == null) {
             return null;
         }
-        String webappPath = getServletContext().getRealPath("/");
-        if (webappPath != null) {
-            if (webappPath.endsWith("/")) {
-                webappPath = webappPath.substring(0, webappPath.length() - 1);
-            }
-            path = path.replace("{webapp}", webappPath);
-        }
+
         return path;
     }
 

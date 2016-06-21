@@ -59,7 +59,7 @@ public class WBDatasourceModule extends AbstractModule {
                 throw new RuntimeException(msg, e);
             }
         }
-        String propsFile = cfg.substitutePath(xcfg.getString("datasource.propertiesFile"));
+        String propsFile = xcfg.getString("datasource.propertiesFile");
         if (!StringUtils.isBlank(propsFile)) {
             log.info("WBDatasourceModule loading the properties file: {}", propsFile);
             try (FileInputStream is = new FileInputStream(propsFile)) {
