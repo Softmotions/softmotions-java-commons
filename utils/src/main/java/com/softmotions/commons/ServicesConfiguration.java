@@ -168,7 +168,7 @@ public class ServicesConfiguration implements Module {
             //init logging
             String lref = xcfg().getString("logging-ref");
             if (!StringUtils.isBlank(lref) && LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
-                String pdir = FilenameUtils.getPath(cfgUrl.getPath());
+                String pdir = FilenameUtils.getFullPath(cfgUrl.getPath());
                 String lcfg = pdir + lref;
                 LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
                 String protocol = cfgUrl.getProtocol();
