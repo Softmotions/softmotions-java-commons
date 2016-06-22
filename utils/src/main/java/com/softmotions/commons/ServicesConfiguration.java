@@ -224,20 +224,6 @@ public class ServicesConfiguration implements Module {
         return sessionTmpDir;
     }
 
-    public String substitutePath(String path) {
-        if (path == null) {
-            return null;
-        }
-        path = path.replace("{cwd}", System.getProperty("user.dir"))
-                   .replace("{home}", System.getProperty("user.home"))
-                   .replace("{tmp}", getTmpdir().getAbsolutePath());
-
-        if (path.contains("{newtmp}")) {
-            path = path.replace("{newtmp}", getSessionTmpdir().getAbsolutePath());
-        }
-        return path;
-    }
-
     public void dispose() {
         synchronized (ServicesConfiguration.class) {
             if (sessionTmpDir != null) {

@@ -50,16 +50,6 @@ public abstract class WBConfiguration extends ServicesConfiguration {
     }
 
     @Override
-    public String substitutePath(String path) {
-        path = super.substitutePath(path);
-        if (path == null) {
-            return null;
-        }
-
-        return path;
-    }
-
-    @Override
     @Dispose(order = 1)
     public void dispose() {
         super.dispose();
