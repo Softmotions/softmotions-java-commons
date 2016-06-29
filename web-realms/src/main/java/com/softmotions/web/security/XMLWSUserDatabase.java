@@ -569,9 +569,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
 
     /**
-     * !!!! todo
-     * <p/>
-     * It is workaround for commons-configuration2 bug: attribute values are not splitted!
+     * !!!! todo  It is workaround for commons-configuration2 bug: attribute values are not splitted!
      */
     private String[] attrArray(String av) {
         if (av == null) {

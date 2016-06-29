@@ -18,6 +18,7 @@ import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -233,6 +234,24 @@ public class ServicesConfiguration implements Module {
                     log.error("", e);
                 }
             }
+        }
+    }
+
+    /**
+     * !!!! todo  It is workaround for commons-configuration2 bug: attribute values are not splitted!
+     */
+    public String[] attrArray(String av) {
+        if (av == null) {
+            return ArrayUtils.EMPTY_STRING_ARRAY;
+        }
+        if (av.indexOf(',') != -1) {
+            String[] ret = StringUtils.split(av, ',');
+            for (int i = 0, l = ret.length; i < l; ++i) {
+                ret[i] = ret[i].trim();
+            }
+            return ret;
+        } else {
+            return new String[]{av};
         }
     }
 
