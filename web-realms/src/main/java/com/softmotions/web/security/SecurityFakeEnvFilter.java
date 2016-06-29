@@ -28,6 +28,7 @@ public class SecurityFakeEnvFilter implements Filter {
 
     private String username;
 
+    @Override
     public void init(FilterConfig conf) throws ServletException {
         String dbJndiName = conf.getInitParameter("dbJndiName");
         if (!StringUtils.isBlank(dbJndiName)) {
@@ -42,6 +43,7 @@ public class SecurityFakeEnvFilter implements Filter {
         username = conf.getInitParameter("username");
     }
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (db != null && username != null) {
             request = new SecurityHttpServletRequestWrapper(db, username, (HttpServletRequest) request);
@@ -49,6 +51,7 @@ public class SecurityFakeEnvFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    @Override
     public void destroy() {
         this.db = null;
         this.username = null;
@@ -67,14 +70,17 @@ public class SecurityFakeEnvFilter implements Filter {
             this.username = username;
         }
 
+        @Override
         public String getRemoteUser() {
             return username;
         }
 
+        @Override
         public Principal getUserPrincipal() {
             return db.findUser(username);
         }
 
+        @Override
         public boolean isUserInRole(String role) {
             WSUser wsuser = db.findUser(username);
             WSRole wsrole = db.findRole(role);

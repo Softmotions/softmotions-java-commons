@@ -1,24 +1,5 @@
 package com.softmotions.web.security;
 
-import com.softmotions.commons.bean.BeanException;
-import com.softmotions.commons.bean.BeanUtils;
-import com.softmotions.commons.cont.ArrayUtils;
-import com.softmotions.commons.io.Loader;
-
-import com.google.common.collect.AbstractIterator;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.SubnodeConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -29,13 +10,33 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.convert.LegacyListDelimiterHandler;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.tree.ImmutableNode;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.AbstractIterator;
+import com.softmotions.commons.bean.BeanException;
+import com.softmotions.commons.bean.BeanUtils;
+import com.softmotions.commons.cont.ArrayUtils;
+import com.softmotions.commons.io.Loader;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -46,6 +47,8 @@ public class XMLWSUserDatabase implements WSUserDatabase {
     private static final Logger log = LoggerFactory.getLogger(XMLWSUserDatabase.class);
 
     private final XMLConfiguration xcfg;
+
+    private final FileBasedConfigurationBuilder<XMLConfiguration> cfgBuilder;
 
     private final String databaseName;
 
@@ -61,26 +64,32 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
     private boolean canSave;
 
+    @Override
     public boolean isCanUsersWrite() {
         return canSave;
     }
 
+    @Override
     public boolean isCanUsersAccessWrite() {
         return canSave;
     }
 
+    @Override
     public boolean isCanGroupsWrite() {
         return canSave;
     }
 
+    @Override
     public boolean isCanRolesWrite() {
         return canSave;
     }
 
+    @Override
     public int getWriteMask() {
         return canSave ? USERS_WRITABLE | GROUPS_WRITABLE | ROLES_WRITABLE | USERS_ACCESS_WRITABLE : 0;
     }
 
+    @Override
     public String getDatabaseName() {
         return databaseName;
     }
@@ -92,13 +101,13 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         if (xmlLocationUrl == null) {
             throw new RuntimeException("Failed to find database xml file: " + xmlLocation);
         }
+        Parameters params = new Parameters();
+        cfgBuilder = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
+                .configure(params.xml()
+                                 .setListDelimiterHandler(new LegacyListDelimiterHandler(','))
+                                 .setURL(xmlLocationUrl)
+                                 .setValidating(false));
 
-        try {
-            xcfg = new XMLConfiguration(xmlLocationUrl);
-        } catch (ConfigurationException e) {
-            log.error("", e);
-            throw new RuntimeException(e);
-        }
         if (xmlLocationUrl.getProtocol() != null &&
             xmlLocationUrl.getProtocol().startsWith("file")) {
             try {
@@ -110,12 +119,17 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         } else {
             canSave = false;
         }
-
         if (canSave) {
-            xcfg.setAutoSave(autoSave);
+            cfgBuilder.setAutoSave(autoSave);
+        }
+        try {
+            xcfg = cfgBuilder.getConfiguration();
+        } catch (ConfigurationException e) {
+            log.error("", e);
+            throw new RuntimeException(e);
         }
         reload();
-        log.info("XMLWSUserDatabase allocated " + this);
+        log.info("XMLWSUserDatabase allocated {}", this);
     }
 
 
@@ -152,30 +166,35 @@ public class XMLWSUserDatabase implements WSUserDatabase {
     }
 
 
+    @Override
     public Iterator<WSGroup> getGroups() {
         synchronized (lock) {
             return IteratorUtils.arrayIterator(groups.values().toArray(new WSGroup[groups.size()]));
         }
     }
 
+    @Override
     public Iterator<WSRole> getRoles() {
         synchronized (lock) {
             return IteratorUtils.arrayIterator(roles.values().toArray(new WSRole[roles.size()]));
         }
     }
 
+    @Override
     public Iterator<WSUser> getUsers() {
         synchronized (lock) {
             return IteratorUtils.arrayIterator(users.values().toArray(new WSUser[users.size()]));
         }
     }
 
+    @Override
     public int getUsersCount() {
         synchronized (lock) {
             return users.size();
         }
     }
 
+    @Override
     public int getUsersCount(String query) {
         if (query != null) {
             query = query.trim().toLowerCase();
@@ -191,6 +210,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return c;
     }
 
+    @Override
     public int getActiveUsersCount(String query) {
         if (query != null) {
             query = query.trim().toLowerCase();
@@ -206,6 +226,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return c;
     }
 
+    @Override
     public Iterator<WSUser> getUsers(String query,
                                      final String orderProperty,
                                      final boolean desc,
@@ -219,12 +240,14 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return getUsersInternal(uarr, query, orderProperty, desc, skip, limit);
     }
 
+    @Override
     public Iterator<WSUser> getActiveUsers(String query, String orderProperty, boolean desc, int skip, int limit) {
         WSUser[] uarr;
         synchronized (lock) {
             Collection<WSUser> ucol = CollectionUtils.select(users.values(), new Predicate() {
+                @Override
                 public boolean evaluate(Object u) {
-                    return u instanceof WSUser && ((WSUser)u).getRoles().hasNext() || ((WSUser)u).getGroups().hasNext();
+                    return u instanceof WSUser && ((WSUser) u).getRoles().hasNext() || ((WSUser) u).getGroups().hasNext();
                 }
             });
 
@@ -244,25 +267,23 @@ public class XMLWSUserDatabase implements WSUserDatabase {
                 final Collator coll = Collator.getInstance();
                 final Class pclazz = BeanUtils.getPropertyType(WSUser.class, orderProperty, false);
                 final boolean comparable = Comparable.class.isAssignableFrom(pclazz);
-                Arrays.sort(uarr, new Comparator<WSUser>() {
-                    public int compare(WSUser u1, WSUser u2) {
-                        int res = 0;
-                        try {
-                            Object v1 = BeanUtils.getProperty(u1, orderProperty);
-                            Object v2 = BeanUtils.getProperty(u2, orderProperty);
-                            if (comparable) {
-                                res = ObjectUtils.compare((Comparable) v1, (Comparable) v2);
-                            } else {
-                                res = coll.compare(String.valueOf(v1), String.valueOf(v2));
-                            }
-                        } catch (BeanException e) {
-                            log.error("", e);
+                Arrays.sort(uarr, (u1, u2) -> {
+                    int res = 0;
+                    try {
+                        Object v1 = BeanUtils.getProperty(u1, orderProperty);
+                        Object v2 = BeanUtils.getProperty(u2, orderProperty);
+                        if (comparable) {
+                            res = ObjectUtils.compare((Comparable) v1, (Comparable) v2);
+                        } else {
+                            res = coll.compare(String.valueOf(v1), String.valueOf(v2));
                         }
-                        if (desc) {
-                            res *= -1;
-                        }
-                        return res;
+                    } catch (BeanException e) {
+                        log.error("", e);
                     }
+                    if (desc) {
+                        res *= -1;
+                    }
+                    return res;
                 });
             } catch (BeanException e) {
                 log.error("", e);
@@ -300,6 +321,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             this.users = users;
         }
 
+        @Override
         protected WSUser computeNext() {
             WSUser user = null;
             while (user == null) {
@@ -316,24 +338,28 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
     }
 
+    @Override
     public WSGroup findGroup(String groupname) {
         synchronized (lock) {
             return groups.get(groupname);
         }
     }
 
+    @Override
     public WSRole findRole(String rolename) {
         synchronized (lock) {
             return roles.get(rolename);
         }
     }
 
+    @Override
     public WSUser findUser(String username) {
         synchronized (lock) {
             return users.get(username);
         }
     }
 
+    @Override
     public WSGroup createGroup(String groupname, String description) {
         WSGroup group;
         synchronized (lock) {
@@ -345,13 +371,14 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             if (description != null) {
                 xcfg.addProperty("group[@description]", description);
             }
-            SubnodeConfiguration cfg = xcfg.configurationAt("group(" + groups.size() + ")", true);
+            HierarchicalConfiguration<ImmutableNode> cfg = xcfg.configurationAt("group(" + groups.size() + ")", true);
             group = new WSGroupImpl(cfg);
             groups.put(groupname, group);
         }
         return group;
     }
 
+    @Override
     public WSRole createRole(String rolename, String description) {
         WSRole role;
         synchronized (lock) {
@@ -363,13 +390,14 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             if (description != null) {
                 xcfg.addProperty("role[@description]", description);
             }
-            SubnodeConfiguration cfg = xcfg.configurationAt("role(" + roles.size() + ")", true);
+            HierarchicalConfiguration<ImmutableNode> cfg = xcfg.configurationAt("role(" + roles.size() + ")", true);
             role = new WSRoleImpl(cfg);
             roles.put(rolename, role);
         }
         return role;
     }
 
+    @Override
     public WSUser createUser(String username, String password, String fullName) {
         WSUser user;
         synchronized (lock) {
@@ -384,16 +412,17 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             if (fullName != null) {
                 xcfg.addProperty("user[@fullName]", fullName);
             }
-            SubnodeConfiguration cfg = xcfg.configurationAt("user(" + users.size() + ")", true);
+            HierarchicalConfiguration<ImmutableNode> cfg = xcfg.configurationAt("user(" + users.size() + ")", true);
             user = new WSUserImpl(cfg);
             users.put(username, user);
         }
         return user;
     }
 
+    @Override
     public void removeGroup(WSGroup group) {
         synchronized (lock) {
-            List<HierarchicalConfiguration> xgroups = xcfg.configurationsAt("group");
+            List<HierarchicalConfiguration<ImmutableNode>> xgroups = xcfg.configurationsAt("group");
             for (int i = 0, l = xgroups.size(); i < l; ++i) {
                 HierarchicalConfiguration hc = xgroups.get(i);
                 String name = hc.getString("[@name]");
@@ -401,6 +430,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
                     for (final WSUser u : users.values()) {
                         u.removeGroup(group);
                     }
+                    xcfg.clearTree("group(" + i + ")");
                     hc.clear();
                     groups.remove(group.getName());
                     break;
@@ -409,9 +439,10 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
     }
 
+    @Override
     public void removeRole(WSRole role) {
         synchronized (lock) {
-            List<HierarchicalConfiguration> xroles = xcfg.configurationsAt("role");
+            List<HierarchicalConfiguration<ImmutableNode>> xroles = xcfg.configurationsAt("role");
             for (int i = 0, l = xroles.size(); i < l; ++i) {
                 HierarchicalConfiguration hc = xroles.get(i);
                 String name = hc.getString("[@name]");
@@ -422,6 +453,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
                     for (final WSUser u : users.values()) {
                         u.removeRole(role);
                     }
+                    xcfg.clearTree("role(" + i + ")");
                     hc.clear();
                     roles.remove(role.getName());
                     break;
@@ -430,13 +462,15 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
     }
 
+    @Override
     public void removeUser(WSUser user) {
         synchronized (lock) {
-            List<HierarchicalConfiguration> xusers = xcfg.configurationsAt("user");
+            List<HierarchicalConfiguration<ImmutableNode>> xusers = xcfg.configurationsAt("user");
             for (int i = 0, l = xusers.size(); i < l; ++i) {
                 HierarchicalConfiguration hc = xusers.get(i);
                 String name = hc.getString("[@name]");
                 if (user.getName().equals(name)) {
+                    xcfg.clearTree("user(" + i + ")");
                     hc.clear();
                     users.remove(user.getName());
                     break;
@@ -445,11 +479,12 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
     }
 
+    @Override
     public void close() throws IOException {
         synchronized (lock) {
-            if (xcfg.isAutoSave()) {
+            if (cfgBuilder.isAutoSave()) {
                 try {
-                    xcfg.save();
+                    cfgBuilder.save();
                 } catch (ConfigurationException e) {
                     log.error("", e);
                 }
@@ -459,13 +494,13 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
     public void save() throws ConfigurationException {
         synchronized (lock) {
-            xcfg.save();
+            cfgBuilder.save();
         }
     }
 
     public void save(Writer w) throws ConfigurationException {
         synchronized (lock) {
-            xcfg.save(w);
+            cfgBuilder.getFileHandler().save(w);
         }
     }
 
@@ -533,6 +568,27 @@ public class XMLWSUserDatabase implements WSUserDatabase {
     }
 
 
+    /**
+     * !!!! todo
+     * <p/>
+     * It is workaround for commons-configuration2 bug: attribute values are not splitted!
+     */
+    private String[] attrArray(String av) {
+        if (av == null) {
+            return org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
+        }
+        if (av.indexOf(',') != -1) {
+            String[] ret = StringUtils.split(av, ',');
+            for (int i = 0, l = ret.length; i < l; ++i) {
+                ret[i] = ret[i].trim();
+            }
+            return ret;
+        } else {
+            return new String[]{av};
+        }
+    }
+
+
     private final class WSUserImpl extends AbstractWSUser {
 
         private final HierarchicalConfiguration cfg;
@@ -545,14 +601,16 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             super(cfg.getString("[@name]"), cfg.getString("[@fullName]"), cfg.getString("[@password]"));
             this.cfg = cfg;
             this.email = cfg.getString("[@email]");
-            this.roleNames = cfg.getStringArray("[@roles]");
-            this.groupNames = cfg.getStringArray("[@groups]");
+            this.roleNames = attrArray(cfg.getString("[@roles]"));
+            this.groupNames = attrArray(cfg.getString("[@groups]"));
         }
 
+        @Override
         public WSUserDatabase getUserDatabase() {
             return XMLWSUserDatabase.this;
         }
 
+        @Override
         public Iterator<WSRole> getRoles() {
             synchronized (lock) {
                 if (groupNames.length == 0) {
@@ -568,12 +626,14 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             }
         }
 
+        @Override
         public Iterator<WSGroup> getGroups() {
             synchronized (lock) {
                 return projectGroups(groupNames).iterator();
             }
         }
 
+        @Override
         public boolean isInGroup(WSGroup group) {
             synchronized (lock) {
                 String n = group.getName();
@@ -587,6 +647,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
 
 
+        @Override
         public boolean isHasAnyRole(String... rlist) {
             synchronized (lock) {
                 for (final String r : roleNames) {
@@ -609,6 +670,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             return false;
         }
 
+        @Override
         public boolean isInRole(WSRole role) {
             synchronized (lock) {
                 String n = role.getName();
@@ -631,24 +693,27 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             return false;
         }
 
+        @Override
         public void addGroup(WSGroup group) {
             synchronized (lock) {
                 if (ArrayUtils.indexOf(roleNames, group.getName()) == -1) {
                     cfg.addProperty("[@groups]", group.getName());
-                    groupNames = cfg.getStringArray("[@groups]");
+                    groupNames = attrArray(cfg.getString("[@groups]"));
                 }
             }
         }
 
+        @Override
         public void addRole(WSRole role) {
             synchronized (lock) {
                 if (ArrayUtils.indexOf(roleNames, role.getName()) == -1) {
                     cfg.addProperty("[@roles]", role.getName());
-                    roleNames = cfg.getStringArray("[@roles]");
+                    roleNames = attrArray(cfg.getString("[@roles]"));
                 }
             }
         }
 
+        @Override
         public void removeGroup(WSGroup group) {
             synchronized (lock) {
                 int ind = ArrayUtils.indexOf(groupNames, group.getName());
@@ -667,6 +732,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             }
         }
 
+        @Override
         public void removeRole(WSRole role) {
             synchronized (lock) {
                 int ind = ArrayUtils.indexOf(roleNames, role.getName());
@@ -685,12 +751,14 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             }
         }
 
+        @Override
         public void removeGroups() {
             synchronized (lock) {
                 cfg.clearProperty("[@groups]");
             }
         }
 
+        @Override
         public void removeRoles() {
             synchronized (lock) {
                 cfg.clearProperty("[@roles]");
@@ -725,6 +793,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             this.cfg = cfg;
         }
 
+        @Override
         public WSUserDatabase getUserDatabase() {
             return XMLWSUserDatabase.this;
         }
@@ -740,9 +809,10 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         private WSGroupImpl(HierarchicalConfiguration cfg) {
             super(cfg.getString("[@name]"), cfg.getString("[@description]"));
             this.cfg = cfg;
-            this.roleNames = cfg.getStringArray("[@roles]");
+            this.roleNames = attrArray(cfg.getString("[@roles]"));
         }
 
+        @Override
         public boolean isInRole(WSRole role) {
             synchronized (lock) {
                 String rname = role.getName();
@@ -755,31 +825,36 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             }
         }
 
+        @Override
         public Iterator<WSRole> getRoles() {
             synchronized (lock) {
                 return projectRoles(roleNames).iterator();
             }
         }
 
+        @Override
         public WSUserDatabase getUserDatabase() {
             return XMLWSUserDatabase.this;
         }
 
+        @Override
         public Iterator<WSUser> getUsers() {
             synchronized (lock) {
                 return projectUsers(this).iterator();
             }
         }
 
+        @Override
         public void addRole(WSRole role) {
             synchronized (lock) {
                 if (ArrayUtils.indexOf(roleNames, role.getName()) == -1) {
                     cfg.addProperty("[@roles]", role.getName());
-                    roleNames = cfg.getStringArray("[@roles]");
+                    roleNames = attrArray(cfg.getString("[@roles]"));
                 }
             }
         }
 
+        @Override
         public void removeRole(WSRole role) {
             synchronized (lock) {
                 int ind = ArrayUtils.indexOf(roleNames, role.getName());
@@ -798,6 +873,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             }
         }
 
+        @Override
         public void removeRoles() {
             synchronized (lock) {
                 cfg.clearProperty("[@roles]");

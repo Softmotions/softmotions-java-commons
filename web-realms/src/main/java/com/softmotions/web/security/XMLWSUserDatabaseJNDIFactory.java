@@ -24,6 +24,7 @@ public class XMLWSUserDatabaseJNDIFactory extends AbstractWSUserDatabaseJNDIFact
               null);
     }
 
+    @Override
     public Object getObjectInstance(Object obj, Name name,
                                     Context nameCtx, Hashtable<?, ?> environment) throws Exception {
         if ((obj == null) || !(obj instanceof Reference)) {
@@ -52,8 +53,8 @@ public class XMLWSUserDatabaseJNDIFactory extends AbstractWSUserDatabaseJNDIFact
             if (config == null) {
                 throw new RuntimeException("Missing required 'config' parameter");
             }
-            log.info("Using database configuration: " + config);
-            log.info("autoSave: " + autoSave);
+            log.info("Using database configuration: {}", config);
+            log.info("autoSave: {}", autoSave);
             db = createWrapper(new XMLWSUserDatabase(name.toString(), config, autoSave));
             DB_CACHE.put(name, (WSUserDatabaseWrapper) db);
         }

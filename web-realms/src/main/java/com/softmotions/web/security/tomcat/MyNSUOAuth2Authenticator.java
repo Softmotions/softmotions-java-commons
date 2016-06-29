@@ -1,8 +1,28 @@
 package com.softmotions.web.security.tomcat;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.catalina.Realm;
+import org.apache.catalina.Session;
+import org.apache.catalina.authenticator.Constants;
+import org.apache.catalina.authenticator.FormAuthenticator;
+import org.apache.catalina.connector.Request;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.descriptor.web.LoginConfig;
+
 import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
@@ -13,24 +33,6 @@ import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
-
-import org.apache.catalina.Realm;
-import org.apache.catalina.Session;
-import org.apache.catalina.authenticator.Constants;
-import org.apache.catalina.authenticator.FormAuthenticator;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.deploy.LoginConfig;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
@@ -190,7 +192,7 @@ public class MyNSUOAuth2Authenticator extends FormAuthenticator {
         TokenResponse tokenResponse = TokenResponse.parse(tokenRequest.toHTTPRequest().send());
 
         if (tokenResponse instanceof TokenErrorResponse) {
-            throw new GeneralException(((TokenErrorResponse) tokenResponse).getErrorObject().getDescription());
+            throw new GeneralException(((ErrorResponse) tokenResponse).getErrorObject().getDescription());
         } else if (!(tokenResponse instanceof AccessTokenResponse)) {
             throw new RuntimeException("Unexpected response from IP token endpoint");
         }
@@ -199,7 +201,7 @@ public class MyNSUOAuth2Authenticator extends FormAuthenticator {
 
         Map<String, String> params = new HashMap<>();
         params.put("client_id", clientId);
-        params.put("access_token", accessTokenResponse.getAccessToken().getValue());
+        params.put("access_token", accessTokenResponse.getTokens().getAccessToken().getValue());
 
         HTTPRequest r = new HTTPRequest(HTTPRequest.Method.GET, new URL(userinfoEndpoint));
         r.setQuery(URLUtils.serializeParameters(params));
@@ -237,7 +239,7 @@ public class MyNSUOAuth2Authenticator extends FormAuthenticator {
         register(request,
                  response,
                  principal,
-                 Constants.FORM_METHOD,
+                 HttpServletRequest.FORM_AUTH,
                  (String) session.getNote(Constants.SESS_USERNAME_NOTE),
                  (String) session.getNote(Constants.SESS_PASSWORD_NOTE));
 

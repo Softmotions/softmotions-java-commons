@@ -29,42 +29,52 @@ public abstract class AbstractWSUser implements WSUser {
     protected String email;
 
 
+    @Override
     public boolean implies(Subject subject) {
         return (subject != null && subject.getPrincipals().contains(this));
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
 
+    @Override
     public void setPassword(String password) {
         this.password = password;
     }
 
+    @Override
     public String getFullName() {
         return fullName;
     }
 
+    @Override
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
 
+    @Override
     public String getEmail() {
         return email;
     }
 
+    @Override
     public void setEmail(String email) {
         this.email = email;
     }
 
+    @Override
     public String[] getRoleNames() {
         List<String> rnames = new ArrayList<>();
         Iterator<WSRole> roles = getRoles();

@@ -104,7 +104,7 @@ public class XMLUserDatabaseTest {
         db.save(sw);
 
         String ncfg = sw.toString();
-        log.info("Resulted configuration: \n" + ncfg);
+        log.info("Resulted configuration: \n{}", ncfg);
 
         assertFalse(ncfg.contains("role5"));
         assertTrue(ncfg.contains("role6"));

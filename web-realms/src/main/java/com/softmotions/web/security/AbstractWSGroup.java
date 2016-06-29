@@ -22,22 +22,27 @@ public abstract class AbstractWSGroup implements WSGroup {
         this.description = description;
     }
 
+    @Override
     public boolean implies(Subject subject) {
         return (subject != null && subject.getPrincipals().contains(this));
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }

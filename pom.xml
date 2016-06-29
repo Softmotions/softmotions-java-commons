@@ -265,7 +265,7 @@
         <module>utils-ujac</module>
         <module>web</module>
         <module>weboot</module>
-        <!--<module>web-realms</module>-->
+        <module>web-realms</module>
         <module>weboot-solr</module>
         <module>weboot-mybatis</module>
         <module>weboot-cayenne</module>
