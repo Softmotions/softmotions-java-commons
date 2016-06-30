@@ -1,12 +1,13 @@
 package com.softmotions.web.security;
 
-import org.apache.commons.collections.IteratorUtils;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.StringWriter;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -18,6 +19,19 @@ public class XMLUserDatabaseTest {
 
     private static final Logger log = LoggerFactory.getLogger(XMLUserDatabaseTest.class);
 
+
+    public static <E> List<E> toList(final Iterator<? extends E> iterator) {
+        if (iterator == null) {
+            throw new NullPointerException("Iterator must not be null");
+        }
+        final List<E> list = new ArrayList<E>(10);
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list;
+    }
+
+
     @Test
     public void testXMLUserdatabase() throws Exception {
         XMLWSUserDatabase db =
@@ -25,9 +39,9 @@ public class XMLUserDatabaseTest {
                                       "com/softmotions/web/security/test-users-db.xml",
                                       false);
 
-        List<WSGroup> groups = IteratorUtils.toList(db.getGroups());
-        List<WSRole> roles = IteratorUtils.toList(db.getRoles());
-        List<WSUser> users = IteratorUtils.toList(db.getUsers());
+        List<WSGroup> groups = toList(db.getGroups());
+        List<WSRole> roles = toList(db.getRoles());
+        List<WSUser> users = toList(db.getUsers());
 
         assertEquals(4, roles.size());
         assertEquals(3, groups.size());
@@ -51,7 +65,7 @@ public class XMLUserDatabaseTest {
         assertEquals("user1", user.getName());
         assertNull(user.getFullName());
 
-        roles = IteratorUtils.toList(user.getRoles());
+        roles = toList(user.getRoles());
         assertEquals(3, roles.size());
         for (WSRole role : roles) {
             assertTrue("role1".equals(role.getName()) ||
@@ -66,21 +80,21 @@ public class XMLUserDatabaseTest {
         }
 
         WSGroup group = db.findGroup("group1");
-        roles = IteratorUtils.toList(group.getRoles());
+        roles = toList(group.getRoles());
         assertEquals(3, roles.size());
         for (final WSRole role : roles) {
             assertTrue(group.isInRole(role));
         }
 
         group = db.findGroup("group2");
-        roles = IteratorUtils.toList(group.getRoles());
+        roles = toList(group.getRoles());
         assertEquals(1, roles.size());
         for (final WSRole role : roles) {
             assertTrue(group.isInRole(role));
         }
 
         WSRole role = db.createRole("role5", null);
-        roles = IteratorUtils.toList(db.getRoles());
+        roles = toList(db.getRoles());
         assertEquals(5, roles.size());
 
         user = db.findUser("user2");

@@ -10,6 +10,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,21 +23,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 @Provider
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED})
-public class JsonNodeReader {
+public class JsonNodeReader implements MessageBodyReader {
 
     @Inject
     private ObjectMapper mapper;
 
-    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        //noinspection ObjectEquality
+    @Override
+    public boolean isReadable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return (type == JsonNode.class || type == ArrayNode.class || type == ObjectNode.class);
     }
 
-    public JsonNode readFrom(Class<JsonNode> type, Type genericType,
-                             Annotation[] annotations,
-                             MediaType mediaType,
-                             MultivaluedMap<String, String> httpHeaders,
-                             InputStream entityStream) throws IOException, WebApplicationException {
+    @Override
+    public Object readFrom(Class type, Type genericType, Annotation[] annotations,
+                           MediaType mediaType,
+                           MultivaluedMap httpHeaders,
+                           InputStream entityStream) throws IOException, WebApplicationException {
         JsonNode res = mapper.readTree(entityStream);
         //noinspection ObjectEquality
         if (type != JsonNode.class && !type.isAssignableFrom(res.getClass())) {

@@ -1,9 +1,7 @@
 package com.softmotions.web.security;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.IOException;
+import java.security.Principal;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.Filter;
@@ -14,8 +12,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.io.IOException;
-import java.security.Principal;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -31,7 +30,7 @@ public class SecurityFakeEnvFilter implements Filter {
     @Override
     public void init(FilterConfig conf) throws ServletException {
         String dbJndiName = conf.getInitParameter("dbJndiName");
-        if (!StringUtils.isBlank(dbJndiName)) {
+        if (dbJndiName == null || dbJndiName.trim().isEmpty()) {
             try {
                 InitialContext ctx = new InitialContext();
                 db = (WSUserDatabase) ctx.lookup(dbJndiName);
