@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,9 +96,12 @@ public class WBLiquibaseModule extends AbstractModule {
                     }
                 }
 
-                if (lbCfg.containsKey("update.dropAll")) {
-                    log.info("Executing Liqubase.DropAll");
-                    liquibase.dropAll();
+                if (lbCfg.containsKey("update.dropAll") || lbCfg.containsKey("update.dropAll.activate")) {
+                    boolean activate = BooleanUtils.toBoolean(lbCfg.getString("update.dropAll.activate", "true"));
+                    if (activate) {
+                        log.info("Executing Liqubase.DropAll");
+                        liquibase.dropAll();
+                    }
                 }
 
                 if (lbCfg.containsKey("update.contexts")) {
