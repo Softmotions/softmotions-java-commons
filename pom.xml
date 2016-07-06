@@ -285,6 +285,7 @@
         <module>weboot-templates</module>
         <module>weboot-validators</module>
         <module>weboot-jaxrs</module>
+        <module>weboot-testing</module>
     </modules>
 
 </project>
