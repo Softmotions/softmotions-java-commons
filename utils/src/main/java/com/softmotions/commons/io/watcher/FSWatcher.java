@@ -84,12 +84,14 @@ public class FSWatcher implements Closeable, Runnable, UserDataStore {
         }
     }
 
+    @Override
     public <T> T getUserData() {
         synchronized (lock) {
             return (T) userData;
         }
     }
 
+    @Override
     public <T> void setUserData(T data) {
         synchronized (lock) {
             userData = data;
@@ -111,11 +113,13 @@ public class FSWatcher implements Closeable, Runnable, UserDataStore {
     public void register(Path path, final boolean recursive) throws IOException {
         if (recursive) {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     register(dir, new WatchSlot(true));
                     return FileVisitResult.CONTINUE;
                 }
 
+                @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     fireRegister(new FSWatcherRegisterEvent(FSWatcher.this, file));
                     return FileVisitResult.CONTINUE;
@@ -151,6 +155,7 @@ public class FSWatcher implements Closeable, Runnable, UserDataStore {
         WatchSlot slot = unregisterFlat(path);
         if (slot != null && slot.recursive) {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                     unregisterFlat(dir);
                     return FileVisitResult.CONTINUE;
@@ -192,6 +197,7 @@ public class FSWatcher implements Closeable, Runnable, UserDataStore {
         }
     }
 
+    @Override
     public void close() throws IOException {
         try {
             synchronized (lock) {
@@ -289,6 +295,7 @@ public class FSWatcher implements Closeable, Runnable, UserDataStore {
     }
 
 
+    @Override
     public void run() {
         log.info("Starting watcher thread: " + Thread.currentThread().getName());
         while (!Thread.currentThread().isInterrupted()) {

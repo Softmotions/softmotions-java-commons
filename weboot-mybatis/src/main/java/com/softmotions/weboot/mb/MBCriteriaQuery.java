@@ -63,6 +63,7 @@ public class MBCriteriaQuery<T extends MBCriteriaQuery> extends Flat3Map {
         }
     }
 
+    @Override
     public void clear() {
         finished = false;
         columnPrefix = null;

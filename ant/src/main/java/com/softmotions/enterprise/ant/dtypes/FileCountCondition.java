@@ -36,6 +36,7 @@ public class FileCountCondition extends DataType implements Condition {
         this.fileSet = fileSet;
     }
 
+    @Override
     public boolean eval() throws BuildException {
         if (fileSet == null) {
             throw new BuildException("Missing required nested <fileset> element");

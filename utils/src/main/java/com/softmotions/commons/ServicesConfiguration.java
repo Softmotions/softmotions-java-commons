@@ -190,9 +190,27 @@ public class ServicesConfiguration implements Module {
             }
             log.info("Using TMP dir: {}", tmpdir.getAbsolutePath());
             DirUtils.ensureDir(tmpdir, true);
+
+            if (xcfg().getBoolean("newtmp-cleanup-on-exit", true)) {
+                Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        File stmp = sessionTmpDir;
+                        if (stmp != null && stmp.isDirectory()) {
+                            log.info("Delete newtmp dir: {}", stmp.getAbsolutePath());
+                            try {
+                                FileUtils.deleteDirectory(stmp);
+                            } catch (IOException e) {
+                                log.error("", e);
+                            }
+                        }
+                    }
+                }));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public HierarchicalConfiguration<ImmutableNode> xcfg() {

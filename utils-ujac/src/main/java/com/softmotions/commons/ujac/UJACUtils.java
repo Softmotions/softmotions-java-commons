@@ -163,6 +163,7 @@ public class UJACUtils {
      */
     static class SeparateLettersExpressionOperation implements ExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expressionTuple, ExpressionContext expressionContext) throws ExpressionException {
             Operand obj = expressionTuple.getObject();
             if (obj == null) {
@@ -182,10 +183,12 @@ public class UJACUtils {
             return sb.toString();
         }
 
+        @Override
         public String getDescription() {
             return "Separate letters in strings";
         }
 
+        @Override
         public String getExamples() {
             return null;
         }
@@ -193,6 +196,7 @@ public class UJACUtils {
 
     static class EscapeXMLOperation implements ExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expressionTuple, ExpressionContext expressionContext) throws ExpressionException {
             Operand operand = expressionTuple.getObject();
             if (operand == null || operand.getValue() == null) {
@@ -202,10 +206,12 @@ public class UJACUtils {
             return EscapeHelper.escapeXML(val);
         }
 
+        @Override
         public String getDescription() {
             return "XML Escape operation";
         }
 
+        @Override
         public String getExamples() {
             return "";
         }
@@ -219,6 +225,7 @@ public class UJACUtils {
             this.interpreter = interpreter;
         }
 
+        @Override
         public Object evaluate(ExpressionTuple expr, ExpressionContext ctx) throws ExpressionException {
 
             Operand operand = expr.getOperand();
@@ -249,6 +256,7 @@ public class UJACUtils {
 
     static class RoundDivOperation extends BaseExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expr,
                                ExpressionContext ctx) throws ExpressionException {
 
@@ -270,6 +278,7 @@ public class UJACUtils {
 
     static class PrintfFormatExpressionOperation implements ExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expressionTuple, ExpressionContext expressionContext) throws ExpressionException {
             Operand obj = expressionTuple.getObject();
             if (obj == null) {
@@ -279,10 +288,12 @@ public class UJACUtils {
             return String.format(format, obj);
         }
 
+        @Override
         public String getDescription() {
             return "Formatting like 'String.format(...)' implementation";
         }
 
+        @Override
         public String getExamples() {
             return null;
         }
@@ -297,6 +308,7 @@ public class UJACUtils {
      */
     static class NZExpressionOperation implements ExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expressionTuple, ExpressionContext expressionContext) throws ExpressionException {
             Operand obj = expressionTuple.getObject();
 
@@ -315,10 +327,12 @@ public class UJACUtils {
             return value;
         }
 
+        @Override
         public String getDescription() {
             return "Not Zero (nz) Operation";
         }
 
+        @Override
         public String getExamples() {
             return null;
         }
@@ -331,6 +345,7 @@ public class UJACUtils {
      */
     static class NNExpressionOperation implements ExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expr, ExpressionContext ctx) throws ExpressionException {
 
             Operand obj = expr.getObject();
@@ -341,10 +356,12 @@ public class UJACUtils {
             }
         }
 
+        @Override
         public String getDescription() {
             return "Not Null (nn) Operation";
         }
 
+        @Override
         public String getExamples() {
             return null;
         }
@@ -357,6 +374,7 @@ public class UJACUtils {
      */
     static class CapitalizeExpressionOperation implements ExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expr, ExpressionContext expressionContext) throws ExpressionException {
             Operand obj = expr.getObject();
             if (obj == null) {
@@ -373,10 +391,12 @@ public class UJACUtils {
             return val;
         }
 
+        @Override
         public String getDescription() {
             return "String capitalization (capitalize) operation";
         }
 
+        @Override
         public String getExamples() {
             return null;
         }
@@ -385,6 +405,7 @@ public class UJACUtils {
 
     static class DecapitalizeExpressionOperation implements ExpressionOperation {
 
+        @Override
         public Object evaluate(ExpressionTuple expr, ExpressionContext expressionContext) throws ExpressionException {
             Operand obj = expr.getObject();
             if (obj == null) {
@@ -400,10 +421,12 @@ public class UJACUtils {
             return val;
         }
 
+        @Override
         public String getDescription() {
             return "String decapitalization (decapitalize) operation";
         }
 
+        @Override
         public String getExamples() {
             return null;
         }

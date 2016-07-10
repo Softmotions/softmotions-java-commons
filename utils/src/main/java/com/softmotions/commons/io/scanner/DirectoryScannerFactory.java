@@ -200,14 +200,17 @@ public class DirectoryScannerFactory {
         }
 
 
+        @Override
         public <T> T getUserData() {
             return (T) userData;
         }
 
+        @Override
         public <T> void setUserData(T data) {
             userData = data;
         }
 
+        @Override
         public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) throws IOException {
             path = basedir.relativize(path);
             String spath = path.toString();
@@ -218,6 +221,7 @@ public class DirectoryScannerFactory {
             }
         }
 
+        @Override
         public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
             path = basedir.relativize(path);
             if (accept(path, attrs)) {
@@ -226,11 +230,13 @@ public class DirectoryScannerFactory {
             return FileVisitResult.CONTINUE;
         }
 
+        @Override
         public FileVisitResult visitFileFailed(Path path, IOException exc) throws IOException {
             visitor.error(path, exc);
             return FileVisitResult.CONTINUE;
         }
 
+        @Override
         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
             return FileVisitResult.CONTINUE;
         }
@@ -243,32 +249,38 @@ public class DirectoryScannerFactory {
             return matcher.voteAll(segments, (attrs != null && attrs.isDirectory()));
         }
 
+        @Override
         public void init(FSWatcher w) {
         }
 
 
+        @Override
         public void handlePollTimeout(FSWatcher watcher) throws Exception {
             handler.handlePollTimeout(watcher);
         }
 
+        @Override
         public void handleRegisterEvent(FSWatcherRegisterEvent e) throws Exception {
             if (!Files.isDirectory(e.getFullPath()) && acceptWatcherEvent(e.getFullPath())) {
                 handler.handleRegisterEvent(e);
             }
         }
 
+        @Override
         public void handleCreateEvent(FSWatcherCreateEvent e) throws Exception {
             if (!Files.isDirectory(e.getFullPath()) && acceptWatcherEvent(e.getFullPath())) {
                 handler.handleCreateEvent(e);
             }
         }
 
+        @Override
         public void handleDeleteEvent(FSWatcherDeleteEvent e) throws Exception {
             if (acceptWatcherEvent(e.getFullPath())) {
                 handler.handleDeleteEvent(e);
             }
         }
 
+        @Override
         public void handleModifyEvent(FSWatcherModifyEvent e) throws Exception {
             if (!Files.isDirectory(e.getFullPath()) && acceptWatcherEvent(e.getFullPath())) {
                 handler.handleModifyEvent(e);
@@ -281,6 +293,7 @@ public class DirectoryScannerFactory {
             return !spath.isEmpty() && accept(path, null);
         }
 
+        @Override
         public void close() throws IOException {
             if (watcher != null) {
                 watcher.close();
@@ -288,11 +301,13 @@ public class DirectoryScannerFactory {
             visitor = null;
         }
 
+        @Override
         public FSWatcher activateFileSystemWatcher(FSWatcherEventHandler handler) throws IOException {
             return activateFileSystemWatcher(handler, 0, null);
         }
 
 
+        @Override
         public FSWatcher activateFileSystemWatcher(FSWatcherEventHandler handler,
                                                    long pollTimeoutMills,
                                                    Object userData) throws IOException {
@@ -305,10 +320,12 @@ public class DirectoryScannerFactory {
             return watcher;
         }
 
+        @Override
         public Path getBasedir() {
             return basedir;
         }
 
+        @Override
         public void scan(DirectoryScannerVisitor visitor) throws IOException {
             this.visitor = visitor;
             Files.walkFileTree(basedir, this);

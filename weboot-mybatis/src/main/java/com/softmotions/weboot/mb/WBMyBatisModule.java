@@ -111,6 +111,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             this.sessionFactoryProvider = sessionFactoryProvider;
         }
 
+        @Override
         public DataSource get() {
             SqlSessionFactory sf = sessionFactoryProvider.get();
             Environment env = sf.getConfiguration().getEnvironment();

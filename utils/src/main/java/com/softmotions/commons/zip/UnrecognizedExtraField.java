@@ -66,6 +66,7 @@ public class UnrecognizedExtraField
      *
      * @return the central directory data.
      */
+    @Override
     public byte[] getCentralDirectoryData() {
         if (m_centralData != null) {
             return m_centralData;
@@ -78,6 +79,7 @@ public class UnrecognizedExtraField
      *
      * @return the length of the central directory in bytes.
      */
+    @Override
     public ZipShort getCentralDirectoryLength() {
         if (m_centralData != null) {
             return new ZipShort(m_centralData.length);
@@ -90,6 +92,7 @@ public class UnrecognizedExtraField
      *
      * @return the HeaderID
      */
+    @Override
     public ZipShort getHeaderID() {
         return m_headerID;
     }
@@ -99,6 +102,7 @@ public class UnrecognizedExtraField
      *
      * @return the local file data
      */
+    @Override
     public byte[] getLocalFileDataData() {
         return m_localData;
     }
@@ -108,6 +112,7 @@ public class UnrecognizedExtraField
      *
      * @return the length of local file data in bytes
      */
+    @Override
     public ZipShort getLocalFileDataLength() {
         return new ZipShort(m_localData.length);
     }
@@ -119,6 +124,7 @@ public class UnrecognizedExtraField
      * @param offset the offset into buffer
      * @param length then length of data
      */
+    @Override
     public void parseFromLocalFileData(final byte[] buffer,
                                        final int offset,
                                        final int length) {

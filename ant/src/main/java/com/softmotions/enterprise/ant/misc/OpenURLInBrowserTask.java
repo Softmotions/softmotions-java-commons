@@ -20,6 +20,7 @@ public class OpenURLInBrowserTask extends Task {
         this.url = url;
     }
 
+    @Override
     public void execute() throws BuildException {
         if (!Desktop.isDesktopSupported()) {
             log("Desktop is not supported", Project.MSG_WARN);

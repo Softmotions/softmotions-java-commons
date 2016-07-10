@@ -34,30 +34,37 @@ public abstract class AbstractIndexedCollection<K, V> implements Collection<V> {
         return index;
     }
 
+    @Override
     public int size() {
         return wrappedCollection.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return wrappedCollection.isEmpty();
     }
 
+    @Override
     public boolean contains(Object o) {
         return wrappedCollection.contains(o);
     }
 
+    @Override
     public Iterator<V> iterator() {
         return wrappedCollection.iterator();
     }
 
+    @Override
     public Object[] toArray() {
         return wrappedCollection.toArray();
     }
 
+    @Override
     public <T> T[] toArray(T[] a) {
         return wrappedCollection.toArray(a);
     }
 
+    @Override
     public boolean add(V v) {
         K k = getElementKey(v);
         if (k != null) {
@@ -66,6 +73,7 @@ public abstract class AbstractIndexedCollection<K, V> implements Collection<V> {
         return wrappedCollection.add(v);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
         V to = (V) o;
@@ -76,10 +84,12 @@ public abstract class AbstractIndexedCollection<K, V> implements Collection<V> {
         return wrappedCollection.remove(to);
     }
 
+    @Override
     public boolean containsAll(Collection<?> c) {
         return wrappedCollection.containsAll(c);
     }
 
+    @Override
     public boolean addAll(Collection<? extends V> c) {
         for (V v : c) {
             K k = getElementKey(v);
@@ -90,6 +100,7 @@ public abstract class AbstractIndexedCollection<K, V> implements Collection<V> {
         return wrappedCollection.addAll(c);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public boolean removeAll(Collection<?> c) {
         for (Object o : c) {
@@ -101,6 +112,7 @@ public abstract class AbstractIndexedCollection<K, V> implements Collection<V> {
         return wrappedCollection.removeAll(c);
     }
 
+    @Override
     public boolean retainAll(Collection<?> c) {
         boolean res = wrappedCollection.retainAll(c);
         index.clear();
@@ -113,6 +125,7 @@ public abstract class AbstractIndexedCollection<K, V> implements Collection<V> {
         return res;
     }
 
+    @Override
     public void clear() {
         wrappedCollection.clear();
         index.clear();

@@ -146,6 +146,7 @@ public class AsiExtraField
      * @return The CentralDirectoryData value
      * @since 1.1
      */
+    @Override
     public byte[] getCentralDirectoryData() {
         return getLocalFileDataData();
     }
@@ -156,6 +157,7 @@ public class AsiExtraField
      * @return The CentralDirectoryLength value
      * @since 1.1
      */
+    @Override
     public ZipShort getCentralDirectoryLength() {
         return getLocalFileDataLength();
     }
@@ -188,6 +190,7 @@ public class AsiExtraField
      * @return The HeaderId value
      * @since 1.1
      */
+    @Override
     public ZipShort getHeaderID() {
         return HEADER_ID;
     }
@@ -210,6 +213,7 @@ public class AsiExtraField
      * @return The LocalFileDataData value
      * @since 1.1
      */
+    @Override
     public byte[] getLocalFileDataData() {
         // CRC will be added later
         byte[] data = new byte[getLocalFileDataLength().getValue() - 4];
@@ -243,6 +247,7 @@ public class AsiExtraField
      * @return The LocalFileDataLength value
      * @since 1.1
      */
+    @Override
     public ZipShort getLocalFileDataLength() {
         return new ZipShort(4 + // CRC
                             2 + // Mode
@@ -312,6 +317,7 @@ public class AsiExtraField
      * @throws ZipException on error
      * @since 1.1
      */
+    @Override
     public void parseFromLocalFileData(final byte[] buffer,
                                        final int offset,
                                        final int length)

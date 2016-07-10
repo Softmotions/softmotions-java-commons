@@ -13,26 +13,32 @@ public class FSWatcherEBusEventHandler implements FSWatcherEventHandler {
         this.ebus = ebus;
     }
 
+    @Override
     public void init(FSWatcher watcher) {
 
     }
 
+    @Override
     public void handlePollTimeout(FSWatcher watcher) {
 
     }
 
+    @Override
     public void handleRegisterEvent(FSWatcherRegisterEvent ev) {
         ebus.fire(ev);
     }
 
+    @Override
     public void handleCreateEvent(FSWatcherCreateEvent ev) {
         ebus.fire(ev);
     }
 
+    @Override
     public void handleDeleteEvent(FSWatcherDeleteEvent ev) {
         ebus.fire(ev);
     }
 
+    @Override
     public void handleModifyEvent(FSWatcherModifyEvent ev) {
         ebus.fire(ev);
     }

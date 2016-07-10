@@ -364,6 +364,7 @@ class ZipOutputStream
      * @throws IOException if an IO failure causes operation to fail
      * @since 1.1
      */
+    @Override
     public void finish()
             throws IOException {
         closeEntry();
@@ -426,6 +427,7 @@ class ZipOutputStream
      * @param length the length of data to write
      * @throws IOException if an IO error causes operation to fail
      */
+    @Override
     public void write(final byte[] buffer,
                       final int offset,
                       final int length)

@@ -82,14 +82,17 @@ public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Clon
         }
     }
 
+    @Override
     public void init(FSWatcher watcher) {
 
     }
 
+    @Override
     public void handlePollTimeout(FSWatcher watcher) {
 
     }
 
+    @Override
     public void handleRegisterEvent(FSWatcherRegisterEvent ev) {
         if (registered == null) {
             registered = new ArrayList<>();
@@ -97,6 +100,7 @@ public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Clon
         registered.add(toPath(ev.getFullPath()));
     }
 
+    @Override
     public void handleCreateEvent(FSWatcherCreateEvent ev) {
         if ((flags & MOVE_CREATED_INTO_MODIFIED) != 0) {
             if (modified == null) {
@@ -111,6 +115,7 @@ public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Clon
         }
     }
 
+    @Override
     public void handleDeleteEvent(FSWatcherDeleteEvent ev) {
         if (deleted == null) {
             deleted = new ArrayList<>();
@@ -118,6 +123,7 @@ public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Clon
         deleted.add(toPath(ev.getFullPath()));
     }
 
+    @Override
     public void handleModifyEvent(FSWatcherModifyEvent ev) {
         if (modified == null) {
             modified = new ArrayList<>();
@@ -126,6 +132,7 @@ public class FSWatcherCollectEventHandler implements FSWatcherEventHandler, Clon
     }
 
 
+    @Override
     public Object clone() {
         FSWatcherCollectEventHandler cloned = new FSWatcherCollectEventHandler();
         cloned.basedir = basedir;

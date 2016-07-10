@@ -21,6 +21,7 @@ public class MBSqlSessionManagerProvider implements Provider<MBSqlSessionManager
         this.sqlSessionManager = MBSqlSessionManager.newInstance(sqlSessionFactory);
     }
 
+    @Override
     public MBSqlSessionManager get() {
         return sqlSessionManager;
     }

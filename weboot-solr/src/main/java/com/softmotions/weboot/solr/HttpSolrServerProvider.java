@@ -18,6 +18,7 @@ public class HttpSolrServerProvider extends AbstractSolrServerProvider {
         super(cfg);
     }
 
+    @Override
     public SolrServer get() {
 //        TODO: check & configure
         return new HttpSolrServer(scfg.getString("connectionUrl"));

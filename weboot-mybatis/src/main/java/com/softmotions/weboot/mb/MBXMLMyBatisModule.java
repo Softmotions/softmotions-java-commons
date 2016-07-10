@@ -132,6 +132,7 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
     }
 
     private class ExtendedSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
+        @Override
         public SqlSessionFactory build(Configuration config) {
             if (extraMappers == null || extraMappers.isEmpty()) {
                 return super.build(config);

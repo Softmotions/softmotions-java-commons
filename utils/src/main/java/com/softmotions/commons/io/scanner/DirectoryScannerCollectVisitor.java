@@ -18,10 +18,12 @@ public class DirectoryScannerCollectVisitor implements DirectoryScannerVisitor {
     final List<Pair<Path, IOException>> errors = new ArrayList<>();
 
 
+    @Override
     public void visit(Path file, BasicFileAttributes attrs) throws IOException {
         matches.add(new Pair<>(file, attrs));
     }
 
+    @Override
     public void error(Path file, IOException exc) throws IOException {
         errors.add(new Pair<>(file, exc));
     }

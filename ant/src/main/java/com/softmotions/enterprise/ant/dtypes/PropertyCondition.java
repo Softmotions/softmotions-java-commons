@@ -30,6 +30,7 @@ public class PropertyCondition extends ConditionBase implements Condition {
         this.value = value;
     }
 
+    @Override
     public boolean eval() throws BuildException {
         if (property == null) {
             throw new BuildException("Missing required attribute 'property'");

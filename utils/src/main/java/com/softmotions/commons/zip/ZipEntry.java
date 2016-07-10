@@ -205,6 +205,7 @@ public class ZipEntry extends java.util.zip.ZipEntry {
      * @throws RuntimeException if fail to set extra data
      * @since 1.1
      */
+    @Override
     public void setExtra(final byte[] extra)
             throws RuntimeException {
         try {
@@ -254,6 +255,7 @@ public class ZipEntry extends java.util.zip.ZipEntry {
      * @return The CompressedSize value
      * @since 1.2
      */
+    @Override
     public long getCompressedSize() {
         if (m_compressedSize != null) {
             // has been set explicitly and we are running in a 1.1 VM
@@ -333,6 +335,7 @@ public class ZipEntry extends java.util.zip.ZipEntry {
      * @return Description of the Returned Value
      * @since 1.1
      */
+    @Override
     public Object clone() {
         ZipEntry entry;
         try {

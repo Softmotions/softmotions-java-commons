@@ -72,6 +72,17 @@ public class WSUserDatabaseRealm extends RealmBase {
         this.localDatabase = localDatabase;
     }
 
+    public void setDatabase(WSUserDatabase database) {
+        this.database = database;
+    }
+
+    public WSUserDatabaseRealm() {
+    }
+
+    public WSUserDatabaseRealm(WSUserDatabase database) {
+        this.database = database;
+    }
+
     /**
      * Return <code>true</code> if the specified Principal has the specified
      * security role, within the context of this Realm; otherwise return
@@ -82,6 +93,7 @@ public class WSUserDatabaseRealm extends RealmBase {
      * @param principal Principal for whom the role is to be checked
      * @param role      Security role to be checked
      */
+    @Override
     public boolean hasRole(Wrapper wrapper, Principal principal, String role) {
         // Check for a role alias defined in a <security-role-ref> element
         if (wrapper != null) {
@@ -112,6 +124,7 @@ public class WSUserDatabaseRealm extends RealmBase {
     /**
      * Return a short name for this Realm implementation.
      */
+    @Override
     protected String getName() {
         return name;
     }
@@ -119,6 +132,7 @@ public class WSUserDatabaseRealm extends RealmBase {
     /**
      * Return the password associated with the given principal's user name.
      */
+    @Override
     protected String getPassword(String username) {
         WSUser user = getDatabase().findUser(username);
         if (user == null) {
@@ -130,6 +144,7 @@ public class WSUserDatabaseRealm extends RealmBase {
     /**
      * Return the Principal associated with the given user name.
      */
+    @Override
     protected Principal getPrincipal(String username) {
         WSUser user = getDatabase().findUser(username);
         if (user == null) {
@@ -152,6 +167,7 @@ public class WSUserDatabaseRealm extends RealmBase {
      * @throws org.apache.catalina.LifecycleException if this component detects a fatal error
      *                                                that prevents this component from being used
      */
+    @Override
     protected void startInternal() throws LifecycleException {
         super.startInternal();
     }
@@ -193,10 +209,13 @@ public class WSUserDatabaseRealm extends RealmBase {
      * @throws LifecycleException if this component detects a fatal error
      *                            that needs to be reported
      */
+    @Override
     protected void stopInternal() throws LifecycleException {
         // Perform normal superclass finalization
         super.stopInternal();
-        // Release reference to our user database
-        database = null;
+        if (resourceName != null) {
+            // Release reference to our user database
+            database = null;
+        }
     }
 }

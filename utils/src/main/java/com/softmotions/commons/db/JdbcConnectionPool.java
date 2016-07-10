@@ -63,6 +63,7 @@ public class JdbcConnectionPool implements DataSource, ConnectionEventListener, 
         }
     }
 
+    @Override
     public void close() throws IOException {
         synchronized (lock) {
             if (closed) {
@@ -76,6 +77,7 @@ public class JdbcConnectionPool implements DataSource, ConnectionEventListener, 
         }
     }
 
+    @Override
     public PrintWriter getLogWriter() throws SQLException {
         return dataSource.getLogWriter();
     }
@@ -89,10 +91,12 @@ public class JdbcConnectionPool implements DataSource, ConnectionEventListener, 
         return lw;
     }
 
+    @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
         dataSource.setLogWriter(out);
     }
 
+    @Override
     public void setLoginTimeout(int seconds) throws SQLException {
         synchronized (lock) {
             if (seconds < 1) {
@@ -102,16 +106,19 @@ public class JdbcConnectionPool implements DataSource, ConnectionEventListener, 
         }
     }
 
+    @Override
     public int getLoginTimeout() throws SQLException {
         synchronized (lock) {
             return loginTimeout;
         }
     }
 
+    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return dataSource.getParentLogger();
     }
 
+    @Override
     public Connection getConnection() throws SQLException {
         long max = System.currentTimeMillis() + loginTimeout * 1000;
         do {
@@ -142,12 +149,14 @@ public class JdbcConnectionPool implements DataSource, ConnectionEventListener, 
         throw new SQLException("Login timeout");
     }
 
+    @Override
     public void connectionClosed(ConnectionEvent event) {
         PooledConnection pc = (PooledConnection) event.getSource();
         pc.removeConnectionEventListener(this);
         recycleConnection(pc);
     }
 
+    @Override
     public void connectionErrorOccurred(ConnectionEvent event) {
         PooledConnection pc = (PooledConnection) event.getSource();
         if (pc != null && !invalidConnections.contains(pc)) {
@@ -155,14 +164,17 @@ public class JdbcConnectionPool implements DataSource, ConnectionEventListener, 
         }
     }
 
+    @Override
     public Connection getConnection(String username, String password) throws SQLException {
         throw new UnsupportedOperationException("getConnection(username, password)");
     }
 
+    @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         throw new UnsupportedOperationException("unwrap");
     }
 
+    @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }

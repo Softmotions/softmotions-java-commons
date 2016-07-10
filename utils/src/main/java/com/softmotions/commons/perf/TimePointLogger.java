@@ -136,6 +136,7 @@ public final class TimePointLogger {
             }
         }
         Collections.sort(flushed, new Comparator<TimePoint>() {
+            @Override
             public int compare(TimePoint tp1, TimePoint tp2) {
                 return (tp1.totalTime > tp2.totalTime ? -1 : (tp1.totalTime == tp2.totalTime ? 0 : 1));
             }

@@ -20,6 +20,7 @@ public final class MBMapperProvider<T> implements javax.inject.Provider<T> {
         this.sqlSessionManager = sqlSessionManager;
     }
 
+    @Override
     public T get() {
         return this.sqlSessionManager.getMapper(mapperType);
     }

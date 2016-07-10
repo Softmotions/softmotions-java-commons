@@ -31,10 +31,12 @@ public class SimpleMoveTask extends Task {
         this.tofile = tofile;
     }
 
+    @Override
     public String getTaskName() {
         return "simpleMove";
     }
 
+    @Override
     public void execute() throws BuildException {
         if (file == null) {
             throw new BuildException("Missing required attribute 'file'");

@@ -58,6 +58,7 @@ public class BacktimeFileSelector extends BaseSelector {
         }
     }
 
+    @Override
     public boolean isSelected(File basedir, String filename, File file) throws BuildException {
         if (pattern == null) {
             throw new BuildException("Missing required attribute: 'pattern'");
