@@ -39,7 +39,7 @@ public class I18n {
 
     public static final String LNG_COOKIE_NAME = "NG_TRANSLATE_LANG_KEY";
 
-    public static final String REQ_LOCALE_ATTR_NAME = "SMFLNG_REQ_LOCALE";
+    public static final String REQ_LOCALE_ATTR_NAME = "LNG_REQ_LOCALE";
 
     public static final String REQ_LOCALE_PARAM_NAME = "lang";
 
