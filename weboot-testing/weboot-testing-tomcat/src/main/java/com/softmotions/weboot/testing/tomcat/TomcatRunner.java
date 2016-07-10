@@ -103,7 +103,7 @@ public class TomcatRunner {
 
     public <T> T getContextEventListener(Class<T> type) throws Exception {
         if (context != null) {
-            for (Object el : context.getApplicationEventListeners()) {
+            for (Object el : context.getApplicationLifecycleListeners()) {
                 if (type.isAssignableFrom(el.getClass())) {
                     //noinspection unchecked
                     return (T) el;
