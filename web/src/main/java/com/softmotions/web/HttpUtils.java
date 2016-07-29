@@ -3,6 +3,8 @@ package com.softmotions.web;
 import java.net.Inet4Address;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -12,6 +14,21 @@ public class HttpUtils {
 
     private HttpUtils() {
     }
+
+    @Nullable
+    public Cookie findCookie(HttpServletRequest req, String name) {
+        Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (final Cookie c : cookies) {
+            if (name.equals(c.getName())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
 
     public static String toAbsoluteUrl(HttpServletRequest req) {
         return toAbsoluteUrl(req, null, null);
