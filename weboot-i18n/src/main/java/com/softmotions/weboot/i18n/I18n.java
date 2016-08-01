@@ -1,32 +1,21 @@
 package com.softmotions.weboot.i18n;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Localization support.
@@ -146,8 +135,8 @@ public class I18n {
                         lang = c.getValue();
                         //strip quotes if presented
                         if (lang.length() > 1
-                            && lang.charAt(0) == '\"'
-                            && lang.charAt(lang.length() - 1) == '\"') {
+                                && lang.charAt(0) == '\"'
+                                && lang.charAt(lang.length() - 1) == '\"') {
                             lang = lang.substring(1, lang.length() - 1);
                         }
                         break;
@@ -169,23 +158,50 @@ public class I18n {
         if (req == null) {
             return;
         }
-        String lang = '\"' + fetchRequestLanguage(req) + '\"';
+        String lang = fetchRequestLanguage(req);
+        String qlang = '\"' + lang  + '\"';
         Cookie[] cookies = req.getCookies();
         if (cookies != null) {
             for (final Cookie c : cookies) {
                 if (LNG_COOKIE_NAME.equals(c.getName())) {
                     String clang = c.getValue();
-                    if (Objects.equals(lang, clang)) {
+                    if (Objects.equals(qlang, clang) || Objects.equals(lang, clang)) {
                         return;
                     }
                     break;
                 }
             }
         }
-        Cookie c = new Cookie(LNG_COOKIE_NAME, lang);
+        Cookie c = new Cookie(LNG_COOKIE_NAME, qlang);
         c.setMaxAge(60 * 60 * 24 * 7); //1 week todo configurable
         resp.addCookie(c);
     }
+
+
+    public void saveRequestLang(String lang, HttpServletRequest req, HttpServletResponse resp) {
+        lang = lang.toLowerCase();
+        if (!isValidISO2Language(lang)) {
+            return;
+        }
+        String qlang = '\"' + lang + '\"';
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (final Cookie c : cookies) {
+                if (LNG_COOKIE_NAME.equals(c.getName())) {
+                    String clang = c.getValue();
+                    if (Objects.equals(qlang, clang) || Objects.equals(lang, clang)) {
+                        return;
+                    }
+                    break;
+                }
+            }
+        }
+        Cookie c = new Cookie(LNG_COOKIE_NAME, qlang);
+        c.setMaxAge(60 * 60 * 24 * 7); //1 week todo configurable
+        resp.addCookie(c);
+        req.setAttribute(REQ_LOCALE_ATTR_NAME, new Locale(lang));
+    }
+
 
     public String format(Date date,
                          String format,
