@@ -129,7 +129,7 @@ public class ServicesConfiguration implements Module {
     }
 
     private String preprocessConfigData(String cdata) {
-        Pattern p = Pattern.compile("\\{(((env|sys):)?[A-Za-z\\.]+)\\}");
+        Pattern p = Pattern.compile("\\{(((env|sys):)?[A-Za-z\\_\\.]+)\\}");
         Matcher m = p.matcher(cdata);
         StringBuffer sb = new StringBuffer(cdata.length());
         while (m.find()) {
