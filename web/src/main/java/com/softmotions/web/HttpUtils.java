@@ -16,7 +16,7 @@ public class HttpUtils {
     }
 
     @Nullable
-    public Cookie findCookie(HttpServletRequest req, String name) {
+    public static Cookie findCookie(HttpServletRequest req, String name) {
         Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return null;
