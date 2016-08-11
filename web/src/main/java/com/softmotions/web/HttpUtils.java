@@ -31,7 +31,7 @@ public class HttpUtils {
      * @param ua User-agent in lower case
      */
     public static boolean isTablet(String ua) {
-        return ua != null && (isAndroidTablet(ua) || isIpad(ua));
+        return ua != null && (isAndroidTablet(ua) || isIpad(ua) || (ua.contains("touch") && ua.contains("win")));
     }
 
     public static boolean isTablet(HttpServletRequest req) {
