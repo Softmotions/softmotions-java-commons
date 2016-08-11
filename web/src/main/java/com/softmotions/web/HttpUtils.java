@@ -1,11 +1,11 @@
 package com.softmotions.web;
 
-import java.net.Inet4Address;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.net.Inet4Address;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -13,6 +13,138 @@ import javax.servlet.http.HttpServletRequest;
 public class HttpUtils {
 
     private HttpUtils() {
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isMobile(String ua) {
+        return ua != null && (isAndroidMobile(ua) || isIphone(ua) || isIeMobile(ua));
+    }
+
+    public static boolean isMobile(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isTablet(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isTablet(String ua) {
+        return ua != null && (isAndroidTablet(ua) || isIpad(ua));
+    }
+
+    public static boolean isTablet(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isTablet(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isAndroidMobile(String ua) {
+        return ua != null && ua.contains("android") && ua.contains("mobile");
+    }
+
+    public static boolean isAndroidMobile(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isAndroidMobile(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isAndroidTablet(String ua) {
+        return ua != null && ua.contains("android") && !ua.contains("mobile");
+    }
+
+    public static boolean isAndroidTablet(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isAndroidMobile(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isIpad(String ua) {
+        return ua != null && ua.contains("ipad");
+    }
+
+    public static boolean isIpad(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isIpad(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isIphone(String ua) {
+        return ua != null && ua.contains("iphone");
+    }
+
+    public static boolean isIphone(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isIpad(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isIeMobile(String ua) {
+        return ua != null && ua.contains("iemobile");
+    }
+
+    public static boolean isIeMobile(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isIpad(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isWebkit(String ua) {
+        return ua != null && ua.contains("applewebkit/");
+    }
+
+    public static boolean isWebkit(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isWebkit(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isGecko(String ua) {
+        return ua != null && ua.contains("gecko/");
+    }
+
+    public static boolean isGecko(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isWebkit(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isTrident(String ua) {
+        return ua != null && ua.contains("trident/");
+    }
+
+    public static boolean isTrident(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isWebkit(ua.toLowerCase());
+    }
+
+    /**
+     * @param ua User-agent in lower case
+     */
+    public static boolean isEdge(String ua) {
+        return ua != null && ua.contains("edge/");
+    }
+
+    public static boolean isEdge(HttpServletRequest req) {
+        String ua = req.getHeader("user-agent");
+        return ua != null && isWebkit(ua.toLowerCase());
     }
 
     @Nullable
@@ -38,9 +170,9 @@ public class HttpUtils {
                                        String overrideServerName,
                                        Integer overrideServerPort) {
         String u = req.getScheme() +
-                   "://" + ((overrideServerName != null) ? overrideServerName : req.getServerName()) +
-                   ":" + ((overrideServerPort != null) ? overrideServerPort : req.getServerPort()) +
-                   req.getRequestURI();
+                "://" + ((overrideServerName != null) ? overrideServerName : req.getServerName()) +
+                ":" + ((overrideServerPort != null) ? overrideServerPort : req.getServerPort()) +
+                req.getRequestURI();
         if (req.getQueryString() != null) {
             u += '?' + req.getQueryString();
         }
