@@ -24,7 +24,7 @@ public class HttpUtils {
 
     public static boolean isMobile(HttpServletRequest req) {
         String ua = req.getHeader("user-agent");
-        return ua != null && isTablet(ua.toLowerCase());
+        return ua != null && isMobile(ua.toLowerCase());
     }
 
     /**
