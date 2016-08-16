@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.jodd</groupId>
             <artifactId>jodd-mail</artifactId>
-            <version>3.7</version>
+            <version>3.7.1</version>
         </dependency>
     </dependencies>
 </project>
