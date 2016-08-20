@@ -66,6 +66,9 @@ public class JettyRunner {
 
         Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(jetty);
         classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration");
+        classlist.addAfter("org.eclipse.jetty.webapp.FragmentConfiguration",
+                           "org.eclipse.jetty.plus.webapp.EnvConfiguration",
+                           "org.eclipse.jetty.plus.webapp.PlusConfiguration");
         context.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
                              ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
 
