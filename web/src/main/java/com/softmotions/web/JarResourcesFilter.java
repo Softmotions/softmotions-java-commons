@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -23,6 +24,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.map.Flat3Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.BooleanUtils;
@@ -122,6 +124,13 @@ public class JarResourcesFilter implements Filter {
                 resp.setCharacterEncoding("UTF-8");
             }
         }
+        MappingSlot ms = cd.mappingSlot;
+        if (!ms.headers.isEmpty()) {
+            for (Map.Entry<String, String> he : ms.headers.entrySet()) {
+                resp.setHeader(he.getKey(), he.getValue());
+            }
+        }
+
         URL url = cd.getUrl();
         try (InputStream is = url.openStream()) {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -157,7 +166,7 @@ public class JarResourcesFilter implements Filter {
         if (url == null) {
             return null;
         }
-        return new ContentDescriptor(url, req.getServletContext().getMimeType(path));
+        return new ContentDescriptor(ms, url, req.getServletContext().getMimeType(path));
     }
 
     MappingSlot findMatchingSlot(String path) {
@@ -184,6 +193,8 @@ public class JarResourcesFilter implements Filter {
 
         final Object lock = new Object();
 
+        final Map<String, String> headers = new Flat3Map<>();
+
         boolean watch;
 
         long lastLoadMtime;
@@ -203,7 +214,7 @@ public class JarResourcesFilter implements Filter {
             this.path = StringUtils.strip(parts[0].trim(), "/");
             //Parse options
             for (int i = 1; i < parts.length; ++i) {
-                String p = parts[i].toLowerCase();
+                String p = parts[i];
                 String[] pp = p.split("=");
                 if (pp.length == 2) {
                     p = pp[0].trim();
@@ -213,10 +224,17 @@ public class JarResourcesFilter implements Filter {
                             this.watch = BooleanUtils.toBoolean(pp[1]);
                             break;
                     }
+                    String lp = p.toLowerCase();
+                    if (lp.startsWith("x-")) {
+                        headers.put(p, pp[1].trim());
+                    }
                 }
             }
             this.prefix = prefix;
             log.info("Registered JAR resources mapping: {} => {}", prefix, spec);
+            if (!headers.isEmpty()) {
+                log.info("Response headers: {}", headers);
+            }
         }
 
         URL getResourceUrl(String resource) {
@@ -363,6 +381,8 @@ public class JarResourcesFilter implements Filter {
 
         private final String mimeType;
 
+        private final MappingSlot mappingSlot;
+
         public URL getUrl() {
             return url;
         }
@@ -371,7 +391,8 @@ public class JarResourcesFilter implements Filter {
             return mimeType;
         }
 
-        private ContentDescriptor(URL url, String mimeType) {
+        private ContentDescriptor(MappingSlot mappingSlot, URL url, String mimeType) {
+            this.mappingSlot = mappingSlot;
             this.url = url;
             this.mimeType = mimeType;
         }

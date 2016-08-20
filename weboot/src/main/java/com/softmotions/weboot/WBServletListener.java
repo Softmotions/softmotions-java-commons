@@ -27,6 +27,7 @@ import com.samaxes.filter.NoCacheFilter;
 import com.samaxes.filter.util.CacheConfigParameter;
 import com.softmotions.commons.JVMResources;
 import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.cont.ArrayUtils;
 import com.softmotions.commons.cont.Pair;
 import com.softmotions.commons.lifecycle.LifeCycleModule;
 import com.softmotions.commons.lifecycle.LifeCycleService;
@@ -170,12 +171,19 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         return getInjector().getInstance(LifeCycleService.class).isStarted();
     }
 
-    protected void initCacheHeadersFilters(ServicesConfiguration env, ServletContext sctx) {
+    protected void initCacheHeadersFilters(WBConfiguration env, ServletContext sctx) {
         HierarchicalConfiguration<ImmutableNode> xcfg = env.xcfg();
         List<HierarchicalConfiguration<ImmutableNode>> cgroups = xcfg.configurationsAt("cache-headers-groups.cache-group");
         for (HierarchicalConfiguration cfg : cgroups) {
             String name = cfg.getString("name", "");
             String[] patterns = cfg.getStringArray("patterns");
+            String prefix = env.getAppPrefix();
+            for (int i = 0; i < patterns.length; ++i) {
+                String p = patterns[i].trim();
+                if (p.charAt(0) == '/') {
+                    patterns[i] = prefix + p;
+                }
+            }
             if (patterns.length > 0) {
                 initCacheHeadersFilter(sctx, name, patterns, cfg);
             }
@@ -235,11 +243,11 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         List<HierarchicalConfiguration<ImmutableNode>> rlist = env.xcfg().configurationsAt("jar-web-resources.resource");
         for (HierarchicalConfiguration rcfg : rlist) {
             String pp = rcfg.getString("path-prefix");
-            String opts = rcfg.getString("options");
-            if (pp == null || opts == null) {
+            String[] opts = rcfg.getStringArray("options");
+            if (pp == null || opts.length == 0) {
                 continue;
             }
-            fr.setInitParameter(pp, opts);
+            fr.setInitParameter(pp, ArrayUtils.stringJoin(opts, ","));
         }
         fr.setInitParameter("strip-prefix", env.getAppPrefix());
     }
