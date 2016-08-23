@@ -141,9 +141,10 @@ public abstract class WBConfiguration extends ServicesConfiguration {
     public String getAbsoluteLink(HttpServletRequest req, String link) {
         boolean preferRequestUrl = xcfg().getBoolean("site.preferRequestUrl", false);
         if (preferRequestUrl) {
+            //noinspection MagicNumber
             link = req.getScheme() + "://" +
                    req.getServerName() +
-                   ":" + req.getServerPort() +
+                   (req.getServerPort() != 80 ? ":" + req.getServerPort() : "") +
                    link;
         } else {
             link = xcfg().getString("site.root") + link;
