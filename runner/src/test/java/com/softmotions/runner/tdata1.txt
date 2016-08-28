@@ -1,0 +1,4 @@
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                      NAMES
+f94c2a915b88        registry:2          "/bin/registry serve "   3 weeks ago         Up 2 weeks          127.0.0.1:5000->5000/tcp   registry
+f94c2a915b81        registry:2          "/bin/registry serve "   3 weeks ago         Up 3 weeks          127.0.0.1:5001->5001/tcp   registry1
+f94c2a915b81        registry:2                                   3 weeks ago                             127.0.0.1:5001->5001/tcp   registry1
