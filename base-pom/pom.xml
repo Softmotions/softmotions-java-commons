@@ -31,7 +31,7 @@
         </repository>
         <repository>
             <id>jaxion_repository</id>
-            <url>http://jaxion.org/mvn/</url>
+            <url>https://repo.softmotions.com/repository/softmotions-internal</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -62,7 +62,7 @@
         </pluginRepository>
         <pluginRepository>
             <id>jaxion_repository</id>
-            <url>http://jaxion.org/mvn/</url>
+            <url>https://repo.softmotions.com/repository/softmotions-internal</url>
             <layout>default</layout>
             <releases>
                 <enabled>true</enabled>
@@ -78,7 +78,7 @@
     <distributionManagement>
         <repository>
             <id>jaxion_repository</id>
-            <url>sftp://jaxion.org/mvn/</url>
+            <url>https://repo.softmotions.com/repository/softmotions-internal</url>
         </repository>
     </distributionManagement>
 
