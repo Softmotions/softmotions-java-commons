@@ -36,14 +36,6 @@
             <id>softmotions_repository</id>
             <url>https://repo.softmotions.com/repository/softmotions-public</url>
         </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>jcenter</id>
-            <name>bintray</name>
-            <url>http://jcenter.bintray.com</url>
-        </repository>
     </repositories>
 
     <build>

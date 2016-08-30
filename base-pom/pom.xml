@@ -52,15 +52,6 @@
             </releases>
         </pluginRepository>
         <pluginRepository>
-            <id>apache-snapshots</id>
-            <name>Apache Maven Snapshots</name>
-            <url>https://repository.apache.org/content/groups/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
             <id>softmotions_repository</id>
             <url>https://repo.softmotions.com/repository/softmotions-public</url>
             <layout>default</layout>
