@@ -260,11 +260,20 @@ object ProcessRunners {
                 }
 
                 try {
-                    selfFuture.join()
+                    if (pwait != null) {
+                        selfFuture.get(pwait.toMillis(), TimeUnit.MILLISECONDS)
+                    } else {
+                        selfFuture.get()
+                    }
+                } catch (te: TimeoutException) {
+                    if (spec.failOnTimeout) {
+                        throw ProcessWaitTimeoutException("${clist.joinToString(" ")}")
+                    }
+                } catch (ee: ExecutionException) {
+                    throw ee.cause ?: ee
                 } catch(ce: CompletionException) {
                     throw ce.cause ?: ce
                 }
-
                 if (spec.failOnTimeout && !ret) {
                     throw ProcessWaitTimeoutException("${clist.joinToString(" ")}")
                 }
