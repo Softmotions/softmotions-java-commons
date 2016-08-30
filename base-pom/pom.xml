@@ -30,8 +30,8 @@
             </snapshots>
         </repository>
         <repository>
-            <id>jaxion_repository</id>
-            <url>https://repo.softmotions.com/repository/softmotions-internal</url>
+            <id>softmotions_repository</id>
+            <url>https://repo.softmotions.com/repository/softmotions-public</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -61,8 +61,8 @@
             </snapshots>
         </pluginRepository>
         <pluginRepository>
-            <id>jaxion_repository</id>
-            <url>https://repo.softmotions.com/repository/softmotions-internal</url>
+            <id>softmotions_repository</id>
+            <url>https://repo.softmotions.com/repository/softmotions-public</url>
             <layout>default</layout>
             <releases>
                 <enabled>true</enabled>
@@ -77,8 +77,8 @@
 
     <distributionManagement>
         <repository>
-            <id>jaxion_repository</id>
-            <url>https://repo.softmotions.com/repository/softmotions-internal</url>
+            <id>softmotions_repository</id>
+            <url>https://repo.softmotions.com/repository/softmotions-public</url>
         </repository>
     </distributionManagement>
 
@@ -96,12 +96,5 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.10</version>
-            </extension>
-        </extensions>
     </build>
 </project>

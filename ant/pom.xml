@@ -12,34 +12,6 @@
     <artifactId>softmotions-ant</artifactId>
     <packaging>jar</packaging>
 
-<!--
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>upload-jars-on-jaxion</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>upload</goal>
-                        </goals>
-                        <configuration>
-                            <serverId>jaxion_repository</serverId>
-                            <url>sftp://jaxion.org/repository</url>
-                            <fromDir>${project.build.directory}</fromDir>
-                            <includes>${project.build.finalName}.jar</includes>
-                            <toDir>softmotions/jars</toDir>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
--->
-
     <dependencies>
         <dependency>
             <groupId>org.apache.ant</groupId>
@@ -55,8 +27,5 @@
             <artifactId>softmotions-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-
     </dependencies>
-
-
 </project>
