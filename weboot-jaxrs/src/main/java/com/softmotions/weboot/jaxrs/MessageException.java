@@ -43,7 +43,7 @@ public class MessageException extends RuntimeException {
     }
 
     public MessageException(String message, Object request) {
-        this(message, false);
+        this(message, false, request);
     }
 
     public MessageException(String message, boolean err, Object request) {
