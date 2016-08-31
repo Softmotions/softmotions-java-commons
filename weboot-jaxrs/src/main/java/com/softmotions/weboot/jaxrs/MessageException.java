@@ -23,6 +23,8 @@ public class MessageException extends RuntimeException {
 
     private final List<Pair<String, Boolean>> messages = new ArrayList<>();
 
+    private Object request;
+
     public MessageException() {
     }
 
@@ -40,6 +42,22 @@ public class MessageException extends RuntimeException {
         addMessage(message, true);
     }
 
+    public MessageException(String message, Object request) {
+        this(message, false);
+    }
+
+    public MessageException(String message, boolean err, Object request) {
+        super(message);
+        this.request = request;
+        addMessage(message, err);
+    }
+
+    public MessageException(String message, Throwable cause, Object request) {
+        super(message, cause);
+        this.request = request;
+        addMessage(message, true);
+    }
+
     public MessageException(Throwable cause) {
         super(cause);
         addMessage(cause.getMessage(), true);
@@ -47,6 +65,10 @@ public class MessageException extends RuntimeException {
 
     public String getAppId() {
         return APP_ID;
+    }
+
+    public Object getRequest() {
+        return request;
     }
 
     public MessageException addMessage(String message, boolean err) {
