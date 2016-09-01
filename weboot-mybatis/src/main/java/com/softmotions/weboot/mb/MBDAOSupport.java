@@ -1,16 +1,20 @@
 package com.softmotions.weboot.mb;
 
-import org.apache.commons.collections.map.Flat3Map;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
-import org.apache.ibatis.session.SqlSession;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.sql.DataSource;
+
+import org.apache.commons.collections.map.Flat3Map;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.SqlSession;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -21,16 +25,20 @@ public class MBDAOSupport {
 
     protected final SqlSession sess;
 
+    @Nonnull
     public SqlSession getSession() {
+        Preconditions.checkNotNull(sess);
         return sess;
     }
 
+    @Nonnull
     public Connection getConnection() {
-        return sess.getConnection();
+        return getSession().getConnection();
     }
 
+    @Nonnull
     public DataSource getDataSource() {
-        return sess.getConfiguration().getEnvironment().getDataSource();
+        return getSession().getConfiguration().getEnvironment().getDataSource();
     }
 
     public MBDAOSupport(SqlSession sess) {
@@ -79,28 +87,34 @@ public class MBDAOSupport {
                     rh);
     }
 
+    @Nonnull
     public <E> List<E> select(String stmtId, Object... params) {
         return sess.selectList(toStatementId(stmtId), toParametersObj(params));
     }
 
+    @Nonnull
     public <E> List<E> select(String stmtId, RowBounds rb, Object... params) {
         return sess.selectList(toStatementId(stmtId), toParametersObj(params), rb);
     }
 
+    @Nonnull
     public <E> List<E> selectByCriteria(MBCriteriaQuery crit) {
         return selectByCriteria(crit, null);
     }
 
+    @Nonnull
     public <E> List<E> selectByCriteria(MBCriteriaQuery crit, String defstmtId) {
         crit.finish();
         return sess.selectList(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId),
                                crit);
     }
 
+    @Nullable
     public <E> E selectOneByCriteria(MBCriteriaQuery crit) {
         return selectOneByCriteria(crit, null);
     }
 
+    @Nullable
     public <E> E selectOneByCriteria(MBCriteriaQuery crit, String defstmtId) {
         crit.finish();
         return sess.selectOne(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId), crit);
@@ -133,18 +147,22 @@ public class MBDAOSupport {
         return sess.delete(crit.getStatement() != null ? crit.getStatement() : toStatementId(defstmtId), crit);
     }
 
+    @Nullable
     public <E> E selectOne(String stmtId, Object... params) {
         return sess.selectOne(toStatementId(stmtId), toParametersObj(params));
     }
 
+    @Nullable
     public <T> T withinTransaction(MBAction<T> action) throws SQLException {
         return action.exec(sess, sess.getConnection());
     }
 
+    @Nonnull
     public MBCriteriaQuery createCriteria() {
         return new MBCriteriaQuery(this);
     }
 
+    @Nullable
     protected static Object toParametersObj(Object[] params) {
         if (params == null || params.length == 0) {
             return null;
@@ -165,6 +183,7 @@ public class MBDAOSupport {
         return pmap;
     }
 
+    @Nonnull
     protected String toStatementId(String stmtId) {
         if (stmtId == null) {
             throw new RuntimeException("MyBatis statement id cannot be null");
