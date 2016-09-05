@@ -73,7 +73,7 @@ public class JettyRunner {
                              ".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
 
 
-        Path jspTmp = Files.createTempDirectory(Paths.get(System.getProperty("java.io.tmpdir")), "smsfinance-");
+        Path jspTmp = Files.createTempDirectory(Paths.get(System.getProperty("java.io.tmpdir")), "jettytmp-");
         log.info("Using JSP tmp dir: {}", jspTmp);
         context.setAttribute("javax.servlet.context.tempdir", jspTmp.toAbsolutePath().toString());
 
