@@ -46,6 +46,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.19.1</version>
                     <configuration>
+                        <failIfNoTests>false</failIfNoTests>
                         <systemPropertyVariables>
                             <project.basedir>${project.basedir}</project.basedir>
                             <org.slf4j.simpleLogger.showShortLogName>true</org.slf4j.simpleLogger.showShortLogName>

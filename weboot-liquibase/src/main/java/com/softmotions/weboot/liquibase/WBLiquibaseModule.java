@@ -1,11 +1,10 @@
 package com.softmotions.weboot.liquibase;
 
 import java.sql.Connection;
-import java.util.Iterator;
+import java.sql.Statement;
 import java.util.List;
 import javax.sql.DataSource;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.BooleanUtils;
@@ -58,7 +57,7 @@ public class WBLiquibaseModule extends AbstractModule {
         ServicesConfiguration cfg;
 
         @Start(order = 10)
-        public void start() {
+        public void start() throws Exception {
             HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
             HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
             if (lbCfg == null) {
@@ -96,14 +95,40 @@ public class WBLiquibaseModule extends AbstractModule {
                     }
                 }
 
+                // DropAll staff
                 if (lbCfg.containsKey("update.dropAll") || lbCfg.containsKey("update.dropAll.activate")) {
                     boolean activate = BooleanUtils.toBoolean(lbCfg.getString("update.dropAll.activate", "true"));
                     if (activate) {
+                        String bsql = lbCfg.getString("update.dropAll.sql-before", null);
+                        if (bsql != null) {
+                            boolean failOnError = lbCfg.getBoolean("update.dropAll.sql-before[@failOnError]", true);
+                            log.info("Executing before dropall sql. FailOnError={}", failOnError);
+                            for (String sql : bsql.split(";")) {
+                                sql = sql.trim();
+                                if (sql.isEmpty()) {
+                                    continue;
+                                }
+                                log.info("{};", sql);
+                                try (Connection conn = ds.getConnection()) {
+                                    try (Statement stmt = conn.createStatement()) {
+                                        stmt.execute(sql);
+                                    }
+                                    conn.commit();
+                                } catch (Exception e) {
+                                    if (failOnError) {
+                                        throw e;
+                                    } else {
+                                        log.warn("Sql failed: {} error: {}", sql, e.toString());
+                                    }
+                                }
+                            }
+                        }
                         log.info("Executing Liqubase.DropAll");
                         liquibase.dropAll();
                     }
                 }
 
+                // Update
                 if (lbCfg.containsKey("update.contexts")) {
                     String contexts = lbCfg.getString("update.contexts");
                     log.info("Executing Liquibase update, contexts={}", contexts);
@@ -112,6 +137,7 @@ public class WBLiquibaseModule extends AbstractModule {
                     log.info("Executing Liquibase update");
                     liquibase.update("");
                 }
+
             } catch (Exception e) {
                 log.error("Failed to initiate WBLiquibaseModule", e);
                 throw new RuntimeException(e);
