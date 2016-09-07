@@ -1,14 +1,5 @@
 package com.softmotions.weboot.mb;
 
-import org.apache.ibatis.builder.xml.XMLMapperBuilder;
-import org.apache.ibatis.executor.ErrorContext;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.ibatis.type.TypeHandler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -17,12 +8,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.executor.ErrorContext;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.ibatis.type.TypeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.apache.ibatis.io.Resources.getResourceAsReader;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
+
+    private static final Logger log = LoggerFactory.getLogger(MBXMLMyBatisModule.class);
 
     private static final String DEFAULT_CONFIG_RESOURCE = "mybatis-config.xml";
 
@@ -116,7 +120,8 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
             for (Interceptor interceptor : interceptors) {
                 requestInjection(interceptor);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            log.error("", e);
             addError("Impossible to read classpath resource '%s', see nested exceptions: %s",
                      classPathResource,
                      e.getMessage());
@@ -135,7 +140,12 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
         @Override
         public SqlSessionFactory build(Configuration config) {
             if (extraMappers == null || extraMappers.isEmpty()) {
-                return super.build(config);
+                try {
+                    return super.build(config);
+                } catch (Throwable tr) {
+                    log.error("", tr);
+                    throw new RuntimeException(tr);
+                }
             }
             for (final String resource : extraMappers) {
                 try {
@@ -143,11 +153,17 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
                     InputStream inputStream = Resources.getResourceAsStream(resource);
                     XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, config, resource, config.getSqlFragments());
                     mapperParser.parse();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                } catch (Throwable tr) {
+                    log.error("", tr);
+                    throw new RuntimeException(tr);
                 }
             }
-            return super.build(config);
+            try {
+                return super.build(config);
+            } catch (Throwable tr) {
+                log.error("", tr);
+                throw new RuntimeException(tr);
+            }
         }
     }
 
