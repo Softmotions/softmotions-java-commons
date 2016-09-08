@@ -59,7 +59,7 @@ public class SchedulerModule extends AbstractModule {
         bind(Scheduler.class).toInstance(scheduler);
         bind(SchedulerInitializer.class).asEagerSingleton();
         if ((cfg == null) || cfg.xcfg().configurationsAt("scheduler").isEmpty()) {
-            log.warn("No WBSchedluer module configuration found. Skipping.");
+            log.warn("No SchedulerModule configuration found. Skipping.");
             return;
         }
     }

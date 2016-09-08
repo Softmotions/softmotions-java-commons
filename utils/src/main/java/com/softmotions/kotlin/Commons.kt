@@ -77,6 +77,8 @@ fun Long.toMinutes(): TimeSpec = TimeSpec(this, TimeUnit.MINUTES)
 fun Int.toMinutes(): TimeSpec = TimeSpec(this.toLong(), TimeUnit.MINUTES)
 fun Long.toHours(): TimeSpec = TimeSpec(this, TimeUnit.HOURS)
 fun Int.toHours(): TimeSpec = TimeSpec(this.toLong(), TimeUnit.HOURS)
+fun Long.toDays(): TimeSpec = TimeSpec(this, TimeUnit.DAYS)
+fun Int.toDays(): TimeSpec = TimeSpec(this.toLong(), TimeUnit.DAYS)
 
 ///////////////////////////////////////////////////////////////////////////
 //                              Storage units                            //
