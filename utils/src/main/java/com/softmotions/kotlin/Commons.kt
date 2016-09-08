@@ -48,6 +48,10 @@ data class TimeSpec(val time: Long, val unit: TimeUnit = TimeUnit.MILLISECONDS) 
         return unit.toMillis(time)
     }
 
+    fun toSeconds(): Long {
+        return unit.toSeconds(time)
+    }
+
     fun toNanos(): Long {
         return unit.toNanos(time)
     }
