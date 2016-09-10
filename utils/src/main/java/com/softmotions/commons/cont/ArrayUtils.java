@@ -7,13 +7,13 @@
 
 package com.softmotions.commons.cont;
 
-import org.apache.commons.collections.iterators.ArrayIterator;
-
 import java.lang.reflect.Array;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+
+import org.apache.commons.collections4.iterators.ArrayIterator;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)

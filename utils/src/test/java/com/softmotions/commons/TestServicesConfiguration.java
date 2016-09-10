@@ -1,11 +1,9 @@
 package com.softmotions.commons;
 
-import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

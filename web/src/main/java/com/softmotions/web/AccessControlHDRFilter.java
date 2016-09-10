@@ -1,7 +1,6 @@
 package com.softmotions.web;
 
-import org.apache.commons.lang3.BooleanUtils;
-
+import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -10,7 +9,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * Разрешает все Access-Control-* заголовки.

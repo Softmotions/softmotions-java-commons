@@ -1,7 +1,7 @@
 package com.softmotions.runner
 
 import com.softmotions.commons.string.CmdArgumentsTokenizer
-import org.apache.commons.collections.map.Flat3Map
+import org.apache.commons.collections4.map.Flat3Map
 import java.util.*
 import javax.annotation.concurrent.NotThreadSafe
 
@@ -56,7 +56,7 @@ open class TabularOutputCollector(val expectHeader: Boolean = false,
             val res = (
                     if (header.size > 3)
                         HashMap<String, String>(header.size)
-                    else Flat3Map())
+                    else Flat3Map<String, String>())
                     as MutableMap<String, String>
             for ((idx, v) in it.withIndex()) {
                 if (idx < header.size) {

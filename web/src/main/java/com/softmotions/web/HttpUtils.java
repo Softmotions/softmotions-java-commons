@@ -1,11 +1,11 @@
 package com.softmotions.web;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import java.net.Inet4Address;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -170,9 +170,9 @@ public class HttpUtils {
                                        String overrideServerName,
                                        Integer overrideServerPort) {
         String u = req.getScheme() +
-                "://" + ((overrideServerName != null) ? overrideServerName : req.getServerName()) +
-                ":" + ((overrideServerPort != null) ? overrideServerPort : req.getServerPort()) +
-                req.getRequestURI();
+                   "://" + ((overrideServerName != null) ? overrideServerName : req.getServerName()) +
+                   ":" + ((overrideServerPort != null) ? overrideServerPort : req.getServerPort()) +
+                   req.getRequestURI();
         if (req.getQueryString() != null) {
             u += '?' + req.getQueryString();
         }

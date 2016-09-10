@@ -1,15 +1,14 @@
 package com.softmotions.commons.cont;
 
-import com.softmotions.commons.json.JsonUtils;
+import java.util.Map;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import org.apache.commons.collections.MapIterator;
-import org.apache.commons.collections.map.Flat3Map;
+import org.apache.commons.collections4.MapIterator;
+import org.apache.commons.collections4.map.Flat3Map;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Map;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.softmotions.commons.json.JsonUtils;
 
 /**
  * Fast key->value map with support of typed values and
@@ -17,7 +16,7 @@ import java.util.Map;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class KVOptions extends Flat3Map {
+public class KVOptions extends Flat3Map<String, String> {
 
     public KVOptions() {
     }
@@ -39,7 +38,7 @@ public class KVOptions extends Flat3Map {
     }
 
     public String getString(String key) {
-        return (String) get(key);
+        return get(key);
     }
 
     public int getInt(String key, int defVal) {
@@ -136,7 +135,11 @@ public class KVOptions extends Flat3Map {
             Object val = mit.getValue();
             if (val instanceof Map) {
                 KVOptions nopts = new KVOptions();
-                nopts.putAll((Map) val);
+                Map mval = (Map) val;
+                for (final Object oe : mval.entrySet()) {
+                    Map.Entry e = (Entry) oe;
+                    nopts.put(e.getKey().toString(), e.getValue() != null ? e.getValue().toString() : null);
+                }
                 val = nopts;
             } else if (val instanceof ObjectNode) {
                 KVOptions nopts = new KVOptions();

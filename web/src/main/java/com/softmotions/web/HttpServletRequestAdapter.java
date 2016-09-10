@@ -1,8 +1,14 @@
 package com.softmotions.web;
 
-import org.apache.commons.collections.iterators.IteratorEnumeration;
-import org.apache.commons.collections.map.Flat3Map;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -17,15 +23,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
+
+import org.apache.commons.collections4.iterators.IteratorEnumeration;
+import org.apache.commons.collections4.map.Flat3Map;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -204,7 +205,7 @@ public abstract class HttpServletRequestAdapter implements HttpServletRequest {
         if (attrs == null) {
             return Collections.emptyEnumeration();
         }
-        return new IteratorEnumeration(attrs.keySet().iterator());
+        return new IteratorEnumeration<>(attrs.keySet().iterator());
     }
 
     @Override
@@ -249,7 +250,7 @@ public abstract class HttpServletRequestAdapter implements HttpServletRequest {
 
     @Override
     public String[] getParameterValues(String name) {
-        return new String[0];
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
 
     @Override
@@ -295,7 +296,7 @@ public abstract class HttpServletRequestAdapter implements HttpServletRequest {
     @Override
     public void setAttribute(String name, Object o) {
         if (attrs == null) {
-            attrs = new Flat3Map();
+            attrs = new Flat3Map<>();
         }
         attrs.put(name, o);
     }

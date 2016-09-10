@@ -1,13 +1,13 @@
 package com.softmotions.commons.cont;
 
-import org.apache.commons.collections.map.Flat3Map;
+import org.apache.commons.collections4.map.Flat3Map;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class TinyParamMap extends Flat3Map {
+public class TinyParamMap<V> extends Flat3Map<String, V> {
 
-    public TinyParamMap param(String k, Object v) {
+    public TinyParamMap param(String k, V v) {
         put(k, v);
         return this;
     }

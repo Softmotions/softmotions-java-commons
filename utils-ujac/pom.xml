@@ -23,7 +23,7 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-        <groupId>net.sf.ujac</groupId>
+            <groupId>net.sf.ujac</groupId>
             <artifactId>ujac</artifactId>
             <version>1.0.0</version>
             <exclusions>

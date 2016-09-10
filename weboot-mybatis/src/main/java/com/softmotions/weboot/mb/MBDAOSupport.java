@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.sql.DataSource;
 
-import org.apache.commons.collections.map.Flat3Map;
+import org.apache.commons.collections4.map.Flat3Map;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
@@ -170,7 +170,7 @@ public class MBDAOSupport {
         if (params.length == 1) {
             return params[0];
         }
-        Map<String, Object> pmap = (params.length / 2 > 3) ? new HashMap<>(params.length / 2) : new Flat3Map();
+        Map<String, Object> pmap = (params.length / 2 > 3) ? new HashMap<>(params.length / 2) : new Flat3Map<>();
         String key = null;
         for (int i = 0; i < params.length; ++i) {
             if (i % 2 == 0) {
