@@ -20,7 +20,7 @@ class DirResourcesFilter : Filter {
     override fun doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
         req as HttpServletRequest
         resp as HttpServletResponse
-        if (!getContent(req, resp, "HEAD" == req.method) && !resp.isCommitted) {
+        if (!getContent(req, resp, "HEAD" != req.method) && !resp.isCommitted) {
             chain.doFilter(req, resp)
         }
     }
