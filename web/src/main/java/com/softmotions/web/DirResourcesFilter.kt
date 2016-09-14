@@ -51,7 +51,6 @@ class DirResourcesFilter : Filter {
             log.debug("Serving '${file.absolutePath}' canRead=${file.canRead()} mtype=${req.servletContext.getMimeType(path)}")
         }
         if (!file.canRead()) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND)
             return false
         }
         val mtype = req.servletContext.getMimeType(path)

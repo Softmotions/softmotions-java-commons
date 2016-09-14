@@ -1,21 +1,32 @@
 package com.softmotions.weboot.i18n;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
-
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.Objects;
+import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.tree.ImmutableNode;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Localization support.
@@ -55,8 +66,11 @@ public class I18n {
 
     private Map<Locale, ResourceBundle> bundleCache;
 
+    private boolean forceDefaultLocaleForRequests;
+
     @Inject
     public I18n(HierarchicalConfiguration<ImmutableNode> xcfg) {
+        forceDefaultLocaleForRequests = xcfg.getBoolean("force-default-locale-for-requests", false);
         List<Object> blist = xcfg.getList("messages.bundle");
         ArrayList<String> rnames = new ArrayList<>();
         for (Object v : blist) {
@@ -109,7 +123,7 @@ public class I18n {
 
     @Nonnull
     public Locale getLocale(@Nullable HttpServletRequest req) {
-        if (req == null) {
+        if (req == null || forceDefaultLocaleForRequests) {
             return Locale.getDefault();
         }
         Locale l = (Locale) req.getAttribute(REQ_LOCALE_ATTR_NAME);
@@ -126,6 +140,9 @@ public class I18n {
 
     @Nonnull
     private String fetchRequestLanguage(HttpServletRequest req) {
+        if (forceDefaultLocaleForRequests) {
+            return Locale.getDefault().getLanguage();
+        }
         String lang = req.getParameter(REQ_LOCALE_PARAM_NAME);
         if (StringUtils.isBlank(lang)) {
             Cookie[] cookies = req.getCookies();
@@ -155,7 +172,7 @@ public class I18n {
     }
 
     public void initRequestI18N(HttpServletRequest req, HttpServletResponse resp) {
-        if (req == null) {
+        if (req == null || forceDefaultLocaleForRequests) {
             return;
         }
         String lang = fetchRequestLanguage(req);
@@ -179,6 +196,9 @@ public class I18n {
 
 
     public void saveRequestLang(String lang, HttpServletRequest req, HttpServletResponse resp) {
+        if (forceDefaultLocaleForRequests) {
+            return;
+        }
         lang = lang.toLowerCase();
         if (!isValidISO2Language(lang)) {
             return;
