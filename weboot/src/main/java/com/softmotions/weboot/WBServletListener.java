@@ -1,5 +1,6 @@
 package com.softmotions.weboot;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,11 +27,11 @@ import com.samaxes.filter.CacheFilter;
 import com.samaxes.filter.NoCacheFilter;
 import com.samaxes.filter.util.CacheConfigParameter;
 import com.softmotions.commons.JVMResources;
-import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.cont.ArrayUtils;
 import com.softmotions.commons.cont.Pair;
 import com.softmotions.commons.lifecycle.LifeCycleModule;
 import com.softmotions.commons.lifecycle.LifeCycleService;
+import com.softmotions.web.DirResourcesFilter;
 import com.softmotions.web.JarResourcesFilter;
 
 /**
@@ -250,6 +251,36 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
             fr.setInitParameter(pp, ArrayUtils.stringJoin(opts, ","));
         }
         fr.setInitParameter("strip-prefix", env.getAppPrefix());
+    }
+
+
+    protected void initDirResources(WBConfiguration env, ServletContext sctx) {
+        List<HierarchicalConfiguration<ImmutableNode>> rlist = env.xcfg().configurationsAt("dir-web-resources.resource");
+        int c = 0;
+        for (HierarchicalConfiguration rcfg : rlist) {
+            String dir = StringUtils.trimToNull(rcfg.getString("dir"));
+            String mount = StringUtils.trimToNull(rcfg.getString("mount"));
+            if (StringUtils.isBlank(dir) || StringUtils.isBlank(mount)) {
+                continue;
+            }
+            File rootFile = new File(dir);
+            if (!rootFile.isDirectory()) {
+                log.error("Content of directory: '{}' is not accessible", rootFile.getAbsolutePath());
+                continue;
+            }
+            if (!mount.endsWith("/")) {
+                mount += '/';
+            }
+            if (mount.length() > 1 && mount.charAt(0) != '/') {
+                mount = '/' + mount;
+            }
+            mount = env.getAppPrefix() + mount + '*';
+            log.info("Serving directory: '{}' as {}", rootFile.getAbsolutePath(), mount);
+            FilterRegistration.Dynamic fr = sctx.addFilter("dirResourcesFilter" + (c++), DirResourcesFilter.class);
+            fr.addMappingForUrlPatterns(null, false, mount);
+            fr.setInitParameter("rootDir", rootFile.getAbsolutePath());
+            fr.setInitParameter("stripPrefix", mount.substring(0, mount.length() - 2));
+        }
     }
 
     protected abstract Collection<Module> getStartupModules();

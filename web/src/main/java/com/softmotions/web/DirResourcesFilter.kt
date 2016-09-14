@@ -2,6 +2,7 @@ package com.softmotions.web
 
 import com.softmotions.kotlin.toFile
 import org.apache.commons.io.IOUtils
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import javax.servlet.*
@@ -15,7 +16,11 @@ class DirResourcesFilter : Filter {
 
     private val log = LoggerFactory.getLogger(DirResourcesFilter::class.java)
 
-    private lateinit var rootDir: Path;
+    private lateinit var rootDir: Path
+
+    private var stripPrefix: String = ""
+
+    private var welcomeFile = "index.html"
 
     override fun doFilter(req: ServletRequest, resp: ServletResponse, chain: FilterChain) {
         req as HttpServletRequest
@@ -29,7 +34,7 @@ class DirResourcesFilter : Filter {
                            resp: HttpServletResponse,
                            transfer: Boolean): Boolean {
 
-        val path = req.pathInfo?.substring(1) ?: return false
+        var path = req.requestURI.removePrefix(stripPrefix)
         if (path.isEmpty()) {
             if (log.isDebugEnabled) {
                 log.debug("Sending redirect to: ${req.requestURI + '/'}")
@@ -37,26 +42,32 @@ class DirResourcesFilter : Filter {
             resp.sendRedirect(req.requestURI + '/')
             return false
         }
-
+        if (path == "/") {
+            path = "index.html"
+        }
+        path = path.removePrefix("/")
         val file = rootDir.resolve(path).toFile()
         if (log.isDebugEnabled) {
-            log.debug("File readable=${file.canRead()} path=${file.absolutePath}")
+            log.debug("Serving '${file.absolutePath}' canRead=${file.canRead()} mtype=${req.servletContext.getMimeType(path)}")
         }
         if (!file.canRead()) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND)
             return false
         }
         val mtype = req.servletContext.getMimeType(path)
-        if (log.isDebugEnabled) {
-            log.debug("MimeType=${mtype} for path=${path}")
-        }
         if (mtype != null) {
             resp.contentType = mtype
         }
-        resp.setContentLengthLong(file.length())
+
         if (transfer) {
             file.inputStream().use {
-                IOUtils.copy(it, resp.outputStream)
+                val output = ByteArrayOutputStream()
+                IOUtils.copy(it, output)
+                resp.setContentLength(output.size())
+                if (transfer) {
+                    output.writeTo(resp.outputStream)
+                    resp.outputStream.flush()
+                }
             }
         }
         resp.flushBuffer()
@@ -66,10 +77,20 @@ class DirResourcesFilter : Filter {
     override fun init(conf: FilterConfig) {
         val rootDir = (conf.getInitParameter("rootDir")
                 ?: throw ServletException("Missing required filter config parameter: 'rootDir'")).toFile()
+        if (rootDir.path.contains("..")) {
+            throw ServletException("Paths containing upper level relatives '/../' are prohibited. Path: ${rootDir.path}")
+        }
         if (!rootDir.isDirectory) {
             throw ServletException("rootDir: ${rootDir} is not a directory")
         }
         this.rootDir = rootDir.toPath()
+        stripPrefix = conf.getInitParameter("stripPrefix") ?: stripPrefix
+        welcomeFile = conf.getInitParameter("welcomeFile") ?: welcomeFile
+        if (log.isInfoEnabled) {
+            log.info("Root: ${this.rootDir}")
+            log.info("stripPrefix: '${stripPrefix}'")
+            log.info("welcomeFile: '${welcomeFile}'")
+        }
     }
 
     override fun destroy() {
