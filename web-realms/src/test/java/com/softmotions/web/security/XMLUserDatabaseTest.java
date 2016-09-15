@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import org.testng.Assert;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -37,76 +37,79 @@ public class XMLUserDatabaseTest {
         XMLWSUserDatabase db =
                 new XMLWSUserDatabase("db1",
                                       "com/softmotions/web/security/test-users-db.xml",
-                                      false);
+                                      false, "");
 
         List<WSGroup> groups = toList(db.getGroups());
         List<WSRole> roles = toList(db.getRoles());
         List<WSUser> users = toList(db.getUsers());
 
-        assertEquals(4, roles.size());
-        assertEquals(3, groups.size());
-        assertEquals(2, users.size());
+        Assert.assertEquals(4, roles.size());
+        Assert.assertEquals(3, groups.size());
+        Assert.assertEquals(2, users.size());
 
         for (final WSRole role : roles) {
-            assertNotNull(role.getName());
-            assertTrue(role.getUserDatabase() == db);
+            Assert.assertNotNull(role.getName());
+            Assert.assertTrue(role.getUserDatabase() == db);
         }
         for (final WSGroup group : groups) {
-            assertNotNull(group.getName());
-            assertTrue(group.getUserDatabase() == db);
+            Assert.assertNotNull(group.getName());
+            Assert.assertTrue(group.getUserDatabase() == db);
         }
         for (final WSUser user : users) {
-            assertNotNull(user.getName());
-            assertTrue(user.getUserDatabase() == db);
+            Assert.assertNotNull(user.getName());
+            Assert.assertTrue(user.getUserDatabase() == db);
         }
 
         WSUser user = db.findUser("user1");
-        assertNotNull(user);
-        assertEquals("user1", user.getName());
-        assertNull(user.getFullName());
+        Assert.assertNotNull(user);
+        Assert.assertEquals("user1", user.getName());
+        Assert.assertNull(user.getFullName());
+        Assert.assertTrue(user.matchPassword("pw1"));
 
         roles = toList(user.getRoles());
-        assertEquals(3, roles.size());
+        Assert.assertEquals(3, roles.size());
         for (WSRole role : roles) {
-            assertTrue("role1".equals(role.getName()) ||
+            Assert.assertTrue("role1".equals(role.getName()) ||
                        "role2".equals(role.getName()) ||
                        "role3".equals(role.getName())
             );
-            assertTrue(user.isInRole(role));
+            Assert.assertTrue(user.isInRole(role));
             if ("role2".equals(role.getName())) {
-                assertEquals("description of role2", role.getDescription());
+                Assert.assertEquals("description of role2", role.getDescription());
             }
-            assertNotNull(db.findRole(role.getName()));
+            Assert.assertNotNull(db.findRole(role.getName()));
         }
 
         WSGroup group = db.findGroup("group1");
         roles = toList(group.getRoles());
-        assertEquals(3, roles.size());
+        Assert.assertEquals(3, roles.size());
         for (final WSRole role : roles) {
-            assertTrue(group.isInRole(role));
+            Assert.assertTrue(group.isInRole(role));
         }
 
         group = db.findGroup("group2");
         roles = toList(group.getRoles());
-        assertEquals(1, roles.size());
+        Assert.assertEquals(1, roles.size());
         for (final WSRole role : roles) {
-            assertTrue(group.isInRole(role));
+            Assert.assertTrue(group.isInRole(role));
         }
 
         WSRole role = db.createRole("role5", null);
         roles = toList(db.getRoles());
-        assertEquals(5, roles.size());
+        Assert.assertEquals(5, roles.size());
 
         user = db.findUser("user2");
-        assertNotNull(user);
-        assertFalse(user.isInRole(role));
+        Assert.assertNotNull(user);
+        Assert.assertFalse(user.matchPassword("pw1"));
+        Assert.assertTrue(user.matchPassword("pw2"));
+        Assert.assertFalse(user.isInRole(role));
         user.addRole(role);
-        assertTrue(user.isInRole(role));
+        Assert.assertTrue(user.isInRole(role));
         role = db.createRole("role6", null);
         user.addRole(role);
-        assertTrue(user.isInRole(role));
+        Assert.assertTrue(user.isInRole(role));
         user.removeRole(db.findRole("role5"));
-        assertFalse(user.isInRole(db.findRole("role5")));
+        Assert.assertFalse(user.isInRole(db.findRole("role5")));
         user.addRole(db.createRole("role7", null));
 
         group = db.findGroup("group3");
@@ -120,13 +123,13 @@ public class XMLUserDatabaseTest {
         String ncfg = sw.toString();
         log.info("Resulted configuration: \n{}", ncfg);
 
-        assertFalse(ncfg.contains("role5"));
-        assertTrue(ncfg.contains("role6"));
-        assertTrue(ncfg.contains("role7"));
-        assertTrue(ncfg.contains("group2"));
-        assertTrue(ncfg.contains("group3"));
-        assertTrue(ncfg.contains("user1"));
-        assertTrue(ncfg.contains("user2"));
+        Assert.assertFalse(ncfg.contains("role5"));
+        Assert.assertTrue(ncfg.contains("role6"));
+        Assert.assertTrue(ncfg.contains("role7"));
+        Assert.assertTrue(ncfg.contains("group2"));
+        Assert.assertTrue(ncfg.contains("group3"));
+        Assert.assertTrue(ncfg.contains("user1"));
+        Assert.assertTrue(ncfg.contains("user2"));
     }
 
 }

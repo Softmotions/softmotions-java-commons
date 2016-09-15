@@ -1,6 +1,7 @@
 package com.softmotions.web.security;
 
 import javax.security.auth.Subject;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,11 @@ public abstract class AbstractWSUser implements WSUser {
     @Override
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public boolean matchPassword(String inputPassword) throws NoSuchAlgorithmException {
+        return inputPassword.equals(password);
     }
 
     @Override

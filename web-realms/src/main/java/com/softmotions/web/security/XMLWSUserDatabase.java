@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -49,6 +53,8 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
     private boolean canSave;
 
+    private String hashAlg;
+
     @Override
     public boolean isCanUsersWrite() {
         return canSave;
@@ -79,9 +85,10 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return databaseName;
     }
 
-    public XMLWSUserDatabase(String dbName, String xmlLocation, boolean autoSave) {
+    public XMLWSUserDatabase(String dbName, String xmlLocation, boolean autoSave, String hashAlg) {
         this.databaseName = dbName;
         this.xmlLocationUrl = Helpers.getResourceAsUrl(xmlLocation, getClass());
+        this.hashAlg = hashAlg; // TODO check value!
         if (xmlLocationUrl == null) {
             throw new RuntimeException("Failed to find database xml file: " + xmlLocation);
         }
@@ -553,6 +560,9 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
         private String[] groupNames;
 
+        // ^(?:\{)([^\}]+)(?:\})} - match "sha256" in "{sha256}9f86d081884c..."
+        private final Pattern hashAlgRegex = Pattern.compile("^(?:\\{)([^\\}]+)(?:\\})");
+
         private WSUserImpl(HierarchicalConfiguration cfg) {
             super(cfg.getString("[@name]"), cfg.getString("[@fullName]"), cfg.getString("[@password]"));
             this.cfg = cfg;
@@ -564,6 +574,50 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         @Override
         public WSUserDatabase getUserDatabase() {
             return XMLWSUserDatabase.this;
+        }
+
+        @Override
+        public boolean matchPassword(String inputPassword) throws NoSuchAlgorithmException {
+            String hashAlgorithm;
+            String hashedPassword;
+            String hashedInputPassword;
+
+            Matcher matcher = hashAlgRegex.matcher(password);
+            if (matcher.find()) {
+                hashAlgorithm = matcher.group(1).toUpperCase();
+                hashedPassword = matcher.replaceAll("");
+
+                byte[] hash;
+                switch (hashAlgorithm) {
+                    case "SHA256":
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        hash = digest.digest(inputPassword.getBytes());
+                        break;
+                    default:
+                        throw new NoSuchAlgorithmException("Unknown hash algorithm: \"" + hashAlgorithm + "\"");
+                }
+
+                // Convert byte[] to hex string
+                hashedInputPassword = "";
+                for (int i = 0; i < hash.length; i++) {
+                    String hex = Integer.toHexString(0xff & hash[i]);
+                    if (hex.length() == 1) {
+                        hashedInputPassword += '0';
+                    }
+                    hashedInputPassword += hex;
+                }
+            } else {
+                hashAlgorithm = "plain text";
+                hashedPassword = password;
+                hashedInputPassword = inputPassword;
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Hash algorithm: {}", hashAlgorithm);
+                log.debug("hashed password: {}", hashedPassword);
+                log.debug("hashed input password: {}", hashedInputPassword);
+            }
+            return hashedInputPassword.equals(hashedPassword);
         }
 
         @Override

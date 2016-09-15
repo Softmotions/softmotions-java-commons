@@ -42,6 +42,7 @@ public class XMLWSUserDatabaseJNDIFactory extends AbstractWSUserDatabaseJNDIFact
             }
             boolean autoSave = false;
             String config = null;
+            String hashAlg = "";
             RefAddr ra = ref.get("config");
             if (ra != null) {
                 config = ra.getContent().toString();
@@ -53,9 +54,14 @@ public class XMLWSUserDatabaseJNDIFactory extends AbstractWSUserDatabaseJNDIFact
             if (config == null) {
                 throw new RuntimeException("Missing required 'config' parameter");
             }
+            ra = ref.get("hashAlg");
+            if (ra != null) {
+                hashAlg = ra.getContent().toString();
+            }
             log.info("Using database configuration: {}", config);
             log.info("autoSave: {}", autoSave);
-            db = createWrapper(new XMLWSUserDatabase(name.toString(), config, autoSave));
+            log.info("hashAlg: {}", hashAlg);
+            db = createWrapper(new XMLWSUserDatabase(name.toString(), config, autoSave, hashAlg));
             DB_CACHE.put(name, (WSUserDatabaseWrapper) db);
         }
         return db;

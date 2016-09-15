@@ -1,8 +1,8 @@
 package com.softmotions.commons.cont;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.*;
+import org.testng.Assert;
 
 
 /**
@@ -14,14 +14,14 @@ public class KVOptionsTest {
     @Test
     public void testOptions() throws Exception {
         KVOptions opts = new KVOptions("a=b");
-        assertEquals("b", opts.get("a"));
+        Assert.assertEquals("b", opts.get("a"));
 
         opts = new KVOptions("a=b,vvv=ccc,fff =xxx,esc\\,aped=some\\, escaped\\, text, k= 123");
-        assertEquals("b", opts.get("a"));
-        assertEquals("ccc", opts.get("vvv"));
-        assertEquals("xxx", opts.get("fff"));
-        assertEquals("123", opts.get("k"));
-        assertEquals("some, escaped, text", opts.get("esc,aped"));
+        Assert.assertEquals("b", opts.get("a"));
+        Assert.assertEquals("ccc", opts.get("vvv"));
+        Assert.assertEquals("xxx", opts.get("fff"));
+        Assert.assertEquals("123", opts.get("k"));
+        Assert.assertEquals("some, escaped, text", opts.get("esc,aped"));
 
 
         System.out.println("opts=" + new KVOptions("foo=n,bar=b"));

@@ -6,7 +6,7 @@ import com.softmotions.commons.io.watcher.FSWatcher;
 import com.softmotions.commons.io.watcher.FSWatcherCollectEventHandler;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import static org.junit.Assert.*;
+import org.testng.Assert;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -27,9 +27,9 @@ public class ScannerTest {
     @Test
     public void testScanner() throws Exception {
         final String bdir = System.getProperty("project.basedir");
-        assertNotNull(bdir);
+        Assert.assertNotNull(bdir);
         final Path baseDir = Paths.get(bdir, "src/test/test-data");
-        assertTrue(Files.isDirectory(baseDir));
+        Assert.assertTrue(Files.isDirectory(baseDir));
 
         DirectoryScannerFactory dsf = new DirectoryScannerFactory(baseDir);
 
@@ -37,12 +37,12 @@ public class ScannerTest {
         try (DirectoryScanner scanner = dsf.createScanner()) {
             DirectoryScannerCollectVisitor cv = new DirectoryScannerCollectVisitor();
             scanner.scan(cv);
-            assertEquals(2, cv.getMatches().size());
-            assertEquals(0, cv.getErrors().size());
+            Assert.assertEquals(2, cv.getMatches().size());
+            Assert.assertEquals(0, cv.getErrors().size());
             for (Pair<Path, BasicFileAttributes> p : cv.getMatches()) {
                 Path path = p.getOne();
                 String fname = path.getName(path.getNameCount() - 1).toString();
-                assertTrue("b.txt".equals(fname) || "c.txt".equals(fname));
+                Assert.assertTrue("b.txt".equals(fname) || "c.txt".equals(fname));
             }
             scanner.scan(cv);
         }
@@ -53,12 +53,12 @@ public class ScannerTest {
         try (DirectoryScanner scanner = dsf.createScanner()) {
             DirectoryScannerCollectVisitor cv = new DirectoryScannerCollectVisitor();
             scanner.scan(cv);
-            assertEquals(1, cv.getMatches().size());
-            assertEquals(0, cv.getErrors().size());
+            Assert.assertEquals(1, cv.getMatches().size());
+            Assert.assertEquals(0, cv.getErrors().size());
             for (Pair<Path, BasicFileAttributes> p : cv.getMatches()) {
                 Path path = p.getOne();
                 String fname = path.getName(path.getNameCount() - 1).toString();
-                assertTrue("c.txt".equals(fname));
+                Assert.assertTrue("c.txt".equals(fname));
             }
             scanner.scan(cv);
         }
@@ -69,8 +69,8 @@ public class ScannerTest {
         try (DirectoryScanner scanner = dsf.createScanner()) {
             DirectoryScannerCollectVisitor cv = new DirectoryScannerCollectVisitor();
             scanner.scan(cv);
-            assertEquals(0, cv.getMatches().size());
-            assertEquals(0, cv.getErrors().size());
+            Assert.assertEquals(0, cv.getMatches().size());
+            Assert.assertEquals(0, cv.getErrors().size());
         }
 
         dsf.resetExcludes().resetIncludes();
@@ -87,11 +87,11 @@ public class ScannerTest {
         try (DirectoryScanner scanner = dsf.createScanner()) {
             DirectoryScannerCollectVisitor cv = new DirectoryScannerCollectVisitor();
             scanner.scan(cv);
-            assertEquals(expected.length, cv.getMatches().size());
-            assertEquals(0, cv.getErrors().size());
+            Assert.assertEquals(expected.length, cv.getMatches().size());
+            Assert.assertEquals(0, cv.getErrors().size());
             for (Pair<Path, BasicFileAttributes> p : cv.getMatches()) {
                 Path path = p.getOne();
-                assertTrue(-1 != ArrayUtils.indexOf(expected, path.toString()));
+                Assert.assertTrue(-1 != ArrayUtils.indexOf(expected, path.toString()));
             }
         }
     }
@@ -99,11 +99,11 @@ public class ScannerTest {
     @Test
     public void testWatcher() throws Exception {
         String bdir = System.getProperty("project.basedir");
-        assertNotNull(bdir);
+        Assert.assertNotNull(bdir);
         Path baseDir = Paths.get(bdir, "src/test/test-data");
-        assertTrue(Files.isDirectory(baseDir));
+        Assert.assertTrue(Files.isDirectory(baseDir));
         Path tdir = Files.createTempDirectory("ScannerTest-");
-        assertTrue(Files.exists(tdir));
+        Assert.assertTrue(Files.exists(tdir));
         FileUtils.copyDirectory(baseDir.toFile(), tdir.toFile());
 
         //log.info("tdir=" + tdir);
@@ -113,9 +113,9 @@ public class ScannerTest {
         try (DirectoryScanner scanner = dsf.createScanner()) {
             DirectoryScannerCollectVisitor cv = new DirectoryScannerCollectVisitor();
             scanner.scan(cv);
-            assertEquals(1, cv.getMatches().size());
-            assertEquals(0, cv.getErrors().size());
-            assertEquals("com/softmotions/commons/io/scanner/data/b/b.txt",
+            Assert.assertEquals(1, cv.getMatches().size());
+            Assert.assertEquals(0, cv.getErrors().size());
+            Assert.assertEquals("com/softmotions/commons/io/scanner/data/b/b.txt",
                          cv.getMatches().get(0).getOne().toString());
         }
 
@@ -129,7 +129,7 @@ public class ScannerTest {
         DirectoryScanner scanner = dsf.createScanner();
         FSWatcherCollectEventHandler cv = new FSWatcherCollectEventHandler(tdir);
         FSWatcher watcher = scanner.activateFileSystemWatcher(cv, 0, null);
-        assertNotNull(watcher);
+        Assert.assertNotNull(watcher);
 
         Files.createFile(tdir.resolve("foo.txt"));
         Files.createFile(tdir.resolve("foo.php"));
@@ -160,27 +160,27 @@ public class ScannerTest {
         log.info("d=" + cv.getDeleted());
         log.info("r=" + cv.getRegistered());*/
 
-        assertTrue(cv.getCreated().contains(Paths.get("foo.txt")) ||
+        Assert.assertTrue(cv.getCreated().contains(Paths.get("foo.txt")) ||
                    cv.getRegistered().contains(Paths.get("foo.txt")));
 
-        assertTrue(cv.getCreated().contains(Paths.get("h/a/b/bar2.txt")) ||
+        Assert.assertTrue(cv.getCreated().contains(Paths.get("h/a/b/bar2.txt")) ||
                    cv.getRegistered().contains(Paths.get("h/a/b/bar2.txt")));
 
-        assertTrue(cv.getCreated().contains(Paths.get("h/a/b/bar.txt")) ||
+        Assert.assertTrue(cv.getCreated().contains(Paths.get("h/a/b/bar.txt")) ||
                    cv.getRegistered().contains(Paths.get("h/a/b/bar.txt")));
 
 
-        assertTrue(cv.getModified().contains(Paths.get("foo.txt")));
+        Assert.assertTrue(cv.getModified().contains(Paths.get("foo.txt")));
 
-        assertTrue(cv.getDeleted().contains(Paths.get("h/a/b/bar2.txt")));
-        assertTrue(cv.getDeleted().contains(Paths.get("h/a/b/foo.cpp")));
-        assertTrue(cv.getDeleted().contains(Paths.get("h/a/b/bar.txt")));
+        Assert.assertTrue(cv.getDeleted().contains(Paths.get("h/a/b/bar2.txt")));
+        Assert.assertTrue(cv.getDeleted().contains(Paths.get("h/a/b/foo.cpp")));
+        Assert.assertTrue(cv.getDeleted().contains(Paths.get("h/a/b/bar.txt")));
 
 
-        assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/a/abc.txt")));
-        assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/b/b.txt")));
-        assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/b/c.txt")));
-        assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/b/c/efg.txt")));
+        Assert.assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/a/abc.txt")));
+        Assert.assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/b/b.txt")));
+        Assert.assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/b/c.txt")));
+        Assert.assertTrue(cv.getRegistered().contains(Paths.get("com/softmotions/commons/io/scanner/data/b/c/efg.txt")));
 
         //watcher.join();
         FileUtils.deleteDirectory(tdir.toFile());

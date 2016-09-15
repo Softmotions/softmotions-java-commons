@@ -1,5 +1,6 @@
 package com.softmotions.web.security;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.Iterator;
 
@@ -44,6 +45,10 @@ public interface WSUser extends Principal {
      */
     void setPassword(String password);
 
+    /**
+     * Check inputPassword equals logon password.
+     */
+    boolean matchPassword(String inputPassword) throws NoSuchAlgorithmException;
 
     String getEmail();
 

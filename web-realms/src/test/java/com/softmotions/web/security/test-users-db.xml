@@ -26,7 +26,7 @@
     </user>
 
     <user name="user2"
-          password="pw2"
+          password="{sha256}93915a0a4bf8f634cb1856494dd4304472ad46b9827f541f76b6761c49cc55b0"
           fullName="user2 password"
           groups="group3">
     </user>
