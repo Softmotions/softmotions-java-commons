@@ -88,7 +88,17 @@ public class XMLWSUserDatabase implements WSUserDatabase {
     public XMLWSUserDatabase(String dbName, String xmlLocation, boolean autoSave, String hashAlg) {
         this.databaseName = dbName;
         this.xmlLocationUrl = Helpers.getResourceAsUrl(xmlLocation, getClass());
-        this.hashAlg = hashAlg; // TODO check value!
+        this.hashAlg = "";
+        if (!hashAlg.isEmpty()) {
+            try {
+                // check hashAlg is supported
+                getHash(hashAlg, "");
+                this.hashAlg = hashAlg;
+            } catch (NoSuchAlgorithmException e) {
+                log.error("", e);
+                throw new RuntimeException(e);
+            }
+        }
         if (xmlLocationUrl == null) {
             throw new RuntimeException("Failed to find database xml file: " + xmlLocation);
         }
@@ -392,7 +402,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             }
             xcfg.addProperty("user(-1)[@name]", username);
             if (password != null) {
-                xcfg.addProperty("user[@password]", password);
+                xcfg.addProperty("user[@password]", getHashedPassword(password));
             }
             if (fullName != null) {
                 xcfg.addProperty("user[@fullName]", fullName);
@@ -552,6 +562,40 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return res;
     }
 
+    private String getHash(String algorithm, String input) throws NoSuchAlgorithmException {
+        byte[] hash;
+        switch (algorithm.toUpperCase()) {
+            case "SHA256":
+                MessageDigest digest =  MessageDigest.getInstance("SHA-256");
+                hash = digest.digest(input.getBytes());
+                break;
+            default:
+                throw new NoSuchAlgorithmException("Unsupported hash algorithm: \"" + algorithm + "\"");
+        }
+
+        // Convert byte[] to hex string
+        StringBuilder hashedInput = new StringBuilder("");
+        for (int i = 0; i < hash.length; i++) {
+            String hex = Integer.toHexString(0xff & hash[i]);
+            if (hex.length() == 1) {
+                hashedInput.append('0');
+            }
+            hashedInput.append(hex);
+        }
+        return hashedInput.toString();
+    }
+
+    private String getHashedPassword(String password) {
+        if (!hashAlg.isEmpty()) {
+            try {
+                return "{" + hashAlg + "}" + getHash(hashAlg, password);
+            } catch (NoSuchAlgorithmException e) {
+                // fallback - plain text
+            }
+        }
+        return password;
+    }
+
     private final class WSUserImpl extends AbstractWSUser {
 
         private final HierarchicalConfiguration cfg;
@@ -577,6 +621,39 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         }
 
         @Override
+        public void setName(String name) {
+            synchronized (lock) {
+                super.setName(name);
+                cfg.setProperty("[@name]", name);
+            }
+        }
+
+        @Override
+        public void setFullName(String fullName) {
+            synchronized (lock) {
+                super.setFullName(fullName);
+                cfg.setProperty("[@fullName]", fullName);
+            }
+        }
+
+        @Override
+        public void setEmail(String email) {
+            synchronized (lock) {
+                super.setEmail(email);
+                cfg.setProperty("[@email]", email);
+            }
+        }
+
+        @Override
+        public void setPassword(String password) {
+            synchronized (lock) {
+                password = getHashedPassword(password);
+                super.setPassword(password);
+                cfg.setProperty("[@password]", password);
+            }
+        }
+
+        @Override
         public boolean matchPassword(String inputPassword) throws NoSuchAlgorithmException {
             String hashAlgorithm;
             String hashedPassword;
@@ -584,28 +661,9 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
             Matcher matcher = hashAlgRegex.matcher(password);
             if (matcher.find()) {
-                hashAlgorithm = matcher.group(1).toUpperCase();
-                hashedPassword = matcher.replaceAll("");
-
-                byte[] hash;
-                switch (hashAlgorithm) {
-                    case "SHA256":
-                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                        hash = digest.digest(inputPassword.getBytes());
-                        break;
-                    default:
-                        throw new NoSuchAlgorithmException("Unknown hash algorithm: \"" + hashAlgorithm + "\"");
-                }
-
-                // Convert byte[] to hex string
-                hashedInputPassword = "";
-                for (int i = 0; i < hash.length; i++) {
-                    String hex = Integer.toHexString(0xff & hash[i]);
-                    if (hex.length() == 1) {
-                        hashedInputPassword += '0';
-                    }
-                    hashedInputPassword += hex;
-                }
+                hashAlgorithm = matcher.group(1);
+                hashedPassword = matcher.replaceFirst("");
+                hashedInputPassword = getHash(hashAlgorithm, inputPassword);
             } else {
                 hashAlgorithm = "plain text";
                 hashedPassword = password;
@@ -614,8 +672,8 @@ public class XMLWSUserDatabase implements WSUserDatabase {
 
             if (log.isDebugEnabled()) {
                 log.debug("Hash algorithm: {}", hashAlgorithm);
-                log.debug("hashed password: {}", hashedPassword);
-                log.debug("hashed input password: {}", hashedInputPassword);
+                log.debug("Hashed password: {}", hashedPassword);
+                log.debug("Hashed input password: {}", hashedInputPassword);
             }
             return hashedInputPassword.equals(hashedPassword);
         }

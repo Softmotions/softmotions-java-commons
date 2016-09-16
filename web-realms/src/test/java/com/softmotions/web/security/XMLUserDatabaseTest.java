@@ -37,7 +37,7 @@ public class XMLUserDatabaseTest {
         XMLWSUserDatabase db =
                 new XMLWSUserDatabase("db1",
                                       "com/softmotions/web/security/test-users-db.xml",
-                                      false, "");
+                                      false, "sha256");
 
         List<WSGroup> groups = toList(db.getGroups());
         List<WSRole> roles = toList(db.getRoles());
@@ -102,6 +102,12 @@ public class XMLUserDatabaseTest {
         Assert.assertNotNull(user);
         Assert.assertFalse(user.matchPassword("pw1"));
         Assert.assertTrue(user.matchPassword("pw2"));
+        Assert.assertNull(user.getEmail());
+        user.setEmail("user2@users.com");
+        Assert.assertEquals("user2 password", user.getFullName());
+        user.setFullName("user2 fullname");
+        Assert.assertEquals("user2", user.getName());
+        user.setName("user2 name");
         Assert.assertFalse(user.isInRole(role));
         user.addRole(role);
         Assert.assertTrue(user.isInRole(role));
@@ -116,6 +122,15 @@ public class XMLUserDatabaseTest {
         group.addRole(db.findRole("role5"));
         db.removeRole(db.findRole("role5"));
 
+        user = db.findUser("user1");
+        db.removeUser(user);
+
+        db.createUser("user3", "pw3", "user3added");
+        user = db.findUser("user3");
+        Assert.assertNotNull(user);
+        String password = user.getPassword();
+        Assert.assertTrue(password.startsWith("{sha256}"));
+        Assert.assertTrue(password.length() == "{sha256}".length() + 64); // check hash length
 
         StringWriter sw = new StringWriter();
         db.save(sw);
@@ -128,8 +143,14 @@ public class XMLUserDatabaseTest {
         Assert.assertTrue(ncfg.contains("role7"));
         Assert.assertTrue(ncfg.contains("group2"));
         Assert.assertTrue(ncfg.contains("group3"));
-        Assert.assertTrue(ncfg.contains("user1"));
+        Assert.assertFalse(ncfg.contains("user1"));
         Assert.assertTrue(ncfg.contains("user2"));
+        Assert.assertTrue(ncfg.contains("user2@users.com"));
+        Assert.assertFalse(ncfg.contains("user2 password"));
+        Assert.assertTrue(ncfg.contains("user2 fullname"));
+        Assert.assertTrue(ncfg.contains("user2 name"));
+        Assert.assertTrue(ncfg.contains("user3"));
+        Assert.assertTrue(ncfg.contains("user3added"));
     }
 
 }
