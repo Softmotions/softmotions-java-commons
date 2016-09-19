@@ -85,9 +85,14 @@ public class XMLWSUserDatabase implements WSUserDatabase {
         return databaseName;
     }
 
+    public XMLWSUserDatabase(String dbName, String xmlLocation, boolean autoSave) {
+        this(dbName, xmlLocation, autoSave, "");
+    }
+
     public XMLWSUserDatabase(String dbName, String xmlLocation, boolean autoSave, String hashAlg) {
         this.databaseName = dbName;
         this.xmlLocationUrl = Helpers.getResourceAsUrl(xmlLocation, getClass());
+        // hashAlg - hash algorithm for storing new passwords in DB. Empty - for plain text
         this.hashAlg = "";
         if (!hashAlg.isEmpty()) {
             try {
