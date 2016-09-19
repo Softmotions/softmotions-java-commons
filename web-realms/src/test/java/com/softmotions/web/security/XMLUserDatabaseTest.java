@@ -45,7 +45,7 @@ public class XMLUserDatabaseTest {
 
         Assert.assertEquals(4, roles.size());
         Assert.assertEquals(3, groups.size());
-        Assert.assertEquals(2, users.size());
+        Assert.assertEquals(3, users.size());
 
         for (final WSRole role : roles) {
             Assert.assertNotNull(role.getName());
@@ -122,15 +122,20 @@ public class XMLUserDatabaseTest {
         group.addRole(db.findRole("role5"));
         db.removeRole(db.findRole("role5"));
 
+        user = db.findUser("user3");
+        Assert.assertNotNull(user);
+        Assert.assertTrue(user.matchPassword("pw3"));
+
         user = db.findUser("user1");
         db.removeUser(user);
 
-        db.createUser("user3", "pw3", "user3added");
-        user = db.findUser("user3");
+        db.createUser("user4", "pw4", "user4added");
+        user = db.findUser("user4");
         Assert.assertNotNull(user);
         String password = user.getPassword();
         Assert.assertTrue(password.startsWith("{sha256}"));
         Assert.assertTrue(password.length() == "{sha256}".length() + 64); // check hash length
+        Assert.assertTrue(user.matchPassword("pw4"));
 
         StringWriter sw = new StringWriter();
         db.save(sw);
@@ -150,7 +155,9 @@ public class XMLUserDatabaseTest {
         Assert.assertTrue(ncfg.contains("user2 fullname"));
         Assert.assertTrue(ncfg.contains("user2 name"));
         Assert.assertTrue(ncfg.contains("user3"));
-        Assert.assertTrue(ncfg.contains("user3added"));
+        Assert.assertTrue(ncfg.contains("user3 password"));
+        Assert.assertTrue(ncfg.contains("user4"));
+        Assert.assertTrue(ncfg.contains("user4added"));
     }
 
 }

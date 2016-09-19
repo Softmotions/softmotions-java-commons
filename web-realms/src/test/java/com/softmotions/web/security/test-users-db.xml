@@ -31,5 +31,9 @@
           groups="group3">
     </user>
 
+    <user name="user3"
+          password="{bcrypt}$2a$10$qLnBMUXSoxXHmRNcqWPNH.xoz3W8Abu/NLA7f9iEFV6hpiUN1Sabi"
+          fullName="user3 password">
+    </user>
 
 </database>

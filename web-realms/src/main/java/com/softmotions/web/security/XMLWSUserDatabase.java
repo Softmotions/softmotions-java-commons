@@ -706,7 +706,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
                     hashedInputPassword = getHash(hashAlgorithm, inputPassword);
                 }
             } else {
-                hashAlgorithm = "plain text";
+                hashAlgorithm = "plain";
                 hashedPassword = password;
                 hashedInputPassword = inputPassword;
             }
