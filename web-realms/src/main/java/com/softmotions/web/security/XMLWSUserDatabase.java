@@ -21,6 +21,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -28,6 +29,8 @@ import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jodd.util.BCrypt;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -568,17 +571,41 @@ public class XMLWSUserDatabase implements WSUserDatabase {
     }
 
     private String getHash(String algorithm, String input) throws NoSuchAlgorithmException {
+        return getHash(algorithm, input, null);
+    }
+
+    private String getHash(String algorithm, String input, @Nullable String salt) throws NoSuchAlgorithmException {
         byte[] hash;
         switch (algorithm.toUpperCase()) {
             case "SHA256":
-                MessageDigest digest =  MessageDigest.getInstance("SHA-256");
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                if (salt != null) {
+                    digest.update(fromHex(salt));
+                }
                 hash = digest.digest(input.getBytes());
                 break;
+            case "BCRYPT":
+                if (salt == null) {
+                    salt = BCrypt.gensalt();
+                }
+                return BCrypt.hashpw(input, salt);
             default:
                 throw new NoSuchAlgorithmException("Unsupported hash algorithm: \"" + algorithm + "\"");
         }
+        return toHex(hash);
+    }
 
-        // Convert byte[] to hex string
+    // Convert hex string to byte[]
+    private static byte[] fromHex(String hex) {
+        byte[] bytes = new byte[hex.length() / 2];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
+        }
+        return bytes;
+    }
+
+    // Convert byte[] to hex string
+    private static String toHex(byte[] hash) {
         StringBuilder hashedInput = new StringBuilder("");
         for (int i = 0; i < hash.length; i++) {
             String hex = Integer.toHexString(0xff & hash[i]);
@@ -668,7 +695,16 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             if (matcher.find()) {
                 hashAlgorithm = matcher.group(1);
                 hashedPassword = matcher.replaceFirst("");
-                hashedInputPassword = getHash(hashAlgorithm, inputPassword);
+                if ("BCRYPT".equalsIgnoreCase(hashAlgorithm)) {
+                    // use stored password hash as salt - see implementation of BCrypt.checkpw
+                    hashedInputPassword = getHash(hashAlgorithm, inputPassword, hashedPassword);
+                } else {
+                    // If you want use salt for SHA256, you must:
+                    //      1) add generate salt in getHashedPassword, call getHash with salt and store salt in result
+                    //      2) get salt and hashed password from password stored in DB, then get hashedInputPassword as
+                    //              getHash(hashAlgorithm, inputPassword, salt)
+                    hashedInputPassword = getHash(hashAlgorithm, inputPassword);
+                }
             } else {
                 hashAlgorithm = "plain text";
                 hashedPassword = password;
