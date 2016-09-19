@@ -44,7 +44,6 @@
         <dependency>
             <groupId>org.jodd</groupId>
             <artifactId>jodd-core</artifactId>
-            <version>3.7.1</version>
         </dependency>
     </dependencies>
 
