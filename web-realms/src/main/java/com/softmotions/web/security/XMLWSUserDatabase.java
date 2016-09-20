@@ -132,7 +132,7 @@ public class XMLWSUserDatabase implements WSUserDatabase {
             xcfg.setAutoSave(autoSave);
         }
         reload();
-        log.info("XMLWSUserDatabase allocated " + this);
+        log.info("XMLWSUserDatabase allocated {}", this);
     }
 
 
