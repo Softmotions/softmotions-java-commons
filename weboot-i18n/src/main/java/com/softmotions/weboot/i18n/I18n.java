@@ -191,6 +191,7 @@ public class I18n {
         }
         Cookie c = new Cookie(LNG_COOKIE_NAME, qlang);
         c.setMaxAge(60 * 60 * 24 * 7); //1 week todo configurable
+        c.setPath("/");
         resp.addCookie(c);
     }
 
@@ -218,6 +219,7 @@ public class I18n {
         }
         Cookie c = new Cookie(LNG_COOKIE_NAME, qlang);
         c.setMaxAge(60 * 60 * 24 * 7); //1 week todo configurable
+        c.setPath("/");
         resp.addCookie(c);
         req.setAttribute(REQ_LOCALE_ATTR_NAME, new Locale(lang));
     }
