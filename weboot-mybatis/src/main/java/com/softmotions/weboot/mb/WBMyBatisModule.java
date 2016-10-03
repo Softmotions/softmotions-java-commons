@@ -76,13 +76,19 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
                 throw new RuntimeException(e);
             }
         }
-        addProperties(props);
 
-        for (String k : props.stringPropertyNames()) {
-            if (k.toLowerCase().contains("passw")) {
-                props.setProperty(k, "********");
-            }
+        //
+        // todo fixme! Here is a durty assumptions:
+        String jdbcDriver = props.getProperty("JDBC.driver");
+        if (jdbcDriver != null && jdbcDriver.contains("DB2Driver")) {
+            props.setProperty("SQL.TRUE.LITERAL", "1");
+            props.setProperty("SQL.FALSE.LITERAL", "0");
+        } else {
+            props.setProperty("SQL.TRUE.LITERAL", "true");
+            props.setProperty("SQL.FALSE.LITERAL", "false");
         }
+
+        addProperties(props);
 
         for (HierarchicalConfiguration<ImmutableNode> mc : xcfg.configurationsAt("mybatis.extra-mappers.mapper")) {
             String resource = mc.getString("resource");
@@ -93,7 +99,16 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         }
 
         log.info("MyBatis environment type: {}", dbenv);
-        log.info("MyBatis properties: {}", props);
+        StringBuilder pb = new StringBuilder();
+        props.stringPropertyNames().stream().sorted().forEach(k -> {
+            String pv = props.getProperty(k);
+            if (k.toLowerCase().contains("passw")) {
+                pv = "********";
+            }
+            pb.append(System.getProperty("line.separator")).append("    ")
+              .append(k).append('=').append(pv);
+        });
+        log.info("MyBatis properties: {}", pb);
         log.info("MyBatis config: {}", cfgLocation);
 
         if (xcfg.getBoolean("mybatis.bindDatasource", false)) {
