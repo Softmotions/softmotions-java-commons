@@ -6,7 +6,7 @@
     <groupId>softmotions</groupId>
     <artifactId>softmotions-base-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 
     <organization>
         <name>Sofmotions Ltd.</name>
@@ -84,6 +84,11 @@
                         <target>1.8</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jetbrains.dokka</groupId>
+                    <artifactId>dokka-maven-plugin</artifactId>
+                    <version>0.9.9</version>
                 </plugin>
             </plugins>
         </pluginManagement>
