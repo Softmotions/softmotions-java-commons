@@ -58,10 +58,6 @@ public class SchedulerModule extends AbstractModule {
         bind(SchedulerModule.class).toInstance(this);
         bind(Scheduler.class).toInstance(scheduler);
         bind(SchedulerInitializer.class).asEagerSingleton();
-        if ((cfg == null) || cfg.xcfg().configurationsAt("scheduler").isEmpty()) {
-            log.warn("No SchedulerModule configuration found. Skipping.");
-            return;
-        }
     }
 
     private boolean hasScheduledMethod(Class<?> clazz) {
