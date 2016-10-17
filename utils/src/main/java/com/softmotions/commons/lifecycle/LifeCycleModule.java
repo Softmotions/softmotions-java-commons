@@ -14,6 +14,8 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.softmotions.commons.ClassUtils;
+
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
@@ -34,7 +36,8 @@ public class LifeCycleModule extends AbstractModule {
 
     boolean hasLifecycleMethod(Class<?> clazz) {
         for (Method method : clazz.getMethods()) {
-            if (method.getAnnotation(Start.class) != null || method.getAnnotation(Dispose.class) != null) {
+            if (ClassUtils.getAnnotation(method, Start.class) != null
+                || ClassUtils.getAnnotation(method, Dispose.class) != null) {
                 return true;
             }
         }
@@ -60,11 +63,11 @@ public class LifeCycleModule extends AbstractModule {
 
     void registerLifecycle(Object target) {
         for (final Method method : target.getClass().getMethods()) {
-            Start start = method.getAnnotation(Start.class);
+            Start start = ClassUtils.getAnnotation(method, Start.class);
             if (start != null) {
                 registerStartSlot(new LCSlot(method, target, start.order(), start.parallel()));
             }
-            Dispose dispose = method.getAnnotation(Dispose.class);
+            Dispose dispose = ClassUtils.getAnnotation(method, Dispose.class);
             if (dispose != null) {
                 registerStopSlot(new LCSlot(method, target, dispose.order(), false));
             }

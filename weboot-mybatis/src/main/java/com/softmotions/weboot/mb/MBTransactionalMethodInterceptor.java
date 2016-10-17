@@ -14,6 +14,8 @@ import java.util.Arrays;
 import static java.lang.String.format;
 import static java.lang.Thread.currentThread;
 
+import com.softmotions.commons.ClassUtils;
+
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
@@ -49,7 +51,7 @@ public class MBTransactionalMethodInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Method interceptedMethod = invocation.getMethod();
-        Transactional transactional = interceptedMethod.getAnnotation(Transactional.class);
+        Transactional transactional = ClassUtils.getAnnotation(interceptedMethod, Transactional.class);
 
         // The annotation may be present at the class level instead
         if (transactional == null) {

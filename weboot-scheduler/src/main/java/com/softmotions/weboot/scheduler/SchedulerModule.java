@@ -21,6 +21,7 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
+import com.softmotions.commons.ClassUtils;
 import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.lifecycle.Dispose;
 import com.softmotions.commons.lifecycle.Start;
@@ -62,7 +63,7 @@ public class SchedulerModule extends AbstractModule {
 
     private boolean hasScheduledMethod(Class<?> clazz) {
         for (Method method : clazz.getMethods()) {
-            if (method.getAnnotation(Scheduled.class) != null) {
+            if (ClassUtils.getAnnotation(method, Scheduled.class) != null) {
                 return true;
             }
         }
@@ -71,7 +72,7 @@ public class SchedulerModule extends AbstractModule {
 
     private void registerScheduled(final Object target) {
         for (final Method method : target.getClass().getMethods()) {
-            Scheduled scheduled = method.getAnnotation(Scheduled.class);
+            Scheduled scheduled = ClassUtils.getAnnotation(method, Scheduled.class);
             if (scheduled != null) {
                 String scheduledPattern;
                 if (StringUtils.isNotBlank(scheduled.patternName())) { //For named configuration

@@ -9,6 +9,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.softmotions.commons.ClassUtils;
 import com.softmotions.commons.Human;
 
 /**
@@ -49,7 +50,7 @@ public class ValidationException extends MessageException {
                     pd = PropertyUtils.getPropertyDescriptor(cv.getRootBean(), path);
                     Method readMethod = pd.getReadMethod();
                     if (readMethod != null) {
-                        human = useHumanNames ? readMethod.getAnnotation(Human.class) : null;
+                        human = useHumanNames ? ClassUtils.getAnnotation(readMethod, Human.class) : null;
                         if (human != null) {
                             field = human.value();
                         }

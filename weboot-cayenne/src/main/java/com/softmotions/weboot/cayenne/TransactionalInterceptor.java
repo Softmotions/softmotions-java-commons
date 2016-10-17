@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.softmotions.commons.ClassUtils;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -54,7 +55,7 @@ public final class TransactionalInterceptor implements MethodInterceptor {
 
         Object ret = null;
         Method interceptedMethod = invocation.getMethod();
-        Transactional transactional = interceptedMethod.getAnnotation(Transactional.class);
+        Transactional transactional = ClassUtils.getAnnotation(interceptedMethod, Transactional.class);
         if (transactional == null) {
             transactional = interceptedMethod.getDeclaringClass().getAnnotation(Transactional.class);
         }
