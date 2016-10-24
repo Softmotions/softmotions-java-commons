@@ -1,8 +1,11 @@
 package com.softmotions.commons.cont;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import org.testng.Assert;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.softmotions.commons.json.JsonUtils;
 
 
 /**
@@ -22,15 +25,20 @@ public class KVOptionsTest {
         Assert.assertEquals("xxx", opts.get("fff"));
         Assert.assertEquals("123", opts.get("k"));
         Assert.assertEquals("some, escaped, text", opts.get("esc,aped"));
+        //System.out.println("opts=" + new KVOptions("foo=n,bar=b"));
 
-
-        System.out.println("opts=" + new KVOptions("foo=n,bar=b"));
-
-
-        //allowPages=true,ncms.asm.am.RichRefAM=image=restrict=false\\,width=10\\,skipSmall=true\\,resize=false\,allowDescription=true\,allowImage=true,nestingLevel=2
-        /*opts = new KVOptions("allowPages=true,ncms.asm.am.RichRefAM=image=restrict=false\\\\,width=10\\\\,skipSmall=true\\\\,resize=false\\,allowDescription=true\\,allowImage=true,nestingLevel=2");
-        System.out.println("O=" + opts.keySet());
-        System.out.println("V=" + opts.values());*/
-
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode val = (ObjectNode)
+                mapper.readTree("{\"allowPages\":true,\"allowFiles\":false,\"allowExternal\":false,\"nestingLevel\":2," +
+                                "\"ncms.asm.am.RichRefAM\":{\"allowPages\":true,\"allowFiles\":false,\"allowName\":false," +
+                                "\"optionalLinks\":false,\"allowDescription\":false,\"allowImage\":true," +
+                                "\"image\":{\"width\":\"100\",\"height\":null,\"resize\":false,\"cover\":false,\"restrict\":false,\"skipSmall\":true}," +
+                                "\"styles\":null,\"styles2\":null,\"styles3\":null}}");
+        opts = new KVOptions();
+        JsonUtils.populateMapByJsonNode(val, opts);
+        String sval = opts.toString();
+        Assert.assertTrue(sval.contains("\\\\,width=100\\\\,"));
+        Assert.assertTrue(sval.contains(",skipSmall=true\\\\,"));
+        //System.out.println(sval);
     }
 }

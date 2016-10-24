@@ -38,7 +38,8 @@ public class KVOptions extends Flat3Map<String, String> {
     }
 
     public String getString(String key) {
-        return get(key);
+        Object val = get(key);
+        return val != null ? val.toString() : null;
     }
 
     public int getInt(String key, int defVal) {
@@ -124,6 +125,24 @@ public class KVOptions extends Flat3Map<String, String> {
         }
     }
 
+    private String value2String(Object val) {
+        if (val == null) {
+            return "";
+        }
+        if (val instanceof Map) {
+            KVOptions nopts = new KVOptions();
+            Map mval = (Map) val;
+            for (final Object oe : mval.entrySet()) {
+                Map.Entry e = (Entry) oe;
+                nopts.put(e.getKey().toString(), e.getValue() != null ? value2String(e.getValue()) : null);
+            }
+            return nopts.toString();
+        } else if (val instanceof ObjectNode) {
+            value2String(JsonUtils.populateMapByJsonNode((ObjectNode) val, new Flat3Map<>()));
+        }
+        return val.toString();
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         MapIterator mit = this.mapIterator();
@@ -132,21 +151,7 @@ public class KVOptions extends Flat3Map<String, String> {
             if (mit.getValue() == null) {
                 continue;
             }
-            Object val = mit.getValue();
-            if (val instanceof Map) {
-                KVOptions nopts = new KVOptions();
-                Map mval = (Map) val;
-                for (final Object oe : mval.entrySet()) {
-                    Map.Entry e = (Entry) oe;
-                    nopts.put(e.getKey().toString(), e.getValue() != null ? e.getValue().toString() : null);
-                }
-                val = nopts;
-            } else if (val instanceof ObjectNode) {
-                KVOptions nopts = new KVOptions();
-                JsonUtils.populateMapByJsonNode((ObjectNode) val, nopts);
-                val = nopts;
-            }
-            String sval = val.toString();
+            String sval = value2String(mit.getValue());
             if (sval.isEmpty()) {
                 continue;
             }
