@@ -7,7 +7,7 @@ import org.apache.commons.collections4.map.Flat3Map;
  */
 public class TinyParamMap<V> extends Flat3Map<String, V> {
 
-    public TinyParamMap param(String k, V v) {
+    public TinyParamMap<V> param(String k, V v) {
         put(k, v);
         return this;
     }

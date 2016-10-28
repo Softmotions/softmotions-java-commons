@@ -13,8 +13,19 @@ import java.lang.annotation.Target;
 @Inherited
 @Target(value = {ElementType.METHOD, ElementType.TYPE})
 public @interface Human {
+
     /**
-     * Description.
+     * Default human name
      */
     String value();
+
+    /**
+     * English variant
+     */
+    String en() default "";
+
+    /**
+     * Russian variant
+     */
+    String ru() default "";
 }

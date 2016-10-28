@@ -85,6 +85,7 @@ public abstract class DataObject extends CayenneDataObject {
             src = JsonUtils.populateMapByJsonNode((ObjectNode) src, new HashMap<>());
         }
         if (src instanceof Map) {
+            //noinspection unchecked
             copyNotNullMap(this, (Map<String, Object>) src, false, false);
         } else {
             copyNotNullProperties(this, src, false, false);
