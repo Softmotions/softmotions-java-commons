@@ -16,6 +16,7 @@ public class WBJaxrsModule extends AbstractModule {
     protected void configure() {
         bind(JsonNodeReader.class).in(Singleton.class);
         bind(JacksonContextResolver.class).in(Singleton.class);
+        bind(ResteasyUTF8CharsetFilter.class).in(Singleton.class);
     }
 
     @Singleton
