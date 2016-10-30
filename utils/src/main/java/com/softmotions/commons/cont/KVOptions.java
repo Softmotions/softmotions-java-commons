@@ -30,7 +30,7 @@ public class KVOptions extends Flat3Map<String, String> {
     }
 
     public KVOptions with(String key, String val) {
-        if (val != null) {
+        if (key != null && val != null) {
             put(key, val);
         }
         return this;
