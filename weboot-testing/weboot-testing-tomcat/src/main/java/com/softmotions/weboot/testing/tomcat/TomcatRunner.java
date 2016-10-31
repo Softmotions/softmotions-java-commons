@@ -101,7 +101,7 @@ public class TomcatRunner {
         }
     }
 
-    public <T> T getContextEventListener(Class<T> type) throws Exception {
+    public <T> T getContextEventListener(Class<T> type) {
         if (context != null) {
             for (Object el : context.getApplicationLifecycleListeners()) {
                 if (type.isAssignableFrom(el.getClass())) {
@@ -110,7 +110,7 @@ public class TomcatRunner {
                 }
             }
         }
-        throw new Exception("Unable to find ContextEventListener of type: " + type);
+        throw new RuntimeException("Unable to find ContextEventListener of type: " + type);
     }
 
     public Builder usedBuilder() {
