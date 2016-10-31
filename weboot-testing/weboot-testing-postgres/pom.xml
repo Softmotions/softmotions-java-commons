@@ -8,7 +8,7 @@
         <artifactId>softmotions-weboot-testing</artifactId>
         <version>1.3-SNAPSHOT</version>
     </parent>
-    <artifactId>weboot-testing-postgres</artifactId>
+    <artifactId>softmotions-weboot-testing-postgres</artifactId>
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>

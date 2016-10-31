@@ -10,7 +10,6 @@
         <version>1.3-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-weboot-testing-tomcat</artifactId>
-
     <dependencies>
         <dependency>
             <groupId>commons-io</groupId>
@@ -32,6 +31,4 @@
             <version>8.5.2</version>
         </dependency>
     </dependencies>
-
-
 </project>
