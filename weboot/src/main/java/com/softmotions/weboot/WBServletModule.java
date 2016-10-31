@@ -89,15 +89,20 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                     minst = mclass.newInstance();
                 }
                 install((Module) minst);
-                if (minst instanceof WBServletInitializerModule) {
-                    ((WBServletInitializerModule) minst).initServlets(this);
-                }
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException("Failed to activate Guice module: " + mclassName, e);
             }
         }
 
         init(cfg);
+    }
+
+    @Override
+    protected void install(Module module) {
+        super.install(module);
+        if (module instanceof WBServletInitializerModule) {
+            ((WBServletInitializerModule) module).initServlets(this);
+        }
     }
 
     protected abstract void init(C cfg);

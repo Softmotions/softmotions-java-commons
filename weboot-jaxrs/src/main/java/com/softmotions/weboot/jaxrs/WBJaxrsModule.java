@@ -1,6 +1,8 @@
 package com.softmotions.weboot.jaxrs;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
@@ -15,7 +17,18 @@ import com.softmotions.commons.ServicesConfiguration;
  */
 public class WBJaxrsModule extends AbstractModule {
 
+    private static final Logger log = LoggerFactory.getLogger(WBJaxrsModule.class);
+
     private final ServicesConfiguration cfg;
+
+    /**
+     * For backward compatibility with dependent sowtware
+     */
+    @Deprecated
+    public WBJaxrsModule() {
+        log.warn("!!!! Used deprecated WBJaxrsModule constructor, please upgrade your code !!!");
+        this.cfg = null;
+    }
 
     public WBJaxrsModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
@@ -28,11 +41,13 @@ public class WBJaxrsModule extends AbstractModule {
         bind(ResteasyUTF8CharsetFilter.class).in(Singleton.class);
 
         // todo review it
-        String appId = cfg.xcfg().getString("messages.appId", "");
-        if (StringUtils.isBlank(appId)) {
-            appId = cfg.xcfg().getString("app-name", "App");
+        if (cfg != null) {
+            String appId = cfg.xcfg().getString("messages.appId", "");
+            if (StringUtils.isBlank(appId)) {
+                appId = cfg.xcfg().getString("app-name", "App");
+            }
+            MessageException.APP_ID = appId;
         }
-        MessageException.APP_ID = appId;
     }
 
     @Singleton

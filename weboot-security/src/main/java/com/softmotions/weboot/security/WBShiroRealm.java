@@ -46,6 +46,7 @@ public class WBShiroRealm extends AuthorizingRealm {
     }
 
     public WBShiroRealm(WSUserDatabase database, @Nullable CredentialsMatcher matcher) {
+        log.info("A new WBShiroRealm...");
         this.database = database;
         if (matcher != null) {
             setCredentialsMatcher(matcher);

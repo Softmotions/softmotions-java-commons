@@ -5,6 +5,8 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.PasswordMatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.softmotions.web.security.WSUser;
 
@@ -14,6 +16,12 @@ import com.softmotions.web.security.WSUser;
  * @author Motyrev Pavel (legioner.r@gmail.com)
  */
 public class WBShiroPasswordMatcher extends PasswordMatcher {
+
+    private static final Logger log = LoggerFactory.getLogger(WBShiroPasswordMatcher.class);
+
+    public WBShiroPasswordMatcher() {
+        log.info("A new WBShiroPasswordMatcher...");
+    }
 
     @Override
     public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
