@@ -8,7 +8,7 @@
         <artifactId>softmotions-java-commons</artifactId>
         <version>1.3-SNAPSHOT</version>
     </parent>
-    <artifactId>weboot-security</artifactId>
+    <artifactId>softmotions-weboot-security</artifactId>
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
