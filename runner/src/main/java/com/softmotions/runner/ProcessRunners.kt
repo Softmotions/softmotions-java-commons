@@ -305,14 +305,23 @@ object ProcessRunners {
                         startMon.set(true)
                         (startMon as java.lang.Object).notifyAll()
                     }
-                    if (spec.timeout > 0) {
-                        if (!process.waitFor(spec.timeout.time, spec.timeout.unit)) {
-                            log.error("Process timeout: {}", spec)
-                            process.destroyForcibly()
+
+                    while (true) {
+                        try {
+                            if (spec.timeout > 0) {
+                                // todo review InterruptedException case
+                                if (!process.waitFor(spec.timeout.time, spec.timeout.unit)) {
+                                    log.error("Process timeout: {}", spec)
+                                    process.destroyForcibly()
+                                }
+                            } else {
+                                process.waitFor()
+                            }
+                            break
+                        } catch (ignored: InterruptedException) {
                         }
-                    } else {
-                        process.waitFor()
                     }
+
                     if (verbose) {
                         log.info("Process: {} finished. Exit code: {}", clist, exitCode)
                     }

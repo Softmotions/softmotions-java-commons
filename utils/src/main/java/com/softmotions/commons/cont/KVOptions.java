@@ -29,6 +29,13 @@ public class KVOptions extends Flat3Map<String, String> {
         loadOptions(spec);
     }
 
+    public KVOptions with(String key, String val) {
+        if (key != null && val != null) {
+            put(key, val);
+        }
+        return this;
+    }
+
     public boolean getBoolean(String key) {
         return BooleanUtils.toBoolean(getString(key));
     }
