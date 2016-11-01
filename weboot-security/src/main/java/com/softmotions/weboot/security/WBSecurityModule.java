@@ -56,8 +56,15 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
 
     private final ServicesConfiguration cfg;
 
+    private String appId;
+
     public WBSecurityModule(ServicesConfiguration cfg) {
         this.cfg = cfg;
+    }
+
+    public WBSecurityModule(ServicesConfiguration cfg, String appId) {
+        this.cfg = cfg;
+        this.appId = appId;
     }
 
     @Override
@@ -76,9 +83,11 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
         String dbJndiName = env.xcfg().getString("security.dbJndiName");
         String dbJVMName = env.xcfg().getString("security.dbJVMName");
         String webAccessControlAllow = env.xcfg().getString("security.web-access-control-allow");
-        String appId = env.xcfg().getString("messages.appId", "");
-        if (StringUtils.isBlank(appId)) {
-            appId = env.xcfg().getString("app-name", "App");
+        if (appId == null) {
+            appId = env.xcfg().getString("messages.appId", "");
+            if (StringUtils.isBlank(appId)) {
+                appId = env.xcfg().getString("app-name", "App");
+            }
         }
         WSUserDatabase udb = null;
         if (!StringUtils.isBlank(dbJVMName)) {

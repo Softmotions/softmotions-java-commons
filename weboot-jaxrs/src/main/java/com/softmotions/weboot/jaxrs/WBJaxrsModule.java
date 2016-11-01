@@ -39,9 +39,8 @@ public class WBJaxrsModule extends AbstractModule {
         bind(JsonNodeReader.class).in(Singleton.class);
         bind(JacksonContextResolver.class).in(Singleton.class);
         bind(ResteasyUTF8CharsetFilter.class).in(Singleton.class);
-
         // todo review it
-        if (cfg != null) {
+        if (cfg != null && MessageException.APP_ID == null) {
             String appId = cfg.xcfg().getString("messages.appId", "");
             if (StringUtils.isBlank(appId)) {
                 appId = cfg.xcfg().getString("app-name", "App");
