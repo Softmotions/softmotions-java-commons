@@ -137,6 +137,8 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
 
         private final ServicesConfiguration env;
 
+        private WSUserDatabase usersDb;
+
         @Inject
         public WSUserDatabaseProvider(ServicesConfiguration env) {
             this.env = env;
@@ -145,7 +147,9 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
         @Override
         // todo review code
         public WSUserDatabase get() {
-            WSUserDatabase usersDb = null;
+            if (usersDb != null) {
+                return usersDb;
+            }
             HierarchicalConfiguration<ImmutableNode> xcfg = env.xcfg();
             String dbJVMName = xcfg.getString("security.dbJVMName");
             String jndiName = xcfg.getString("security.dbJndiName");
