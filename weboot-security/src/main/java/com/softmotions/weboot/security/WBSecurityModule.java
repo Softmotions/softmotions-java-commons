@@ -54,9 +54,19 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
 
     private static final Logger log = LoggerFactory.getLogger(WBSecurityModule.class);
 
+    private final ServicesConfiguration cfg;
+
+    public WBSecurityModule(ServicesConfiguration cfg) {
+        this.cfg = cfg;
+    }
+
     @Override
     protected void configure() {
-        bind(WSUserDatabase.class).toProvider(WSUserDatabaseProvider.class).asEagerSingleton();
+        // Eager WSUserDatabaseProvider initialization
+        WSUserDatabaseProvider udbProvider = new WSUserDatabaseProvider(cfg);
+        udbProvider.get();
+
+        bind(WSUserDatabase.class).toProvider(udbProvider);
         bind(WBSecurityContext.class).to(WBSecurityContextImpl.class).in(Singleton.class);
     }
 

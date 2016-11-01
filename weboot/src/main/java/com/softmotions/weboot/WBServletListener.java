@@ -164,7 +164,9 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
 
     @Override
     public void stop() {
-        getInjector().getInstance(LifeCycleService.class).stop();
+        if (injector != null) {
+            injector.getInstance(LifeCycleService.class).stop();
+        }
     }
 
     @Override
