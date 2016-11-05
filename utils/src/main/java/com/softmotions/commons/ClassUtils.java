@@ -23,17 +23,15 @@ public class ClassUtils {
         }
         Class<?> clazz = method.getDeclaringClass();
         int mods = method.getModifiers();
-        if (!Modifier.isPrivate(mods)
-            && !Modifier.isStatic(mods)
-            && Modifier.isFinal(mods)) {
+        if (!Modifier.isPrivate(mods) && !Modifier.isStatic(mods)) {
             for (Field f : clazz.getDeclaredFields()) {
                 if ("CGLIB$BOUND".equals(f.getName())) {
                     try {
                         Class<?> superClass = clazz.getSuperclass();
-                        if (superClass != null) {
-                            ret = superClass
-                                    .getDeclaredMethod(method.getName(), method.getParameterTypes())
-                                    .getAnnotation(annotationClass);
+                        //noinspection ObjectEquality
+                        if (superClass != null && clazz != superClass) {
+                            Method m = superClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
+                            ret = getAnnotation(m, annotationClass);
                         }
                     } catch (NoSuchMethodException ignored) {
                     }
