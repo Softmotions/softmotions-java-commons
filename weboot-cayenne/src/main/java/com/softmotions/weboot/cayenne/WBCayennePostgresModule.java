@@ -3,6 +3,7 @@ package com.softmotions.weboot.cayenne;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 import org.apache.cayenne.access.types.ExtendedType;
@@ -11,7 +12,9 @@ import org.apache.cayenne.di.Binder;
 import org.apache.cayenne.di.Module;
 import org.postgresql.util.PGobject;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -33,14 +36,22 @@ public class WBCayennePostgresModule implements Module {
     public void configure(Binder binder) {
         binder
                 .bindList(Constants.SERVER_DEFAULT_TYPES_LIST)
-                .add(new JacksonJSONType());
+                .add(new JacksonJSONType(ObjectNode.class.getName()))
+                .add(new JacksonJSONType(ArrayNode.class.getName()))
+                .add(new JacksonJSONType(JsonNode.class.getName()));
     }
 
-    public class JacksonJSONType implements ExtendedType {
+    private class JacksonJSONType implements ExtendedType {
+
+        private final String type;
+
+        JacksonJSONType(String type) {
+            this.type = type;
+        }
 
         @Override
         public String getClassName() {
-            return ObjectNode.class.getName();
+            return type;
         }
 
         @Override
@@ -79,6 +90,17 @@ public class WBCayennePostgresModule implements Module {
             } else {
                 return mapper.readTree(value);
             }
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            JacksonJSONType that = (JacksonJSONType) o;
+            return Objects.equals(type, that.type);
+        }
+
+        public int hashCode() {
+            return Objects.hash(type);
         }
     }
 }
