@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.commons.lifecycle.Dispose;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -104,7 +105,7 @@ public class TaskExecutorModule extends AbstractModule {
 
         private final ExecutorService executor;
 
-        public DelegateTaskExecutor(ExecutorService executor) {
+        DelegateTaskExecutor(ExecutorService executor) {
             this.executor = executor;
         }
 
@@ -173,7 +174,14 @@ public class TaskExecutorModule extends AbstractModule {
         @Override
         public void execute(Runnable command) {
             executor.execute(command);
+        }
 
+        @Dispose
+        public void shutdownContainer() {
+            try {
+                executor.shutdown();
+            } catch (Exception ignored) {
+            }
         }
     }
 }
