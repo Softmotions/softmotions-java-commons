@@ -81,6 +81,8 @@ public class DetachedHttpServletRequest implements HttpServletRequest {
 
     private final boolean isRequestedSessionIdValid;
 
+    private final boolean isSecure;
+
     private final String scheme;
 
     private final String protocol;
@@ -143,6 +145,7 @@ public class DetachedHttpServletRequest implements HttpServletRequest {
         isRequestedSessionIdFromCookie = req.isRequestedSessionIdFromCookie();
         isRequestedSessionIdFromURL = req.isRequestedSessionIdFromURL();
         isRequestedSessionIdValid = req.isRequestedSessionIdValid();
+        isSecure = req.isSecure();
         locale = req.getLocale();
         scheme = req.getScheme();
         protocol = req.getProtocol();
@@ -369,6 +372,11 @@ public class DetachedHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
+    public boolean isSecure() {
+        return isSecure;
+    }
+
+    @Override
     public Collection<Part> getParts() throws IOException, ServletException {
         return parts;
     }
@@ -475,53 +483,57 @@ public class DetachedHttpServletRequest implements HttpServletRequest {
 
     @Override
     public RequestDispatcher getRequestDispatcher(String path) {
+        checkDelegate();
         return req.getRequestDispatcher(path);
     }
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
+        checkDelegate();
         return req.getInputStream();
     }
 
     @Override
     public BufferedReader getReader() throws IOException {
+        checkDelegate();
         return req.getReader();
     }
 
     @Override
     public String getRealPath(String path) {
+        checkDelegate();
         //noinspection deprecation
         return req.getRealPath(path);
     }
 
     @Override
-    public boolean isSecure() {
-        return req.isSecure();
-    }
-
-    @Override
     public AsyncContext startAsync() throws IllegalStateException {
+        checkDelegate();
         return req.startAsync();
     }
 
     @Override
     public AsyncContext startAsync(ServletRequest servletRequest,
                                    ServletResponse servletResponse) throws IllegalStateException {
+        checkDelegate();
         return req.startAsync(servletRequest, servletResponse);
     }
 
     @Override
     public boolean isAsyncStarted() {
+        checkDelegate();
         return req.isAsyncStarted();
     }
 
     @Override
     public boolean isAsyncSupported() {
+        checkDelegate();
         return req.isAsyncSupported();
     }
 
     @Override
     public AsyncContext getAsyncContext() {
+        checkDelegate();
         return req.getAsyncContext();
     }
 
