@@ -139,7 +139,7 @@ public abstract class WBConfiguration extends ServicesConfiguration {
 
     @Nonnull
     public String getAbsoluteLink(HttpServletRequest req, String link) {
-        boolean preferRequestUrl = xcfg().getBoolean("site.preferRequestUrl", false);
+        boolean preferRequestUrl = xcfg().getBoolean("site.preferRequestUrl", true);
         if (preferRequestUrl) {
             //noinspection MagicNumber
             link = req.getScheme() + "://" +

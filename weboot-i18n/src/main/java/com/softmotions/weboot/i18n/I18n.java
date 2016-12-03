@@ -68,21 +68,31 @@ public class I18n {
 
     private boolean forceDefaultLocaleForRequests;
 
-    @Inject
-    public I18n(HierarchicalConfiguration<ImmutableNode> xcfg) {
+    public I18n(HierarchicalConfiguration<ImmutableNode> xcfg, String[] extraBundles) {
         forceDefaultLocaleForRequests = xcfg.getBoolean("force-default-locale-for-requests", false);
         List<Object> blist = xcfg.getList("messages.bundle");
         ArrayList<String> rnames = new ArrayList<>();
+        if (extraBundles != null && extraBundles.length > 0) {
+            for (String v : extraBundles) {
+                if (!rnames.contains(v)) {
+                    rnames.add(v);
+                }
+            }
+        }
         for (Object v : blist) {
             String sv = (v != null) ? v.toString() : null;
-            if (StringUtils.isBlank(sv)) {
+            if (StringUtils.isBlank(sv) || rnames.contains(sv)) {
                 continue;
             }
             rnames.add(sv);
         }
         bundleLocator = new AggregateResourceBundleLocator(rnames);
         bundleCache = new ConcurrentHashMap<>();
+    }
 
+    @Inject
+    public I18n(HierarchicalConfiguration<ImmutableNode> xcfg) {
+        this(xcfg, null);
     }
 
     @Nonnull
@@ -152,8 +162,8 @@ public class I18n {
                         lang = c.getValue();
                         //strip quotes if presented
                         if (lang.length() > 1
-                                && lang.charAt(0) == '\"'
-                                && lang.charAt(lang.length() - 1) == '\"') {
+                            && lang.charAt(0) == '\"'
+                            && lang.charAt(lang.length() - 1) == '\"') {
                             lang = lang.substring(1, lang.length() - 1);
                         }
                         break;
@@ -176,7 +186,7 @@ public class I18n {
             return;
         }
         String lang = fetchRequestLanguage(req);
-        String qlang = '\"' + lang  + '\"';
+        String qlang = '\"' + lang + '\"';
         Cookie[] cookies = req.getCookies();
         if (cookies != null) {
             for (final Cookie c : cookies) {
