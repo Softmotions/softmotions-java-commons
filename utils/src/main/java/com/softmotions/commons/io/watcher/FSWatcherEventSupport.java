@@ -2,6 +2,7 @@ package com.softmotions.commons.io.watcher;
 
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Base class form {@link FSWatcher} EventBus events
@@ -39,10 +40,21 @@ public class FSWatcherEventSupport implements Serializable {
         this.watcher = watcher;
         this.directory = directory;
         this.child = child;
-        this.fullPath = directory.resolve(child);
+        this.fullPath = directory.resolve(child).normalize().toAbsolutePath();
     }
 
     public String toString() {
         return getClass().getSimpleName() + '[' + directory + ", " + child + ']';
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FSWatcherEventSupport that = (FSWatcherEventSupport) o;
+        return Objects.equals(fullPath, that.fullPath);
+    }
+
+    public int hashCode() {
+        return Objects.hash(fullPath);
     }
 }
