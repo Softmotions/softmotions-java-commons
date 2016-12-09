@@ -1,19 +1,5 @@
 package com.softmotions.commons.io.scanner;
 
-import com.softmotions.commons.io.watcher.FSWatcher;
-import com.softmotions.commons.io.watcher.FSWatcherCreateEvent;
-import com.softmotions.commons.io.watcher.FSWatcherDeleteEvent;
-import com.softmotions.commons.io.watcher.FSWatcherEventHandler;
-import com.softmotions.commons.io.watcher.FSWatcherModifyEvent;
-import com.softmotions.commons.io.watcher.FSWatcherRegisterEvent;
-import com.softmotions.commons.re.RegexpHelper;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.annotation.concurrent.ThreadSafe;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -27,6 +13,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.softmotions.commons.io.watcher.FSWatcher;
+import com.softmotions.commons.io.watcher.FSWatcherCreateEvent;
+import com.softmotions.commons.io.watcher.FSWatcherDeleteEvent;
+import com.softmotions.commons.io.watcher.FSWatcherEventHandler;
+import com.softmotions.commons.io.watcher.FSWatcherModifyEvent;
+import com.softmotions.commons.io.watcher.FSWatcherRegisterEvent;
+import com.softmotions.commons.re.RegexpHelper;
 
 /**
  * Factory for directory scanners.
@@ -72,7 +72,9 @@ public class DirectoryScannerFactory {
             "**/.bzr/**",
             "**/.bzrignore",
             "**/*___jb_bak___",
-            "**/*___jb_old___"
+            "**/*___jb_old___",
+            "**/*___jb_tmp___",
+            "**/.*.swp",
     };
 
     private final Object lock = new Object();
