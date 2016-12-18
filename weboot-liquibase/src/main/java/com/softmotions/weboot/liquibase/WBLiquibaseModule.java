@@ -3,24 +3,33 @@ package com.softmotions.weboot.liquibase;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
 import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import liquibase.ContextExpression;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.multibindings.Multibinder;
 import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.lifecycle.Start;
 
@@ -46,15 +55,26 @@ public class WBLiquibaseModule extends AbstractModule {
             return;
         }
         bind(LiquibaseInitializer.class).asEagerSingleton();
+        Multibinder.newSetBinder(binder(), WBLiquibaseExtraConfigSupplier.class);
     }
 
     public static class LiquibaseInitializer {
 
-        @Inject
-        DataSource ds;
+
+        private final DataSource ds;
+
+        private final ServicesConfiguration cfg;
+
+        private final Set<WBLiquibaseExtraConfigSupplier> extraConfigSuppliers;
 
         @Inject
-        ServicesConfiguration cfg;
+        public LiquibaseInitializer(DataSource ds,
+                                    ServicesConfiguration cfg,
+                                    Set<WBLiquibaseExtraConfigSupplier> extraConfigSuppliers) {
+            this.ds = ds;
+            this.cfg = cfg;
+            this.extraConfigSuppliers = extraConfigSuppliers;
+        }
 
         @Start(order = 10)
         public void start() throws Exception {
@@ -74,14 +94,29 @@ public class WBLiquibaseModule extends AbstractModule {
                 Database database = DatabaseFactory.getInstance()
                                                    .findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 database.setDefaultSchemaName(lbCfg.getString("defaultSchema"));
+                ResourceAccessor resourceAccessor = new CompositeResourceAccessor(
+                        new ClassLoaderResourceAccessor(),
+                        new FileSystemResourceAccessor(),
+                        new ClassLoaderResourceAccessor(Thread.currentThread()
+                                                              .getContextClassLoader())
+                );
+                ChangeLogParser parser =
+                        ChangeLogParserFactory.getInstance()
+                                              .getParser(changelogResource, resourceAccessor);
+                ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
+                DatabaseChangeLog changeLog = parser.parse(changelogResource, changeLogParameters, resourceAccessor);
+                for (WBLiquibaseExtraConfigSupplier ecs : extraConfigSuppliers) {
+                    for (WBLiquibaseExtraConfigSupplier.ConfigSpec cs : ecs.getConfigSpecs()) {
+                        log.info("Include extra liquibase file: {} context: {}",
+                                 cs.getLocation(), StringUtils.trimToEmpty(cs.getIncludeContexts()));
+                        changeLog.include(cs.getLocation(), false, resourceAccessor,
+                                          new ContextExpression(cs.getIncludeContexts()));
+                    }
+                }
+
                 Liquibase liquibase =
-                        new Liquibase(changelogResource,
-                                      new CompositeResourceAccessor(
-                                              new ClassLoaderResourceAccessor(),
-                                              new FileSystemResourceAccessor(),
-                                              new ClassLoaderResourceAccessor(Thread.currentThread()
-                                                                                    .getContextClassLoader())
-                                      ),
+                        new Liquibase(changeLog,
+                                      resourceAccessor,
                                       database
                         );
 
@@ -144,5 +179,4 @@ public class WBLiquibaseModule extends AbstractModule {
             }
         }
     }
-
 }
