@@ -48,6 +48,10 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
         return extraMappers;
     }
 
+    public Properties getProperties() {
+        return properties;
+    }
+
     /**
      * Set the MyBatis configuration class path resource.
      *
@@ -60,6 +64,10 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
         this.classPathResource = classPathResource;
     }
 
+    public String getClassPathResource() {
+        return classPathResource;
+    }
+
     /**
      * Set the MyBatis configuration environment id.
      *
@@ -70,6 +78,10 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
             throw new IllegalArgumentException("Parameter 'environmentId' must be not null");
         }
         this.environmentId = environmentId;
+    }
+
+    public String getEnvironmentId() {
+        return environmentId;
     }
 
     /**
@@ -87,9 +99,7 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
      * {@inheritDoc}
      */
     @Override
-    final void internalConfigure() {
-        this.initialize();
-
+    protected void configureEagerSessionFactory() {
         Reader reader = null;
         try {
             reader = getResourceAsReader(getResourceClassLoader(), classPathResource);
@@ -100,7 +110,6 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
                                    properties);
 
             bind(SqlSessionFactory.class).toInstance(sessionFactory);
-
             Configuration configuration = sessionFactory.getConfiguration();
 
             // bind mappers
@@ -136,7 +145,7 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
         }
     }
 
-    private class ExtendedSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
+    protected class ExtendedSqlSessionFactoryBuilder extends SqlSessionFactoryBuilder {
         @Override
         public SqlSessionFactory build(Configuration config) {
             if (extraMappers == null || extraMappers.isEmpty()) {
@@ -166,6 +175,5 @@ public abstract class MBXMLMyBatisModule extends MBAbstractMyBatisModule {
             }
         }
     }
-
 }
 

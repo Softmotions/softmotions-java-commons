@@ -1,19 +1,19 @@
 package com.softmotions.weboot.mb;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
+import javax.inject.Provider;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.ibatis.session.SqlSession;
 import org.mybatis.guice.transactional.Transactional;
-
-import javax.inject.Provider;
 
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
 import static com.google.inject.matcher.Matchers.not;
 import static com.google.inject.name.Names.named;
 import static com.google.inject.util.Providers.guicify;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Scopes;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -29,31 +29,27 @@ public abstract class MBAbstractMyBatisModule extends AbstractModule {
      */
     @Override
     protected void configure() {
-        try {
-            // sql session manager
-            bind(MBSqlSessionManager.class).toProvider(createSqlSessionManagerProviderClass()).in(Scopes.SINGLETON);
-            bind(SqlSession.class).to(MBSqlSessionManager.class).in(Scopes.SINGLETON);
 
-            // transactional interceptor
-            MethodInterceptor interceptor = createTransactionalMethodInterceptor();
-            requestInjection(interceptor);
-            bindInterceptor(any(), annotatedWith(Transactional.class), interceptor);
-            // Intercept classes annotated with Transactional, but avoid "double"
-            // interception when a mathod is also annotated inside an annotated
-            // class.
-            bindInterceptor(annotatedWith(Transactional.class), not(annotatedWith(Transactional.class)), interceptor);
+        // sql session manager
+        bind(MBSqlSessionManager.class).toProvider(createSqlSessionManagerProviderClass()).in(Scopes.SINGLETON);
+        bind(SqlSession.class).to(MBSqlSessionManager.class).in(Scopes.SINGLETON);
 
-            internalConfigure();
+        // transactional interceptor
+        MethodInterceptor interceptor = createTransactionalMethodInterceptor();
+        requestInjection(interceptor);
+        bindInterceptor(any(), annotatedWith(Transactional.class), interceptor);
 
-            bind(ClassLoader.class)
-                    .annotatedWith(named("JDBC.driverClassLoader"))
-                    .toInstance(driverClassLoader);
-        } finally {
-            resourcesClassLoader = getDefaultClassLoader();
-            driverClassLoader = getDefaultClassLoader();
-        }
+        // Intercept classes annotated with Transactional, but avoid "double"
+        // interception when a mathod is also annotated inside an annotated
+        // class.
+        bindInterceptor(annotatedWith(Transactional.class), not(annotatedWith(Transactional.class)), interceptor);
+
+        configureEagerSessionFactory();
+
+        bind(ClassLoader.class)
+                .annotatedWith(named("JDBC.driverClassLoader"))
+                .toInstance(driverClassLoader);
     }
-
 
     protected MethodInterceptor createTransactionalMethodInterceptor() {
         return new MBTransactionalMethodInterceptor();
@@ -106,11 +102,5 @@ public abstract class MBAbstractMyBatisModule extends AbstractModule {
     /**
      * Configures a {@link com.google.inject.Binder} via the exposed methods.
      */
-    abstract void internalConfigure();
-
-    /**
-     *
-     */
-    protected abstract void initialize();
-
+    abstract void configureEagerSessionFactory();
 }

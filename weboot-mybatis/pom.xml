@@ -3,14 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <artifactId>softmotions-java-commons</artifactId>
         <groupId>softmotions</groupId>
         <version>1.3-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-weboot-mybatis</artifactId>
-
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
@@ -23,14 +21,16 @@
             <version>3.4.1</version>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis-guice</artifactId>
             <version>3.8</version>
             <optional>true</optional>
         </dependency>
-
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+        </dependency>
         <dependency>
             <groupId>ognl</groupId>
             <artifactId>ognl</artifactId>
@@ -43,5 +43,4 @@
             <version>3.1.12</version>
         </dependency>
     </dependencies>
-
 </project>

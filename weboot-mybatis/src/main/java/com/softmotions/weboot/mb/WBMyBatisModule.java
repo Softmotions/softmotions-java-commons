@@ -2,10 +2,12 @@ package com.softmotions.weboot.mb;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.Set;
 import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
@@ -17,8 +19,12 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.ibatis.io.Resources.getResourceAsReader;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.lifecycle.Dispose;
 
@@ -37,23 +43,37 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
 
     @Override
     protected void configure() {
-        if (cfg.xcfg().configurationsAt("mybatis").isEmpty()) {
+        Multibinder.newSetBinder(binder(), WBMyBatisExtraConfigSupplier.class);
+        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
+        if (xcfg.configurationsAt("mybatis").isEmpty()) {
             return;
         }
-        super.configure();
-    }
-
-    @Override
-    protected void initialize() {
-        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
         String dbenv = xcfg.getString("mybatis.dbenv", "development");
         setEnvironmentId(dbenv);
         String cfgLocation = xcfg.getString("mybatis.config");
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <mybatis> element");
         }
+        log.info("MyBatis config: {}", cfgLocation);
         setClassPathResource(cfgLocation);
+        super.configure();
+        if (xcfg.getBoolean("mybatis.bindDatasource", false)) {
+            bind(DataSource.class).toProvider(DataSourceProvider.class);
+        }
+        bind(WBMyBatisModule.class).toInstance(this);
+        bind(SqlSessionFactory.class).toProvider(SqlSessionFactoryProvider.class).in(Singleton.class);
+        bind(MyBatisInitializer.class).asEagerSingleton();
+    }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    protected void configureEagerSessionFactory() {
+        // we do not want eager session factory building
+        // implemented own SqlSessionFactoryProvider for late initialization
+    }
+
+    protected SqlSessionFactory initialize(Set<WBMyBatisExtraConfigSupplier> extraConfigSuppliers) throws Exception {
+        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
         Properties props = new Properties();
         String propsStr = xcfg.getString("mybatis.extra-properties");
         if (!StringUtils.isBlank(propsStr)) {
@@ -98,7 +118,14 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             }
         }
 
-        log.info("MyBatis environment type: {}", dbenv);
+        for (WBMyBatisExtraConfigSupplier ecs : extraConfigSuppliers) {
+            for (String resource : ecs.extraMappersXML()) {
+                log.info("MyBatis registering extra mapper: '{}' from: '{}'", resource, ecs);
+                getExtraMappers().add(resource);
+            }
+        }
+
+        log.info("MyBatis environment type: {}", getEnvironmentId());
         StringBuilder pb = new StringBuilder();
         props.stringPropertyNames().stream().sorted().forEach(k -> {
             String pv = props.getProperty(k);
@@ -109,17 +136,47 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
               .append(k).append('=').append(pv);
         });
         log.info("MyBatis properties: {}", pb);
-        log.info("MyBatis config: {}", cfgLocation);
 
-        if (xcfg.getBoolean("mybatis.bindDatasource", false)) {
-            bind(DataSource.class).toProvider(DataSourceProvider.class);
+        SqlSessionFactory sessionFactory;
+        try (Reader reader = getResourceAsReader(getResourceClassLoader(), getClassPathResource())) {
+            sessionFactory =
+                    new ExtendedSqlSessionFactoryBuilder()
+                            .build(reader,
+                                   getEnvironmentId(),
+                                   getProperties());
         }
-        bind(MyBatisInitializer.class).asEagerSingleton();
+
+        return sessionFactory;
     }
 
-    static class DataSourceProvider implements Provider<DataSource> {
 
-        final Provider<SqlSessionFactory> sessionFactoryProvider;
+    public static class SqlSessionFactoryProvider implements Provider<SqlSessionFactory> {
+
+        private final WBMyBatisModule module;
+
+        private final Set<WBMyBatisExtraConfigSupplier> extraConfigSuppliers;
+
+        @Inject
+        public SqlSessionFactoryProvider(WBMyBatisModule module,
+                                         Set<WBMyBatisExtraConfigSupplier> extraConfigSuppliers) {
+            this.module = module;
+            this.extraConfigSuppliers = extraConfigSuppliers;
+        }
+
+        @Override
+        public SqlSessionFactory get() {
+            try {
+                return module.initialize(extraConfigSuppliers);
+            } catch (Exception e) {
+                log.error("", e);
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static class DataSourceProvider implements Provider<DataSource> {
+
+        private final Provider<SqlSessionFactory> sessionFactoryProvider;
 
         @Inject
         DataSourceProvider(Provider<SqlSessionFactory> sessionFactoryProvider) {
@@ -136,9 +193,9 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
 
     public static class MyBatisInitializer {
 
-        final Provider<DataSource> dsProvider;
+        private final Provider<DataSource> dsProvider;
 
-        final ServicesConfiguration cfg;
+        private final ServicesConfiguration cfg;
 
         @Inject
         public MyBatisInitializer(Provider<DataSource> dsProvider,
@@ -170,5 +227,4 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             }
         }
     }
-
 }
