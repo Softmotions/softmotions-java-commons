@@ -1,6 +1,8 @@
 package com.softmotions.commons.cont;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -26,6 +28,31 @@ public class CollectionUtils {
         }
         return sb.toString();
     }
+
+
+    public static <T> Collection<Collection<T>> split(Iterable<T> coll, int size) {
+        if (size < 1) {
+            return Collections.emptyList();
+        }
+        final List<Collection<T>> ret = new ArrayList<>();
+        final Iterator<T> it = coll.iterator();
+        Collection<T> box = null;
+        for (int i = 0; it.hasNext(); ++i) {
+            if (i % size == 0) {
+                if (box != null) {
+                    ret.add(box);
+                }
+                box = new ArrayList<>(size);
+            }
+            //noinspection ConstantConditions
+            box.add(it.next());
+        }
+        if (box != null) {
+            ret.add(box);
+        }
+        return ret;
+    }
+
 
     public static final Iterator EMPTY_ITERATOR = new Iterator() {
         @Override
