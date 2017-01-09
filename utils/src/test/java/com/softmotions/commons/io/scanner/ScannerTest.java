@@ -91,7 +91,7 @@ public class ScannerTest {
             Assert.assertEquals(0, cv.getErrors().size());
             for (Pair<Path, BasicFileAttributes> p : cv.getMatches()) {
                 Path path = p.getOne();
-                Assert.assertTrue(-1 != ArrayUtils.indexOf(expected, path.toString()));
+                Assert.assertTrue(-1 != ArrayUtils.indexOf(expected, path.toString().replaceAll("\\\\", "/")));
             }
         }
     }
@@ -116,7 +116,7 @@ public class ScannerTest {
             Assert.assertEquals(1, cv.getMatches().size());
             Assert.assertEquals(0, cv.getErrors().size());
             Assert.assertEquals("com/softmotions/commons/io/scanner/data/b/b.txt",
-                         cv.getMatches().get(0).getOne().toString());
+                         cv.getMatches().get(0).getOne().toString().replaceAll("\\\\", "/"));
         }
 
         dsf.resetIncludes();

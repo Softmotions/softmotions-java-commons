@@ -133,7 +133,7 @@ public class ServicesConfiguration implements Module {
         Matcher m = p.matcher(cdata);
         StringBuffer sb = new StringBuffer(cdata.length());
         while (m.find()) {
-            String s = substituteConfigKey(m.group(1));
+            String s = StringUtils.replaceEach(substituteConfigKey(m.group(1)), new String[]{"\\"}, new String[]{"\\\\"});
             m.appendReplacement(sb, s != null ? s : m.group());
         }
         m.appendTail(sb);
