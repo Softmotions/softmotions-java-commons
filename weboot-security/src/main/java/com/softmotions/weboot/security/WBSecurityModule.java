@@ -209,7 +209,7 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
                 usersDb = locateWSUserDatabaseJNDI(jndiName);
             }
             if (usersDb == null) {
-                throw new RuntimeException("Unable to locate users database, please check the Ncms config");
+                throw new RuntimeException("Unable to locate users database, please check the App config");
             }
             log.info("Users database: {}", usersDb);
             return usersDb;
