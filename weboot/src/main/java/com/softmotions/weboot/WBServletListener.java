@@ -83,59 +83,66 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         return new Pair<>(ret, keys.toString());
     }
 
-
     @Override
+    @SuppressWarnings("ThrowCaughtLocally")
     public void contextInitialized(ServletContextEvent evt) {
-        ServletContext sctx = evt.getServletContext();
-        Pair<String, String> ret = getEnvInitParam(sctx, WEBOOT_CFG_CLASS_INITPARAM);
-        if (ret.getOne() == null) {
-            throw new RuntimeException("Failed to find WEBOOT configuration class implementation " +
-                                       "in [servlet context, system property, system env] " +
-                                       "under the keys: " + ret.getTwo());
-        }
-        String cfgClassName = ret.getOne();
-        log.info("Using WEBOOT configuration class: {}", cfgClassName);
-        ClassLoader cl = ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
-                                                  getClass().getClassLoader());
-        Class cfgClass;
-        WBConfiguration cfg;
         try {
-            cfgClass = cl.loadClass(cfgClassName);
-            if (!WBConfiguration.class.isAssignableFrom(cfgClass)) {
-                throw new RuntimeException("Configuration implementation must extend the: " + WBConfiguration.class + " class");
+
+            ServletContext sctx = evt.getServletContext();
+            Pair<String, String> ret = getEnvInitParam(sctx, WEBOOT_CFG_CLASS_INITPARAM);
+            if (ret.getOne() == null) {
+                throw new RuntimeException("Failed to find WEBOOT configuration class implementation " +
+                                           "in [servlet context, system property, system env] " +
+                                           "under the keys: " + ret.getTwo());
             }
-            cfg = (WBConfiguration) cfgClass.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Failed to load/instantiate WEBOOT configuration class: " + cfgClassName, e);
-        }
-        sctx.setAttribute(WEBOOT_CFG_SCTX_KEY, cfg);
-
-        ret = getEnvInitParam(sctx, WEBOOT_CFG_LOCATION_INITPARAM);
-        if (ret.getOne() == null) {
-            throw new RuntimeException("Failed to find WEBOOT configuration location " +
-                                       "in [servlet context, system property, system env] " +
-                                       "under the KEYS: " + ret.getTwo());
-        }
-
-        String cfgLocation = ret.getOne();
-        cfg.load(cfgLocation, sctx);
-
-        super.contextInitialized(evt);
-
-
-        for (Map.Entry<String, ? extends FilterRegistration> e : sctx.getFilterRegistrations().entrySet()) {
-            FilterRegistration sreg = e.getValue();
-            for (String m : sreg.getUrlPatternMappings()) {
-                log.info("{} => {} ({})", m, sreg.getName(), sreg.getClassName());
+            String cfgClassName = ret.getOne();
+            log.info("Using WEBOOT configuration class: {}", cfgClassName);
+            ClassLoader cl = ObjectUtils.firstNonNull(Thread.currentThread().getContextClassLoader(),
+                                                      getClass().getClassLoader());
+            Class cfgClass;
+            WBConfiguration cfg;
+            try {
+                cfgClass = cl.loadClass(cfgClassName);
+                if (!WBConfiguration.class.isAssignableFrom(cfgClass)) {
+                    throw new RuntimeException("Configuration implementation must extend the: " + WBConfiguration.class + " class");
+                }
+                cfg = (WBConfiguration) cfgClass.newInstance();
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException("Failed to load/instantiate WEBOOT configuration class: " + cfgClassName, e);
             }
-        }
-        for (Map.Entry<String, ? extends ServletRegistration> e : sctx.getServletRegistrations().entrySet()) {
-            ServletRegistration sreg = e.getValue();
-            for (String m : sreg.getMappings()) {
-                log.info("{} => {} ({})", m, sreg.getName(), sreg.getClassName());
+            sctx.setAttribute(WEBOOT_CFG_SCTX_KEY, cfg);
+
+            ret = getEnvInitParam(sctx, WEBOOT_CFG_LOCATION_INITPARAM);
+            if (ret.getOne() == null) {
+                throw new RuntimeException("Failed to find WEBOOT configuration location " +
+                                           "in [servlet context, system property, system env] " +
+                                           "under the KEYS: " + ret.getTwo());
             }
+
+            String cfgLocation = ret.getOne();
+            cfg.load(cfgLocation, sctx);
+
+            super.contextInitialized(evt);
+
+
+            for (Map.Entry<String, ? extends FilterRegistration> e : sctx.getFilterRegistrations().entrySet()) {
+                FilterRegistration sreg = e.getValue();
+                for (String m : sreg.getUrlPatternMappings()) {
+                    log.info("{} => {} ({})", m, sreg.getName(), sreg.getClassName());
+                }
+            }
+            for (Map.Entry<String, ? extends ServletRegistration> e : sctx.getServletRegistrations().entrySet()) {
+                ServletRegistration sreg = e.getValue();
+                for (String m : sreg.getMappings()) {
+                    log.info("{} => {} ({})", m, sreg.getName(), sreg.getClassName());
+                }
+            }
+            log.info(getLogo(), cfg.getEnvironmentType(), cfg.getAppVersion(), Runtime.getRuntime().maxMemory());
+
+        } catch (Exception e) {
+            log.error("", e);
+            throw new RuntimeException(e);
         }
-        log.info(getLogo(), cfg.getEnvironmentType(), cfg.getAppVersion(), Runtime.getRuntime().maxMemory());
     }
 
     @Override
