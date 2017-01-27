@@ -9,6 +9,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.weboot.jaxrs.validator.JaxrsMethodValidatorModule;
 
 /**
  * Weboot JAX-RS module.
@@ -47,6 +48,7 @@ public class WBJaxrsModule extends AbstractModule {
             }
             MessageException.APP_ID = appId;
         }
+        install(new JaxrsMethodValidatorModule());
     }
 
     @Singleton
