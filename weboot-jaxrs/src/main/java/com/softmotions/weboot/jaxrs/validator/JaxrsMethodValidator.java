@@ -12,9 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.softmotions.weboot.i18n.I18n;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -51,11 +48,8 @@ public class JaxrsMethodValidator {
 
     private Map<String, ValidatorsGroup> validatorsGroups = new ConcurrentHashMap<>();
 
-    private final I18n i18n;
-
     @Inject
-    public JaxrsMethodValidator(I18n i18n) {
-        this.i18n = i18n;
+    public JaxrsMethodValidator() {
 
         ///////////////////////////////////////////////////////////
         //                   Default validators                  //
@@ -115,7 +109,6 @@ public class JaxrsMethodValidator {
                                                            String[] rules,
                                                            Method method,
                                                            Object[] arguments,
-                                                           Locale locale,
                                                            @Nullable Consumer<ValidationContext> contextConsumer) {
         List<String> resolvedRules = new ArrayList<>(1 << 6);
         for (String g : collectAllGroups(null, groups)) {
@@ -123,7 +116,7 @@ public class JaxrsMethodValidator {
             Collections.addAll(resolvedRules, vg.validators());
         }
         Collections.addAll(resolvedRules, rules);
-        ValidationContextImpl vctx = new ValidationContextImpl(method, arguments, locale);
+        ValidationContextImpl vctx = new ValidationContextImpl(method, arguments);
         resolvedRules.forEach(vctx::ruleToken);
         vctx.flush();
         if (contextConsumer != null) {
@@ -145,8 +138,6 @@ public class JaxrsMethodValidator {
         private final Method method;
 
         private final Object[] arguments;
-
-        private final Locale locale;
 
         private final List<JaxrsMethodValidationError> errors = new ArrayList<>(8);
 
@@ -176,11 +167,9 @@ public class JaxrsMethodValidator {
 
 
         private ValidationContextImpl(Method method,
-                                      Object[] arguments,
-                                      Locale locale) {
+                                      Object[] arguments) {
             this.method = method;
             this.arguments = arguments;
-            this.locale = locale;
         }
 
         @Override
@@ -314,25 +303,7 @@ public class JaxrsMethodValidator {
         }
 
         private String translate(String key, @Nullable Object val) {
-            String res = key;
-            List<Object> params = new ArrayList<>(1 << 4);
-            params.add(field);
-            params.add(val);
-            params.add(validatorName);
-            if (!validatorArgs.isEmpty()) {
-                params.add(StringUtils.join(validatorArgs, ", ").trim());
-                params.addAll(validatorArgs);
-            } else {
-                for (int i = 0; i < 10; ++i) { // up to 10 empty args instead of scary nulls in messages.
-                    params.add("");
-                }
-            }
-            try {
-                res = i18n.get(key, locale, params.toArray());
-            } catch (MissingResourceException ignored) {
-                log.warn("Missing i18n resource: {}", key);
-            }
-            return res;
+            return key;
         }
 
         private void validateBean() {
@@ -373,7 +344,7 @@ public class JaxrsMethodValidator {
                                   value);
                 if (!Objects.equals(prevTranslatedMessage, translatedMessage)) {
                     prevTranslatedMessage = translatedMessage;
-                    errors.add(new JaxrsMethodValidationError(field, translatedMessage, validatorName));
+                    errors.add(new JaxrsMethodValidationError(field, validatorName));
                 }
             }
         }

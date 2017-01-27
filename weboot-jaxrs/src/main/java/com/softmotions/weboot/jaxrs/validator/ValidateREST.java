@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
-public @interface ValidateJsonBody {
+public @interface ValidateREST {
 
     /**
      * Input JSON validation spec. todo docs

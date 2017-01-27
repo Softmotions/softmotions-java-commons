@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import javax.ws.rs.Path;
 
+import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.inject.matcher.Matchers.any;
+import static com.google.inject.matcher.Matchers.not;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -28,6 +31,18 @@ public class JaxrsMethodValidatorModule extends AbstractModule {
         MethodValidatorService methodValidatorService = new MethodValidatorService(listener);
         requestInjection(methodValidatorService);
         bind(MethodValidatorService.class).toInstance(methodValidatorService);
+
+        // ValidateJsonBodyInterceptor
+        ValidateJsonBodyInterceptor interceptor = new ValidateJsonBodyInterceptor();
+        requestInjection(interceptor);
+        bindInterceptor(any(),
+                        annotatedWith(ValidateREST.class)
+                                .and(annotatedWith(Path.class)),
+                        interceptor);
+        bindInterceptor(annotatedWith(ValidateREST.class),
+                        not(annotatedWith(ValidateREST.class))
+                                .and(annotatedWith(Path.class)),
+                        interceptor);
     }
 
     static class ValidatorGroupsListener implements TypeListener {
