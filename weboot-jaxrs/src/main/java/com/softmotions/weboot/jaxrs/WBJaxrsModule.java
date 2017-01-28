@@ -44,7 +44,7 @@ public class WBJaxrsModule extends AbstractModule {
         if (cfg != null && MessageException.APP_ID == null) {
             String appId = cfg.xcfg().getString("messages.appId", "");
             if (StringUtils.isBlank(appId)) {
-                appId = cfg.xcfg().getString("app-name", "App");
+                appId = cfg.xcfg().getString("app-name", "Softmotions");
             }
             MessageException.APP_ID = appId;
         }

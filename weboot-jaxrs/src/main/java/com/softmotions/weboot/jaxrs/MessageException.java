@@ -17,7 +17,7 @@ import com.softmotions.weboot.i18n.I18n;
 public class MessageException extends RuntimeException {
 
     @SuppressWarnings("StaticNonFinalField")
-    public static volatile String APP_ID = "App";
+    public static volatile String APP_ID = "Softmotions";
 
     private boolean hasError;
 
