@@ -13,6 +13,8 @@ public class JaxrsMethodValidationError implements Serializable {
 
     private final String validator;
 
+    private final String message;
+
     public String getKey() {
         return key;
     }
@@ -21,14 +23,20 @@ public class JaxrsMethodValidationError implements Serializable {
         return validator;
     }
 
-    public JaxrsMethodValidationError(String key, String validator) {
+    public String getMessage() {
+        return message;
+    }
+
+    public JaxrsMethodValidationError(String key, String message, String validator) {
         this.key = key;
+        this.message = message;
         this.validator = validator;
     }
 
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("key", key)
+                          .add("message", message)
                           .add("validator", validator)
                           .toString();
     }

@@ -12,7 +12,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -33,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.softmotions.weboot.i18n.I18n;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -48,8 +51,11 @@ public class JaxrsMethodValidator {
 
     private Map<String, ValidatorsGroup> validatorsGroups = new ConcurrentHashMap<>();
 
+    private final I18n i18n;
+
     @Inject
-    public JaxrsMethodValidator() {
+    public JaxrsMethodValidator(I18n i18n) {
+        this.i18n = i18n;
 
         ///////////////////////////////////////////////////////////
         //                   Default validators                  //
@@ -303,7 +309,25 @@ public class JaxrsMethodValidator {
         }
 
         private String translate(String key, @Nullable Object val) {
-            return key;
+            String res = key;
+            List<Object> params = new ArrayList<>(1 << 4);
+            params.add(field);
+            params.add(val);
+            params.add(validatorName);
+            if (!validatorArgs.isEmpty()) {
+                params.add(StringUtils.join(validatorArgs, ", ").trim());
+                params.addAll(validatorArgs);
+            } else {
+                for (int i = 0; i < 10; ++i) { // up to 10 empty args instead of scary nulls in messages.
+                    params.add("");
+                }
+            }
+            try {
+                res = i18n.get(key, Locale.getDefault(), params.toArray());
+            } catch (MissingResourceException ignored) {
+                log.warn("Missing i18n resource: {}", key);
+            }
+            return res;
         }
 
         private void validateBean() {
@@ -344,7 +368,7 @@ public class JaxrsMethodValidator {
                                   value);
                 if (!Objects.equals(prevTranslatedMessage, translatedMessage)) {
                     prevTranslatedMessage = translatedMessage;
-                    errors.add(new JaxrsMethodValidationError(field, validatorName));
+                    errors.add(new JaxrsMethodValidationError(field, translatedMessage, validatorName));
                 }
             }
         }
