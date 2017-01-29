@@ -10,6 +10,10 @@ public class NumberUtils {
     private NumberUtils() {
     }
 
+    public static double number2Double(Number n, double defval) {
+        return (n != null) ? n.doubleValue() : defval;
+    }
+
     public static long number2Long(Number n, long defval) {
         return (n != null) ? n.longValue() : defval;
     }
