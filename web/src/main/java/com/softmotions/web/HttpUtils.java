@@ -7,12 +7,30 @@ import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 public class HttpUtils {
 
+    private static final Pattern JSESSIONID_RX = Pattern.compile("^(.*)(;jsessionid=[a-zA-Z0-9]+)(.*)$");
+
     private HttpUtils() {
+    }
+
+    /**
+     * String jsessionid from url part
+     */
+    public static String stripJsessionId(String basePath) {
+        if (basePath == null || basePath.isEmpty() || basePath.indexOf(';') == -1) {
+            return basePath;
+        }
+        Matcher m = JSESSIONID_RX.matcher(basePath);
+        if (!m.matches()) {
+            return basePath;
+        }
+        return StringUtils.trimToEmpty(m.group(1)) + StringUtils.trimToEmpty(m.group(3));
     }
 
     /**
