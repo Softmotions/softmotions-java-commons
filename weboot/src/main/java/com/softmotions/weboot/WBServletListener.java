@@ -53,7 +53,14 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
 
     protected Injector injector;
 
-    protected abstract String getLogo();
+    @Deprecated
+    protected String getLogo() {
+        return null;
+    }
+
+    protected String getLogo(WBConfiguration cfg) {
+        return null;
+    }
 
     private Pair<String, String> getEnvInitParam(ServletContext sctx, String pname) {
         String key, ret;
@@ -137,7 +144,17 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
                     log.info("{} => {} ({})", m, sreg.getName(), sreg.getClassName());
                 }
             }
-            log.info(getLogo(), cfg.getEnvironmentType(), cfg.getAppVersion(), Runtime.getRuntime().maxMemory());
+
+            //noinspection deprecation
+            String logo = getLogo();
+            if (logo == null) {
+                logo = getLogo(cfg);
+                if (logo != null) {
+                    log.info(logo);
+                }
+            } else {
+                log.info(getLogo(cfg), cfg.getEnvironmentType(), cfg.getAppVersion(), Runtime.getRuntime().maxMemory());
+            }
 
         } catch (Exception e) {
             log.error("", e);
