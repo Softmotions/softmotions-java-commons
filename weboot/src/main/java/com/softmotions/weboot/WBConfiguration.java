@@ -73,6 +73,10 @@ public abstract class WBConfiguration extends ServicesConfiguration {
         return coreProps.getProperty("project.version");
     }
 
+    public Properties getCoreProperties() {
+        return coreProps;
+    }
+
     @Nonnull
     public String getApplicationName() {
         return xcfg().getString("app-name", "App");
