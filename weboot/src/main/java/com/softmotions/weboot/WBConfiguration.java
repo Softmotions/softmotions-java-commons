@@ -88,7 +88,7 @@ public abstract class WBConfiguration extends ServicesConfiguration {
         if (StringUtils.isBlank(ret)) {
             return xcfg.getString("site.root");
         }
-        return null;
+        return ret;
     }
 
     public ServletContext getServletContext() {
