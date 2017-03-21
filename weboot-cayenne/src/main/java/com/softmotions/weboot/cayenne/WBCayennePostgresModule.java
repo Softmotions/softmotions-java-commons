@@ -102,6 +102,14 @@ public class WBCayennePostgresModule implements Module {
         public int hashCode() {
             return Objects.hash(type);
         }
+
+        @Override
+        public String toString(Object value) {
+            if (value == null) {
+                return "NULL";
+            }
+            return value.toString();
+        }
     }
 }
 
