@@ -148,7 +148,7 @@ public abstract class WBConfiguration extends ServicesConfiguration {
             //noinspection MagicNumber
             link = req.getScheme() + "://" +
                    req.getServerName() +
-                   (req.getServerPort() != 80 ? ":" + req.getServerPort() : "") +
+                   (req.getServerPort() != 80 && req.getServerPort() != 443 ? ":" + req.getServerPort() : "") +
                    link;
         } else {
             link = xcfg().getString("site.root") + link;
