@@ -126,7 +126,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
                                            "under the KEYS: " + ret.getTwo());
             }
 
-            String cfgLocation = ret.getOne();
+            String cfgLocation = ret.getOne().trim();
             cfg.load(cfgLocation, sctx);
 
             super.contextInitialized(evt);
