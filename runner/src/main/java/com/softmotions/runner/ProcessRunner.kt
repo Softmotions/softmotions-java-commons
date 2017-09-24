@@ -26,6 +26,13 @@ interface ProcessRunner : Closeable {
             stderrFn: ((line: String) -> Unit)? = null,
             outputFn: ((line: String) -> Unit)? = null): ProcessRun
 
+
+    fun cmd2(cmdLine: String,
+             failOnExitCode: Boolean,
+             failOnTimeout: Boolean,
+             outputFn: ((line: String) -> Unit)? = null): ProcessRun
+
+
     fun spec(spec: ProcessSpec,
              stdout: OutputHandler? = null,
              stderr: OutputHandler? = null): ProcessRun

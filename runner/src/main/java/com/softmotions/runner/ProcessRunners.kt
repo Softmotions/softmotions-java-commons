@@ -19,10 +19,12 @@ object ProcessRunners {
 
     private val outputTasksPool = Executors.newCachedThreadPool()
 
+    @JvmOverloads
     fun serial(verbose: Boolean = false, group: String? = null): ProcessRunner {
         return ProcessRunnerImpl(verbose, "serial", group)
     }
 
+    @JvmOverloads
     fun parallel(verbose: Boolean = false, group: String? = null): ProcessRunner {
         return ProcessRunnerImpl(verbose, "parallel", group)
     }
@@ -70,6 +72,17 @@ object ProcessRunners {
             ConcurrentHashMap<String, Any>()
         }
 
+        override fun cmd2(cmdLine: String,
+                          failOnExitCode: Boolean,
+                          failOnTimeout:
+                          Boolean, outputFn: ((line: String) -> Unit)?): ProcessRun {
+
+            return cmd(cmdLine,
+                    failOnExitCode = failOnExitCode,
+                    failOnTimeout = failOnTimeout,
+                    outputFn = outputFn)
+        }
+
         override fun cmd(cmdLine: String,
                          directory: File?,
                          env: Map<String, String>,
@@ -77,8 +90,7 @@ object ProcessRunners {
                          failOnTimeout: Boolean,
                          stderrFn: ((line: String) -> Unit)?,
                          outputFn: ((String) -> Unit)?): ProcessRun {
-
-
+            
             return spec(
                     ProcessSpec(
                             cmdLine = cmdLine,
@@ -271,7 +283,7 @@ object ProcessRunners {
                     }
                 } catch (ee: ExecutionException) {
                     throw ee.cause ?: ee
-                } catch(ce: CompletionException) {
+                } catch (ce: CompletionException) {
                     throw ce.cause ?: ce
                 }
                 if (spec.failOnTimeout && !ret) {
@@ -328,14 +340,14 @@ object ProcessRunners {
                     if (!outputTasks.isEmpty()) {
                         try {
                             CompletableFuture.allOf(*outputTasks.toTypedArray()).join()
-                        } catch(ce: CompletionException) {
+                        } catch (ce: CompletionException) {
                             throw ce.cause ?: ce
                         }
                     }
                     if (spec.failOnExitCode && exitCode != 0) {
                         throw ProcessExitCodeException(clist.joinToString(" "), exitCode)
                     }
-                } catch(ignored: InterruptedException) {
+                } catch (ignored: InterruptedException) {
                     log.warn("Process forcibly interrupted. Command: $clist")
                 } finally {
                     Thread.currentThread().name = oldThreadName
