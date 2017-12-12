@@ -12,8 +12,8 @@
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
-            <artifactId>softmotions-utils</artifactId>
-            <version>${softmotion.commons.version}</version>
+            <artifactId>softmotions-weboot</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis</groupId>
@@ -40,7 +40,7 @@
                     <artifactId>javassist</artifactId>
                 </exclusion>
             </exclusions>
-            <version>3.1.14</version>
+            <version>3.2.1</version>
         </dependency>
     </dependencies>
 </project>

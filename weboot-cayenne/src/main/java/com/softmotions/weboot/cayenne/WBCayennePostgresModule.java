@@ -34,11 +34,10 @@ public class WBCayennePostgresModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        binder
-                .bindList(Constants.SERVER_DEFAULT_TYPES_LIST)
-                .add(new JacksonJSONType(ObjectNode.class.getName()))
-                .add(new JacksonJSONType(ArrayNode.class.getName()))
-                .add(new JacksonJSONType(JsonNode.class.getName()));
+        binder.bindList(ExtendedType.class, Constants.SERVER_DEFAULT_TYPES_LIST)
+              .add(new JacksonJSONType(ObjectNode.class.getName()))
+              .add(new JacksonJSONType(ArrayNode.class.getName()))
+              .add(new JacksonJSONType(JsonNode.class.getName()));
     }
 
     private class JacksonJSONType implements ExtendedType {

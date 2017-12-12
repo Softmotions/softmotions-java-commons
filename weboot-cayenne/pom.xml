@@ -19,8 +19,16 @@
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
-            <artifactId>softmotions-utils</artifactId>
-            <version>${softmotion.commons.version}</version>
+            <artifactId>softmotions-weboot</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.cayenne</groupId>
