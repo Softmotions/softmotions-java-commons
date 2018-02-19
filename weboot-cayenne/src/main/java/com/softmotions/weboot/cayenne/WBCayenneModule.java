@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.configuration.server.ServerRuntimeBuilder;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ObjectUtils;
@@ -162,12 +163,12 @@ public class WBCayenneModule extends AbstractModule {
                 }
             }
 
-            runtime = ServerRuntime.builder()
-                                   .addConfigs(cfgLocation)
-                                   .addModules(modules)
-                                   .addModules(extraCayenneModules)
-                                   .dataSource(dataSource)
-                                   .build();
+            runtime = ServerRuntimeBuilder.builder()
+                                          .addConfigs(cfgLocation)
+                                          .addModules(modules)
+                                          .addModules(extraCayenneModules)
+                                          .dataSource(dataSource)
+                                          .build();
 
             log.info("WBCayenneModule cayenne runtime configured");
         }
