@@ -56,6 +56,17 @@ public class WBLiquibaseModule extends AbstractModule {
         }
         bind(LiquibaseInitializer.class).asEagerSingleton();
         Multibinder.newSetBinder(binder(), WBLiquibaseExtraConfigSupplier.class);
+
+        binder().requestInjection(new Object() {
+            @Inject
+            void registerService(LiquibaseInitializer initializer) {
+                try {
+                    initializer.start();
+                } catch (Exception e) {
+                    log.error("Error during liquibase initialization", e);
+                }
+            }
+        });
     }
 
     public static class LiquibaseInitializer {
@@ -76,7 +87,6 @@ public class WBLiquibaseModule extends AbstractModule {
             this.extraConfigSuppliers = extraConfigSuppliers;
         }
 
-        @Start(order = 10)
         public void start() throws Exception {
             HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
             HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
