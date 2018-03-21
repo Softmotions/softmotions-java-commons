@@ -15,6 +15,7 @@ import java.util.zip.ZipException;
  * @author <a href="stefan.bodewig@epost.de">Stefan Bodewig</a>
  * @version $Revision: 155439 $
  */
+@SuppressWarnings("unchecked")
 public class ZipEntry extends java.util.zip.ZipEntry {
 
     /**

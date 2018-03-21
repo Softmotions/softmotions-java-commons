@@ -16,6 +16,7 @@ import com.softmotions.commons.json.JsonUtils;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class KVOptions extends Flat3Map<String, String> {
 
     public KVOptions() {

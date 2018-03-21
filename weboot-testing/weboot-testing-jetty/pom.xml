@@ -11,7 +11,7 @@
     <artifactId>softmotions-weboot-testing-jetty</artifactId>
 
     <properties>
-        <jetty.version>9.4.3.v20170317</jetty.version>
+        <jetty.version>9.4.8.v20171121</jetty.version>
     </properties>
 
     <dependencies>

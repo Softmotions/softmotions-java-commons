@@ -38,6 +38,7 @@ import com.softmotions.commons.re.RegexpHelper;
  * @author Adamansky Anton (adamansky@gmail.com)
  */
 @ThreadSafe
+@SuppressWarnings("unchecked")
 public class DirectoryScannerFactory {
 
     private static final Logger log = LoggerFactory.getLogger(DirectoryScannerFactory.class);
@@ -75,7 +76,7 @@ public class DirectoryScannerFactory {
             "**/*___jb_old___",
             "**/*___jb_tmp___",
             "**/.*.swp",
-    };
+            };
 
     private final Object lock = new Object();
 

@@ -25,6 +25,7 @@ import com.softmotions.commons.ServicesConfiguration;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public abstract class WBServletModule<C extends WBConfiguration> extends ServletModule {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());

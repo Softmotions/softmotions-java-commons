@@ -10,7 +10,6 @@ import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.configuration.server.ServerRuntimeBuilder;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ObjectUtils;
@@ -36,7 +35,7 @@ import com.softmotions.commons.lifecycle.Start;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-@SuppressWarnings("UnnecessaryFullyQualifiedName")
+@SuppressWarnings({"UnnecessaryFullyQualifiedName", "unchecked"})
 public class WBCayenneModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBCayenneModule.class);
@@ -163,12 +162,12 @@ public class WBCayenneModule extends AbstractModule {
                 }
             }
 
-            runtime = ServerRuntimeBuilder.builder()
-                                          .addConfigs(cfgLocation)
-                                          .addModules(modules)
-                                          .addModules(extraCayenneModules)
-                                          .dataSource(dataSource)
-                                          .build();
+            runtime = ServerRuntime.builder()
+                                   .addConfigs(cfgLocation)
+                                   .addModules(modules)
+                                   .addModules(extraCayenneModules)
+                                   .dataSource(dataSource)
+                                   .build();
 
             log.info("WBCayenneModule cayenne runtime configured");
         }

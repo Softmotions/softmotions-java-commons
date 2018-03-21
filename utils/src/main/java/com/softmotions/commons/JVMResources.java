@@ -24,15 +24,14 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class JVMResources {
 
     private static final Logger log = LoggerFactory.getLogger(JVMResources.class);
 
     @SuppressWarnings("StaticCollection")
     private static final Map<String, Object> RESOURCES_MAP = new ConcurrentHashMap<>();
-
-    //private static final Set<String> LOCKED_KEYS = new HashSet<>();
-
+    
     static {
 
         //todo duty hack :(

@@ -20,13 +20,9 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.5</version>
             <exclusions>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-multibindings</artifactId>
         </dependency>
     </dependencies>
 

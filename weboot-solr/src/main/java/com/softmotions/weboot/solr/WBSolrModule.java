@@ -35,6 +35,7 @@ import com.softmotions.weboot.WBConfiguration;
  * @author Tyutyunkov Vyacheslav (tve@softmotions.com)
  * @version $Id$
  */
+@SuppressWarnings("unchecked")
 public class WBSolrModule extends AbstractModule {
 
     protected static final Logger log = LoggerFactory.getLogger(WBSolrModule.class);

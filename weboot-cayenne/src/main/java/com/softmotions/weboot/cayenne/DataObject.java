@@ -22,7 +22,7 @@ import com.softmotions.commons.json.JsonUtils;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-@SuppressWarnings({"ChainOfInstanceofChecks", "ObjectEquality"})
+@SuppressWarnings({"ChainOfInstanceofChecks", "ObjectEquality", "unchecked"})
 public abstract class DataObject extends CayenneDataObject {
 
     @Nullable

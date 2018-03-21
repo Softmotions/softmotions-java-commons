@@ -23,7 +23,7 @@ import com.google.inject.spi.ProviderInstanceBinding;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+@SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "unchecked"})
 public class LifeCycleServiceImpl implements LifeCycleService {
 
     private static final Logger log = LoggerFactory.getLogger(LifeCycleServiceImpl.class);

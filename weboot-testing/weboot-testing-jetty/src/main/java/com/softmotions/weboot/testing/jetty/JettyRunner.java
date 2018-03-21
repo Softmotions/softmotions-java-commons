@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class JettyRunner {
 
     private Logger log = LoggerFactory.getLogger(JettyRunner.class);
@@ -87,7 +88,6 @@ public class JettyRunner {
         WebAppContext wh = (WebAppContext) jetty.getHandler();
         for (EventListener el : wh.getEventListeners()) {
             if (type.isAssignableFrom(el.getClass())) {
-                //noinspection unchecked
                 return (T) el;
             }
         }

@@ -50,6 +50,7 @@ import com.softmotions.weboot.WBServletModule;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class WBSecurityModule extends AbstractModule implements WBServletInitializerModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBSecurityModule.class);

@@ -9,6 +9,7 @@ import java.util.Objects;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class FSWatcherEventSupport implements Serializable {
 
     final FSWatcher watcher;

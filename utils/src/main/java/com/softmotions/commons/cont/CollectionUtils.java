@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Adamansky Anton (adamansky@gmail.com)
  * @version $Id: CollectionUtils.java 6006 2007-10-10 08:24:58Z adam $
  */
+@SuppressWarnings("unchecked")
 public class CollectionUtils {
 
     public static String join(String delim, Collection coll) {

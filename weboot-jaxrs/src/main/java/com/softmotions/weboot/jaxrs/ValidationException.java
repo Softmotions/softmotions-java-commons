@@ -15,6 +15,7 @@ import com.softmotions.commons.Human;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class ValidationException extends MessageException {
 
     private static final Logger log = LoggerFactory.getLogger(ValidationException.class);

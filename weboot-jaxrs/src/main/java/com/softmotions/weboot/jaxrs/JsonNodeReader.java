@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 @Provider
 @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED})
+@SuppressWarnings("unchecked")
 public class JsonNodeReader implements MessageBodyReader {
 
     @Inject

@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
+@SuppressWarnings("unchecked")
 public class TomcatRunner {
 
     private static final Logger log = LoggerFactory.getLogger(TomcatRunner.class);
@@ -105,7 +106,6 @@ public class TomcatRunner {
         if (context != null) {
             for (Object el : context.getApplicationLifecycleListeners()) {
                 if (type.isAssignableFrom(el.getClass())) {
-                    //noinspection unchecked
                     return (T) el;
                 }
             }
