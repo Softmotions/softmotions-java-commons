@@ -14,10 +14,11 @@ import java.net.URLStreamHandlerFactory;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,9 @@ public class JVMResources {
 
     @SuppressWarnings("StaticCollection")
     private static final Map<String, Object> RESOURCES_MAP = new ConcurrentHashMap<>();
-    
+
+    private static final Object lock = new Object();
+
     static {
 
         //todo duty hack :(
@@ -47,8 +50,9 @@ public class JVMResources {
         }
 
         URLStreamHandlerFactory f = new URLStreamHandlerFactory() {
+            @Nullable
             @Override
-            public @Nullable URLStreamHandler createURLStreamHandler(String protocol) {
+            public URLStreamHandler createURLStreamHandler(String protocol) {
                 return "jvmr".equals(protocol) ? new URLStreamHandler() {
                     @Override
                     protected URLConnection openConnection(URL url) throws IOException {
@@ -109,13 +113,41 @@ public class JVMResources {
 
     public static void set(String name, Object val) {
         log.info("Set resource {}", name);
-        RESOURCES_MAP.put(name, val);
+        synchronized (lock) {
+            RESOURCES_MAP.put(name, val);
+            lock.notifyAll();
+        }
     }
 
     public static <T> T get(String name) {
         //noinspection unchecked
         return (T) RESOURCES_MAP.get(name);
     }
+
+    @javax.annotation.Nullable
+    public static <T> T getWait(String name, long units, TimeUnit tu) {
+        T res = get(name);
+        if (res != null) {
+            return res;
+        }
+        long u = tu.toMillis(units);
+        long s = System.currentTimeMillis();
+        while (res == null && u > 0) {
+            synchronized (lock) {
+                try {
+                    lock.wait(u);
+                } catch (InterruptedException ignored) {
+                    ;
+                }
+                long ns = System.currentTimeMillis();
+                u -= (ns - s);
+                s = ns;
+                res = (T) RESOURCES_MAP.get(name);
+            }
+        }
+        return res;
+    }
+
 
     public static <T> T getOrFail(String name) {
         T val = get(name);
@@ -127,6 +159,9 @@ public class JVMResources {
 
     public static void remove(String name) {
         log.info("Remove resource {}", name);
-        RESOURCES_MAP.remove(name);
+        synchronized (lock) {
+            RESOURCES_MAP.remove(name);
+            lock.notifyAll();
+        }
     }
 }
