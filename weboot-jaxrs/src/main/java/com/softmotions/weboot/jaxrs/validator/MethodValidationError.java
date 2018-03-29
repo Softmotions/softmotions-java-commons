@@ -7,7 +7,7 @@ import com.google.common.base.MoreObjects;
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-public class JaxrsMethodValidationError implements Serializable {
+public class MethodValidationError implements Serializable {
 
     private final String key;
 
@@ -27,7 +27,7 @@ public class JaxrsMethodValidationError implements Serializable {
         return message;
     }
 
-    public JaxrsMethodValidationError(String key, String message, String validator) {
+    public MethodValidationError(String key, String message, String validator) {
         this.key = key;
         this.message = message;
         this.validator = validator;

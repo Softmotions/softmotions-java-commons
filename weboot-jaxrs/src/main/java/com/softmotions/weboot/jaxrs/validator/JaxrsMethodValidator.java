@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.softmotions.weboot.i18n.I18n;
+import com.softmotions.weboot.jaxrs.ws.WSRequestContext;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -111,18 +112,18 @@ public class JaxrsMethodValidator {
     }
 
 
-    public List<JaxrsMethodValidationError> validateMethod(String[] groups,
-                                                           String[] rules,
-                                                           Method method,
-                                                           Object[] arguments,
-                                                           @Nullable Consumer<ValidationContext> contextConsumer) {
+    public List<MethodValidationError> validateMethod(String[] groups,
+                                                      String[] rules,
+                                                      Method method,
+                                                      Object[] arguments,
+                                                      @Nullable Consumer<ValidationContext> contextConsumer) {
         List<String> resolvedRules = new ArrayList<>(1 << 6);
         for (String g : collectAllGroups(null, groups)) {
             ValidatorsGroup vg = validatorsGroups.get(g);
             Collections.addAll(resolvedRules, vg.validators());
         }
         Collections.addAll(resolvedRules, rules);
-        ValidationContextImpl vctx = new ValidationContextImpl(method, arguments);
+        ValidationContextImpl vctx = new ValidationContextImpl(method, arguments, method.getParameterTypes());
         resolvedRules.forEach(vctx::ruleToken);
         vctx.flush();
         if (contextConsumer != null) {
@@ -145,7 +146,9 @@ public class JaxrsMethodValidator {
 
         private final Object[] arguments;
 
-        private final List<JaxrsMethodValidationError> errors = new ArrayList<>(8);
+        private final Class[] argumenTypes;
+
+        private final List<MethodValidationError> errors = new ArrayList<>(8);
 
         private final List<String> validatorArgs = new ArrayList<>(4);
 
@@ -173,9 +176,11 @@ public class JaxrsMethodValidator {
 
 
         private ValidationContextImpl(Method method,
-                                      Object[] arguments) {
+                                      Object[] arguments,
+                                      Class[] argumenTypes) {
             this.method = method;
             this.arguments = arguments;
+            this.argumenTypes = argumenTypes;
         }
 
         @Override
@@ -243,24 +248,28 @@ public class JaxrsMethodValidator {
             if (beanFetched) {
                 return bean;
             }
-
             int aind = -1;
             beanFetched = true;
-
             switch (ftype) {
                 case FTYPE_BODY:
-                    for (int i = 0; i < arguments.length; ++i) {
-                        //noinspection ObjectEquality
-                        if (arguments[i] != null
-                            && JsonNode.class.isAssignableFrom(arguments[i].getClass())) {
-                            aind = i;
-                            break;
+                    if (jsonBody != null) {
+                        bean = jsonBody;
+                        return bean;
+                    }
+                    for (int i = 0; i < argumenTypes.length; ++i) {
+                        if (argumenTypes[i] != null) {
+                            if (JsonNode.class.isAssignableFrom(argumenTypes[i])) {
+                                jsonBody = (JsonNode) arguments[i];
+                                bean = jsonBody;
+                                return bean;
+                            } else if (WSRequestContext.class.isAssignableFrom(argumenTypes[i])) {
+                                jsonBody = ((WSRequestContext) arguments[i]).getRequestData();
+                                bean = jsonBody;
+                                return bean;
+                            }
                         }
                     }
-                    if (aind == -1) {
-                        log.error("Unable to find JSON body parameter for method: {}", method);
-                    }
-                    jsonBody = (JsonNode) arguments[aind];
+                    log.error("Unable to find JSON body parameter for method: {}", method);
                     break;
                 case FTYPE_PATH_PARAM: {
                     Annotation[][] pan = method.getParameterAnnotations();
@@ -331,15 +340,12 @@ public class JaxrsMethodValidator {
         }
 
         private void validateBean() {
-
-            Object b = getBean();
-            Object value = null;
             boolean valid;
-
+            Object value = getBean();
             switch (ftype) {
                 case FTYPE_BODY:
-                    if (b != null) {
-                        JsonNode at = ((JsonNode) b).at((field.charAt(0) != '/') ? '/' + field : field);
+                    if (value != null) {
+                        JsonNode at = jsonBody.at((field.charAt(0) != '/') ? '/' + field : field);
                         validatedValues.put(rawField, at);
                         if (!at.isMissingNode()) {
                             value = at.asText();
@@ -348,11 +354,9 @@ public class JaxrsMethodValidator {
                     break;
                 case FTYPE_PATH_PARAM:
                 case FTYPE_REQ_PARAM:
-                    value = b;
                     validatedValues.put(rawField, value);
                     break;
             }
-
             try {
                 valid = validator.validate(value, validatorArgs.toArray(new String[validatorArgs.size()]));
             } catch (Exception e) {
@@ -368,7 +372,7 @@ public class JaxrsMethodValidator {
                                   value);
                 if (!Objects.equals(prevTranslatedMessage, translatedMessage)) {
                     prevTranslatedMessage = translatedMessage;
-                    errors.add(new JaxrsMethodValidationError(field, translatedMessage, validatorName));
+                    errors.add(new MethodValidationError(field, translatedMessage, validatorName));
                 }
             }
         }

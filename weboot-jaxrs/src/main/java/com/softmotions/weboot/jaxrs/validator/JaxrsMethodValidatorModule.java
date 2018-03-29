@@ -36,8 +36,7 @@ public class JaxrsMethodValidatorModule extends AbstractModule {
         ValidateJsonBodyInterceptor interceptor = new ValidateJsonBodyInterceptor();
         requestInjection(interceptor);
         bindInterceptor(any(),
-                        annotatedWith(ValidateREST.class)
-                                .and(annotatedWith(Path.class)),
+                        annotatedWith(ValidateREST.class),
                         interceptor);
         bindInterceptor(annotatedWith(ValidateREST.class),
                         not(annotatedWith(ValidateREST.class))

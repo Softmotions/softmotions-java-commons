@@ -47,10 +47,10 @@ public class ValidateJsonBodyInterceptor implements MethodInterceptor {
         String[] groups = vm.includeGroups();
         String[] rules = vm.validators();
         AtomicReference<ValidationContext> vref = new AtomicReference<>();
-        List<JaxrsMethodValidationError> errors =
+        List<MethodValidationError> errors =
                 methodValidator.validateMethod(groups, rules, method, arguments, vref::set);
         if (!errors.isEmpty()) {
-            throw new JaxrsMethodValidationException(errors);
+            throw new MethodValidationException(errors);
         }
         return Objects.requireNonNull(vref.get());
     }
