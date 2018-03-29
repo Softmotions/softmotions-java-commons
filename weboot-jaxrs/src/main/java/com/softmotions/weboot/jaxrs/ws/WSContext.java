@@ -3,8 +3,6 @@ package com.softmotions.weboot.jaxrs.ws;
 import java.util.Set;
 import javax.websocket.Session;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
@@ -14,6 +12,8 @@ public interface WSContext {
 
     void sendToAll(String text);
 
-    void sendToAll(JsonNode node);
+    void sendToAllAsJSON(Object data);
+
+    void sendToAllAsJSON(String key, Object data);
 
 }

@@ -1,7 +1,7 @@
 package com.softmotions.weboot.cayenne;
 
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.tx.Transaction;
+import org.apache.cayenne.configuration.server.ServerRuntime;
 
 /**
  * Placeholder for the current thread object context.
@@ -25,5 +25,14 @@ public class ObjectContextThreadHolder {
 
     public static void removeObjectContext() {
         contextStore.remove();
+    }
+
+    public static ObjectContext getOrCreate(ServerRuntime crt) {
+        ObjectContext octx = contextStore.get();
+        if (octx == null) {
+            octx = crt.newContext();
+            contextStore.set(octx);
+        }
+        return octx;
     }
 }

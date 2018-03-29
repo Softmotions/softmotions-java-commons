@@ -120,7 +120,7 @@ public class AbstractWS implements WSContext {
         }
     }
 
-    protected void sendToAll(JsonNode node, Set<Session> sessions) {
+    protected void sendToAllAsJSON(Object node, Set<Session> sessions) {
         String buf;
         try {
             buf = mapper.writeValueAsString(node);
@@ -131,16 +131,27 @@ public class AbstractWS implements WSContext {
         sendToAll(buf, sessions);
     }
 
+    protected void sendToAllAsJSON(String key, Object data, Set<Session> sessions) {
+        ObjectNode n = mapper.createObjectNode();
+        n.put("key", key);
+        n.putPOJO("data", data);
+        sendToAllAsJSON(n, sessions);
+    }
+
     @Override
     public void sendToAll(String text) {
         sendToAll(text, getAllSessions());
     }
 
     @Override
-    public void sendToAll(JsonNode node) {
-        sendToAll(node, getAllSessions());
+    public void sendToAllAsJSON(Object data) {
+        sendToAllAsJSON(data, getAllSessions());
     }
 
+    @Override
+    public void sendToAllAsJSON(String key, Object data) {
+        sendToAllAsJSON(key, data, getAllSessions());
+    }
 
     private class WSRequestContextImpl implements WSRequestContext {
 
@@ -178,8 +189,13 @@ public class AbstractWS implements WSContext {
         }
 
         @Override
-        public void sendToAll(JsonNode node) {
-            AbstractWS.this.sendToAll(node, getAllSessions());
+        public void sendToAllAsJSON(Object data) {
+            AbstractWS.this.sendToAllAsJSON(data, getAllSessions());
+        }
+
+        @Override
+        public void sendToAllAsJSON(String key, Object data) {
+            AbstractWS.this.sendToAllAsJSON(key, data, getAllSessions());
         }
 
         private WSRequestContextImpl(Session session, ObjectNode request) {
