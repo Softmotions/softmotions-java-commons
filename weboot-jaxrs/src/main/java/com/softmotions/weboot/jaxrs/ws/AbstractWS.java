@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.websocket.CloseReason;
-import javax.websocket.EncodeException;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -78,7 +77,9 @@ public class AbstractWS implements WSContext {
                     ObjectNode n = mapper.createObjectNode();
                     n.put("key", h.action.key().isEmpty() ? key : h.action.key());
                     n.putPOJO("data", res);
-                    session.getBasicRemote().sendObject(n);
+                    synchronized (session) {
+                        session.getBasicRemote().sendText(mapper.writeValueAsString(n));
+                    }
                 }
             } catch (Exception e) {
                 log.error("", e);
@@ -121,11 +122,12 @@ public class AbstractWS implements WSContext {
         return sessions != null ? sessions : Collections.emptySet();
     }
 
-
     protected void sendToAll(String text, Set<Session> sessions) {
         for (Session session : sessions) {
             try {
-                session.getAsyncRemote().sendText(text);
+                synchronized (session) {
+                    session.getAsyncRemote().sendText(text);
+                }
             } catch (Exception e) {
                 log.error("", e);
             }
@@ -182,17 +184,25 @@ public class AbstractWS implements WSContext {
         }
 
         @Override
-        public void sendError(String msg) {
-            try {
-                getSession().getBasicRemote().sendObject(error(msg));
-            } catch (IOException | EncodeException e) {
-                log.error("", e);
-            }
+        public void sendError(String msg) throws IOException {
+            sendAsJSON(error(msg));
         }
 
         @Override
         public Set<Session> getAllSessions() {
             return getSession().getOpenSessions();
+        }
+
+        @Override
+        public void send(String text) throws IOException {
+            synchronized (session) {
+                session.getBasicRemote().sendText(text);
+            }
+        }
+
+        @Override
+        public void sendAsJSON(Object data) throws IOException {
+            send(mapper.writeValueAsString(data));
         }
 
         @Override

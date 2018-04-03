@@ -1,5 +1,6 @@
 package com.softmotions.weboot.jaxrs.ws;
 
+import java.io.IOException;
 import java.util.Set;
 import javax.websocket.Session;
 
@@ -15,5 +16,4 @@ public interface WSContext {
     void sendToAllAsJSON(Object data);
 
     void sendToAllAsJSON(String key, Object data);
-
 }

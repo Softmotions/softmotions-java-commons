@@ -1,5 +1,6 @@
 package com.softmotions.weboot.jaxrs.ws;
 
+import java.io.IOException;
 import javax.websocket.Session;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -13,5 +14,9 @@ public interface WSRequestContext extends WSContext {
 
     Session getSession();
 
-    void sendError(String msg);
+    void sendError(String msg) throws IOException;
+
+    void send(String text) throws IOException;
+
+    void sendAsJSON(Object data) throws IOException;
 }
