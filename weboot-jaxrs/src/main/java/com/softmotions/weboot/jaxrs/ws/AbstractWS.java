@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,15 +92,26 @@ public class AbstractWS implements WSContext {
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
+        Set<Session> openSessions = session.getOpenSessions();
+        if (!openSessions.contains(session)) {
+            openSessions = new HashSet<>(openSessions);
+            openSessions.add(session);
+        }
+        sessionHolder.set(openSessions);
     }
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
+        Set<Session> openSessions = session.getOpenSessions();
+        if (openSessions.contains(session)) {
+            openSessions = new HashSet<>(openSessions);
+            openSessions.remove(session);
+        }
+        sessionHolder.set(session.getOpenSessions());
     }
 
     @OnError
     public void onError(Session session, Throwable ex) {
-        sessionHolder.set(session.getOpenSessions());
         log.error("error: {}", ex.getMessage(), ex);
     }
 
