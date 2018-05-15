@@ -18,7 +18,7 @@
         <java.source.version>1.8</java.source.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <softmotion.commons.version>1.3-SNAPSHOT</softmotion.commons.version>
-        <kotlin.version>1.2.30</kotlin.version>
+        <kotlin.version>1.2.40</kotlin.version>
         <guice.version>4.2.0</guice.version>
         <tomcat.version>8.5.29</tomcat.version>
         <jackson.version>2.9.4</jackson.version>
@@ -232,7 +232,7 @@
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-jre8</artifactId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
             <dependency>
@@ -299,7 +299,7 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jre8</artifactId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
         </dependency>
     </dependencies>
 
