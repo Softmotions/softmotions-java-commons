@@ -121,14 +121,10 @@ public class WSUserDatabaseRealm extends RealmBase {
         return (dbrole != null && user.isHasAnyRole(dbrole.getName()));
     }
 
-    /**
-     * Return a short name for this Realm implementation.
-     */
-    @Override
     protected String getName() {
         return name;
     }
-
+    
     /**
      * Return the password associated with the given principal's user name.
      */

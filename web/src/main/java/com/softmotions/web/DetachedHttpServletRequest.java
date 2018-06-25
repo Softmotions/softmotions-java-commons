@@ -377,12 +377,13 @@ public class DetachedHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public Collection<Part> getParts() throws IOException, ServletException {
+    public Collection<Part> getParts() {
         return parts;
     }
 
+    @Nullable
     @Override
-    public Part getPart(String name) throws IOException, ServletException {
+    public Part getPart(String name) {
         return parts.stream().filter(part -> name.equals(part.getName())).findFirst().orElse(null);
     }
 

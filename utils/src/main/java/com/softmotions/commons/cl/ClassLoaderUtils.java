@@ -1,9 +1,8 @@
 package com.softmotions.commons.cl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -13,14 +12,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarFile;
 import java.util.zip.ZipFile;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class ClassLoaderUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClassLoaderUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(ClassLoaderUtils.class);
+
+    private static final AtomicBoolean skipClearSunJarFile = new AtomicBoolean();
+
+    private ClassLoaderUtils() {
+    }
 
     /**
      * Taken from: http://tomee.apache.org/
@@ -34,6 +42,13 @@ public class ClassLoaderUtils {
         for (final String jar : getClosedJarFiles(classLoader)) {
             clearSunJarFileFactoryCache(jar);
         }
+        if (Closeable.class.isInstance(classLoader)) {
+            try {
+                Closeable.class.cast(classLoader).close();
+            } catch (IOException ignored) {
+                // no-op
+            }
+        }
     }
 
     /**
@@ -45,10 +60,8 @@ public class ClassLoaderUtils {
      * @param cl ClassLoader of expected type URLClassLoader (Silent failure)
      */
     private static List<String> getClosedJarFiles(final ClassLoader cl) {
-
-        final List<String> files = new ArrayList<String>();
-
-        if (null != cl && cl instanceof URLClassLoader) {
+        final List<String> files = new ArrayList<>();
+        if (cl instanceof URLClassLoader) {
 
             final URLClassLoader ucl = (URLClassLoader) cl;
             final Class clazz = URLClassLoader.class;
@@ -71,11 +84,11 @@ public class ClassLoaderUtils {
                         jf = (JarFile) loader.get(jl);
                         files.add(jf.getName());
                         jf.close();
-                    } catch (Throwable t) {
+                    } catch (Throwable ignored) {
                         //If we got this far, this is probably not a JAR loader so skip it
                     }
                 }
-            } catch (Throwable t) {
+            } catch (Throwable ignored) {
                 //Not an Oracle VM
             }
         }
@@ -103,8 +116,12 @@ public class ClassLoaderUtils {
      */
     @SuppressWarnings({"unchecked"})
     private static synchronized void clearSunJarFileFactoryCacheImpl(final String jarLocation, final int attempt) {
-        logger.debug("Clearing Sun JarFileFactory cache for directory " + jarLocation);
-
+        if (skipClearSunJarFile.get()) {
+            return;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Clearing Sun JarFileFactory cache for directory {}", jarLocation);
+        }
         try {
             final Class jarFileFactory = Class.forName("sun.net.www.protocol.jar.JarFileFactory");
 
@@ -135,7 +152,7 @@ public class ClassLoaderUtils {
                         urlCacheRemoveKeys.add(key);
                     }
                 } else {
-                    logger.warn("Unexpected key type: " + key);
+                    log.warn("Unexpected key type: {}", key);
                 }
             }
 
@@ -160,10 +177,10 @@ public class ClassLoaderUtils {
                 try {
                     final Object remove = fileCache.remove(next);
                     if (null != remove) {
-                        logger.debug("Removed item from fileCache: " + remove);
+                        log.debug("Removed item from fileCache: {}", remove);
                     }
-                } catch (Throwable e) {
-                    logger.warn("Failed to remove item from fileCache: " + next);
+                } catch (final Throwable e) {
+                    log.warn("Failed to remove item from fileCache: {}", next);
                 }
             }
 
@@ -174,31 +191,36 @@ public class ClassLoaderUtils {
 
                 try {
                     final Object remove = urlCache.remove(next);
+
                     try {
-                        ((AutoCloseable) next).close();
-                    } catch (Throwable e) {
+                        ((Closeable) next).close();
+                    } catch (final Throwable ignored) {
                         //Ignore
                     }
 
                     if (null != remove) {
-                        logger.debug("Removed item from urlCache: " + remove);
+                        log.debug("Removed item from urlCache: {}", remove);
                     }
-                } catch (Throwable e) {
-                    logger.warn("Failed to remove item from urlCache: " + next);
+                } catch (final Throwable e) {
+                    log.warn("Failed to remove item from urlCache: {}", next);
                 }
+
             }
         } catch (ConcurrentModificationException e) {
             if (attempt > 0) {
-                clearSunJarFileFactoryCacheImpl(jarLocation, (attempt - 1));
+                clearSunJarFileFactoryCacheImpl(jarLocation, attempt - 1);
             } else {
-                logger.error("Unable to clear Sun JarFileFactory cache after 5 attempts", e);
+                log.error("Unable to clear Sun JarFileFactory cache after 5 attempts", e);
             }
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NoSuchFieldException ignored) {
             // not a sun vm
-        } catch (NoSuchFieldException e) {
-            // different version of sun vm?
-        } catch (Throwable e) {
-            logger.error("Unable to clear Sun JarFileFactory cache", e);
+        } catch (RuntimeException re) {
+            if ("java.lang.reflect.InaccessibleObjectException".equals(re.getClass().getName())) {
+                skipClearSunJarFile.compareAndSet(false, true);
+                return;
+            }
+            throw re;
+        } catch (final Throwable ignored) {
         }
     }
 

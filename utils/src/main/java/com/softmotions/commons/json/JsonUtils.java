@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +37,7 @@ public class JsonUtils {
             if (keys != null && keys.length > 0 && ArrayUtils.indexOf(keys, key) == -1) {
                 continue;
             }
+            //noinspection unchecked
             m.put(key, nodeAsObject(f.getValue()));
         }
         return m;
@@ -61,10 +63,10 @@ public class JsonUtils {
             case BOOLEAN:
                 return n.asBoolean();
             case OBJECT:
-                return populateMapByJsonNode((ObjectNode) n, new HashMap());
+                return populateMapByJsonNode((ObjectNode) n, new HashMap<>());
             case ARRAY:
                 ArrayNode an = (ArrayNode) n;
-                ArrayList al = new ArrayList(an.size());
+                List<Object> al = new ArrayList<>(an.size());
                 Iterator<JsonNode> elements = an.elements();
                 while (elements.hasNext()) {
                     al.add(nodeAsObject(elements.next()));
@@ -109,6 +111,7 @@ public class JsonUtils {
                 o.putNull(key);
                 continue;
             }
+            //noinspection IfStatementWithTooManyBranches
             if (val instanceof String) {
                 o.put(key, (String) val);
             } else if (val instanceof Number) {

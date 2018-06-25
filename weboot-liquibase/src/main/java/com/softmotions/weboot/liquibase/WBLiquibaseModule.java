@@ -131,7 +131,7 @@ public class WBLiquibaseModule extends AbstractModule {
                         log.info("Include extra liquibase file: {} context: {}",
                                  cs.getLocation(), StringUtils.trimToEmpty(cs.getIncludeContexts()));
                         changeLog.include(cs.getLocation(), false, resourceAccessor,
-                                          new ContextExpression(cs.getIncludeContexts()));
+                                          new ContextExpression(cs.getIncludeContexts()), true);
                     }
                 }
 

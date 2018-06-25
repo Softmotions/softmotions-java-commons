@@ -1,24 +1,11 @@
 package com.softmotions.commons;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
+import java.lang.reflect.Method;
 import java.net.URLStreamHandlerFactory;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,78 +23,17 @@ public class JVMResources {
     private static final Object lock = new Object();
 
     static {
-
-        //todo duty hack :(
-
-        URLStreamHandlerFactory of;
-        Field ff;
         try {
-            ff = URL.class.getDeclaredField("factory");
-            ff.setAccessible(true);
-            of = (URLStreamHandlerFactory) ff.get(null);
+            Class<?> clazz = Class.forName("org.apache.catalina.webresources.TomcatURLStreamHandlerFactory");
+            Method m = clazz.getMethod("getInstance");
+            Object hf = m.invoke(null);
+            clazz.getMethod("addUserFactory", URLStreamHandlerFactory.class).invoke(hf, new JVMResourceUrlHandlerFactory());
+            log.info("URLStreamHandlerFactory for jvmr:// protocol successfully registered");
         } catch (Exception e) {
-            throw new Error(e);
-        }
-
-        URLStreamHandlerFactory f = new URLStreamHandlerFactory() {
-            @Nullable
-            @Override
-            public URLStreamHandler createURLStreamHandler(String protocol) {
-                return "jvmr".equals(protocol) ? new URLStreamHandler() {
-                    @Override
-                    protected URLConnection openConnection(URL url) throws IOException {
-                        //noinspection InnerClassTooDeeplyNested
-                        return new URLConnection(url) {
-
-                            @Override
-                            public void connect() throws IOException {
-                            }
-
-                            @Override
-                            public InputStream getInputStream() throws IOException {
-                                Object res = get(url.getPath());
-                                if (res == null) {
-                                    throw new IOException("Null value of JVM resource: " + url);
-                                }
-                                //noinspection ChainOfInstanceofChecks
-                                if (res instanceof URI) {
-                                    return ((URI) res).toURL().openStream();
-                                }
-                                if (res instanceof URL) {
-                                    return ((URL) res).openStream();
-                                }
-                                if (res instanceof Path) {
-                                    res = ((Path) res).toFile();
-                                }
-                                if (res instanceof File) {
-                                    return new FileInputStream((File) res);
-                                }
-                                if (res instanceof byte[]) {
-                                    return new ByteArrayInputStream((byte[]) res);
-                                }
-                                if (res instanceof Byte[]) {
-                                    return new ByteArrayInputStream(ArrayUtils.toPrimitive((Byte[]) res));
-                                }
-                                return IOUtils.toInputStream(res.toString(), "UTF-8");
-                            }
-                        };
-                    }
-                } : (of != null ? of.createURLStreamHandler(protocol) : null);
-            }
-        };
-
-        if (of != null) {
-            try {
-                ff.set(null, f);
-            } catch (Exception e) {
-                throw new Error(e);
-            }
-        } else {
-            URL.setURLStreamHandlerFactory(f);
+            log.warn("TomcatURLStreamHandlerFactory not found: {}", e.toString());
         }
     }
-
-
+    
     private JVMResources() {
     }
 

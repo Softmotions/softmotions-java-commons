@@ -154,7 +154,7 @@ public class WBCayenneModule extends AbstractModule {
                         }
                     }
                     if (module == null) {
-                        module = mclass.newInstance();
+                        module = mclass.getConstructor().newInstance();
                     }
                     modules.add((org.apache.cayenne.di.Module) module);
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {

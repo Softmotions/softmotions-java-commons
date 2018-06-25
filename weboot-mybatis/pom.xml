@@ -6,7 +6,7 @@
     <parent>
         <artifactId>softmotions-java-commons</artifactId>
         <groupId>softmotions</groupId>
-        <version>1.3-SNAPSHOT</version>
+        <version>1.4-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-weboot-mybatis</artifactId>
     <dependencies>
@@ -36,7 +36,7 @@
                     <artifactId>javassist</artifactId>
                 </exclusion>
             </exclusions>
-            <version>3.2.4</version>
+            <version>3.2.6</version>
         </dependency>
     </dependencies>
 </project>

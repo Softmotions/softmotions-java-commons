@@ -63,7 +63,8 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
     }
 
     private Pair<String, String> getEnvInitParam(ServletContext sctx, String pname) {
-        String key, ret;
+        String key;
+        String ret;
         String appId = sctx.getInitParameter(WEBOOT_APP_ID);
         appId = StringUtils.isBlank(appId) ? null : appId.toUpperCase();
         StringBuilder keys = new StringBuilder();
@@ -113,7 +114,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
                 if (!WBConfiguration.class.isAssignableFrom(cfgClass)) {
                     throw new RuntimeException("Configuration implementation must extend the: " + WBConfiguration.class + " class");
                 }
-                cfg = (WBConfiguration) cfgClass.newInstance();
+                cfg = (WBConfiguration) cfgClass.getConstructor().newInstance();
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException("Failed to load/instantiate WEBOOT configuration class: " + cfgClassName, e);
             }

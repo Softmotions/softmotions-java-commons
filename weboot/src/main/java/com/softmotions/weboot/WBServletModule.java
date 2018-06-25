@@ -87,10 +87,11 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                     }
                 }
                 if (minst == null) {
-                    minst = mclass.newInstance();
+                    minst = mclass.getConstructor().newInstance();
                 }
                 install((Module) minst);
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            } catch (NoSuchMethodException | InvocationTargetException
+                    | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException("Failed to activate Guice module: " + mclassName, e);
             }
         }

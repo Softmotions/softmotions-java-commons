@@ -53,7 +53,7 @@ public final class TransactionalInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
 
-        Object ret = null;
+        Object ret;
         Method interceptedMethod = invocation.getMethod();
         Transactional transactional = ClassUtils.getAnnotation(interceptedMethod, Transactional.class);
         if (transactional == null) {
@@ -175,7 +175,7 @@ public final class TransactionalInterceptor implements MethodInterceptor {
         if (checker != null) {
             return checker;
         }
-        checker = transactional.exceptionChecker().newInstance();
+        checker = transactional.exceptionChecker().getConstructor().newInstance();
         EX_CHECKERS.put(transactional.exceptionChecker(), checker);
         return checker;
     }
