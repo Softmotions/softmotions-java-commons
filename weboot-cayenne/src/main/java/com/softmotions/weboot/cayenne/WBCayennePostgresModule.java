@@ -4,6 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Objects;
+import java.util.UUID;
 import javax.annotation.Nullable;
 
 import org.apache.cayenne.access.types.ExtendedType;
@@ -37,9 +38,48 @@ public class WBCayennePostgresModule implements Module {
         binder.bindList(ExtendedType.class, Constants.SERVER_DEFAULT_TYPES_LIST)
               .add(new JacksonJSONType(ObjectNode.class.getName()))
               .add(new JacksonJSONType(ArrayNode.class.getName()))
-              .add(new JacksonJSONType(JsonNode.class.getName()));
+              .add(new JacksonJSONType(JsonNode.class.getName()))
+              .add(new UUIDType());
     }
 
+    private static class UUIDType implements ExtendedType {
+
+        @Override
+        public String getClassName() {
+            return UUID.class.getName();
+        }
+
+        @Override
+        public void setJdbcObject(PreparedStatement ps, Object value, int pos, int type, int scale) throws Exception {
+            if (value == null) {
+                ps.setNull(pos, type);
+            } else {
+                if (!(value instanceof UUID)) {
+                    value = UUID.fromString(value.toString());
+                }
+                ps.setObject(pos, value);
+            }
+        }
+        
+        @Override
+        public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+            return rs.getObject(index);
+        }
+
+        @Override
+        public Object materializeObject(CallableStatement rs, int index, int type) throws Exception {
+            return rs.getObject(index);
+        }
+        
+        @Override
+        public String toString(Object value) {
+            if (value == null) {
+                return "NULL";
+            }
+            return value.toString();
+        }
+    }
+    
     private class JacksonJSONType implements ExtendedType {
 
         private final String type;
@@ -102,6 +142,7 @@ public class WBCayennePostgresModule implements Module {
             return Objects.hash(type);
         }
 
+        @Override
         public String toString(Object value) {
             if (value == null) {
                 return "NULL";
