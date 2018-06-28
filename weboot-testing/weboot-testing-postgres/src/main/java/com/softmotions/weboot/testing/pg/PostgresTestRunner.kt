@@ -14,9 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-open class PostgresTestRunner(val dbName: String,
-                              val dbPort: Int = 9231,
-                              val dbBin: String = "/usr/lib/postgresql/9.6/bin") : DatabaseTestRunner {
+open class PostgresTestRunner(private val dbName: String,
+                              private val dbPort: Int = 9231,
+                              private val dbBin: String = "/usr/lib/postgresql/9.6/bin") : DatabaseTestRunner {
 
     private val log = LoggerFactory.getLogger(PostgresTestRunner::class.java)
 
@@ -54,7 +54,7 @@ open class PostgresTestRunner(val dbName: String,
                     " --lc-collate=$locale --lc-ctype=$locale" +
                     " --lc-monetary=$locale --lc-numeric=$locale --lc-time=$locale" +
                     " -D $dbDir",
-                    env = mapOf("LC_ALL".to("C"))) {
+                    env = mapOf("LC_ALL" to "C")) {
                 outputLine(it)
             }.waitFor {
                 checkExitCode(it)

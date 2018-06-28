@@ -5,7 +5,7 @@ package com.softmotions.weboot.testing.pg
  */
 interface DatabaseTestRunner {
 
-    fun setupDb(props: Map<String, Any> = emptyMap<String, Any>())
+    fun setupDb(props: Map<String, Any> = emptyMap())
 
     fun shutdownDb()
 }
