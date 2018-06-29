@@ -349,6 +349,8 @@ public class JaxrsMethodValidator {
                         validatedValues.put(rawField, at);
                         if (!at.isMissingNode()) {
                             value = at.asText();
+                        } else {
+                            value = null;
                         }
                     }
                     break;
