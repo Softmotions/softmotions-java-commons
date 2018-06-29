@@ -1,5 +1,8 @@
 package com.softmotions.weboot.cayenne;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 
@@ -19,6 +22,7 @@ public class ObjectContextThreadHolder {
         contextStore.set(ctx);
     }
 
+   @Nullable
     public static ObjectContext getObjectContext() {
         return contextStore.get();
     }
@@ -27,6 +31,7 @@ public class ObjectContextThreadHolder {
         contextStore.remove();
     }
 
+    @Nonnull
     public static ObjectContext getOrCreate(ServerRuntime crt) {
         ObjectContext octx = contextStore.get();
         if (octx == null) {
