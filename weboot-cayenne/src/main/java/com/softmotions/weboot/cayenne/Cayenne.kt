@@ -12,7 +12,7 @@ inline fun <reified T : Any> ObjectContext.new(): T {
     return this.newObject(T::class.java)
 }
 
-inline fun <reified T : Any> objectSelect(exprStr: String? = null, expr: Expression? = null): ObjectSelect<T?> {
+inline fun <reified T : Any> objectSelect(expr: Expression? = null, exprStr: String? = null): ObjectSelect<T?> {
     if (exprStr != null) {
         return ObjectSelect.query<T>(T::class.java, ExpressionFactory.exp(exprStr))
     } else if (expr != null) {
@@ -22,7 +22,7 @@ inline fun <reified T : Any> objectSelect(exprStr: String? = null, expr: Express
     }
 }
 
-inline fun <reified T : Any> objectDataRowSelect(exprStr: String? = null, expr: Expression? = null): ObjectSelect<DataRow?> {
+inline fun <reified T : Any> objectDataRowSelect(expr: Expression? = null, exprStr: String? = null): ObjectSelect<DataRow?> {
     if (exprStr != null) {
         return ObjectSelect.dataRowQuery(T::class.java, ExpressionFactory.exp(exprStr))
     } else if (expr != null) {
