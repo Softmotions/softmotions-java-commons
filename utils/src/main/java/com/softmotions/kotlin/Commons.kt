@@ -7,6 +7,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.StringReader
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -32,6 +34,8 @@ fun String.toBase64(): String = Base64.encodeBase64String(toByteArray())
 fun String.toBCode(): String = BCodec().encode(this)
 
 fun String.toFile(): File = File(this)
+
+fun String.toPath(): Path = Paths.get(this)
 
 ///////////////////////////////////////////////////////////////////////////
 //                            Time units                                 //
