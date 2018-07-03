@@ -31,6 +31,35 @@
 # Localstuff:  file(1) magic for locally observed files
 # Add any locally observed files here.
 
+# OpenOffice.org 1.1 puts the mimetype into the header too
+0    string   PK\003\004
+>30  string   mimetype
+>>38 string   application/vnd.sun.xml.calc               application/vnd.sun.xml.calc
+>>38 string   application/vnd.sun.xml.calc.template      application/vnd.sun.xml.calc.template
+>>38 string   application/vnd.sun.xml.draw               application/vnd.sun.xml.draw
+>>38 string   application/vnd.sun.xml.draw.template      application/vnd.sun.xml.draw.template
+>>38 string   application/vnd.sun.xml.impress            application/vnd.sun.xml.impress
+>>38 string   application/vnd.sun.xml.impress.template   application/vnd.sun.xml.impress.template
+>>38 string   application/vnd.sun.xml.writer             application/vnd.sun.xml.writer
+>>38 string   application/vnd.sun.xml.writer.master      application/vnd.sun.xml.writer.master
+>>38 string   application/vnd.sun.xml.writer.template    application/vnd.sun.xml.writer.template
+>>38 string   application/vnd.sun.xml.base               application/vnd.sun.xml.base
+
+# OASIS OpenDocument (KOffice >= 1.4 and OpenOffice >= 2.0)
+0    string   PK\003\004
+>30  string   mimetype
+>>38 string   application/vnd.oasis.opendocument.chart                  application/vnd.oasis.opendocument.chart
+>>38 string   application/vnd.oasis.opendocument.formula                application/vnd.oasis.opendocument.formula
+>>38 string   application/vnd.oasis.opendocument.graphics               application/vnd.oasis.opendocument.graphics
+>>38 string   application/vnd.oasis.opendocument.graphics-template      application/vnd.oasis.opendocument.graphics-template
+>>38 string   application/vnd.oasis.opendocument.image                  application/vnd.oasis.opendocument.image
+>>38 string   application/vnd.oasis.opendocument.presentation           application/vnd.oasis.opendocument.presentation
+>>38 string   application/vnd.oasis.opendocument.presentation-template  application/vnd.oasis.opendocument.presentation-template
+>>38 string   application/vnd.oasis.opendocument.spreadsheet            application/vnd.oasis.opendocument.spreadsheet
+>>38 string   application/vnd.oasis.opendocument.spreadsheet-template   application/vnd.oasis.opendocument.spreadsheet-template
+>>38 string   application/vnd.oasis.opendocument.text                   application/vnd.oasis.opendocument.text
+>>38 string   application/vnd.oasis.opendocument.text-template          application/vnd.oasis.opendocument.text-template
+
 # Real Audio (Magic .ra\0375)
 0	belong		0x2e7261fd	audio/x-pn-realaudio
 0	string		.RMF		application/vnd.rn-realmedia
@@ -134,8 +163,16 @@
 # Java
 
 0	beshort		0xcafe
->2	beshort		0xbabe		application/x-java-applet
+>2	beshort		0xbabe		application/x-java
 >2	beshort		0xd00d		application/x-java-pack200
+
+#------------------------------------------------------------------------------
+# diff:  file(1) magic for diff(1) output
+#
+0       string          diff\		text/x-diff
+0       string          ***\		text/x-diff
+0       string          Only\ in\ 	text/x-diff
+0       string          Common\ subdirectories:\        text/x-diff
 
 #------------------------------------------------------------------------------
 # audio:  file(1) magic for sound formats
@@ -176,8 +213,6 @@
 8	string		AIFC		audio/x-aiff
 #					IFF/8SVX audio data
 8	string		8SVX		audio/x-aiff
-
-
 
 # Creative Labs AUDIO stuff
 #					Standard MIDI data
@@ -315,6 +350,28 @@
 0       string          #!\ /usr/local/bin/perl         application/x-perl
 0       string          eval\ "exec\ /usr/local/bin/perl application/x-perl
 
+# python.
+#
+0       string          #!/bin/python                     application/x-python
+0       string          #!\ /bin/python                   application/x-python
+0       string          eval\ "exec\ /bin/python          application/x-python
+0       string          #!/usr/bin/python                 application/x-python
+0       string          #!\ /usr/bin/python               application/x-python
+0       string          eval\ "exec\ /usr/bin/python      application/x-python
+0       string          #!/usr/local/bin/python           application/x-python
+0       string          #!\ /usr/local/bin/python         application/x-python
+0       string          eval\ "exec\ /usr/local/bin/python application/x-python
+0	string		#!/bin/env\ python		  application/x-python
+0	string		#!\ /bin/env\ python		  application/x-python
+0	string		#!/usr/bin/env\ python		  application/x-python
+0	string		#!\ /usr/bin/env\ python 	  application/x-python
+
+# ruby
+0	string		#!/bin/env\ ruby                   application/x-ruby
+0	string		#!\ /bin/env\ ruby                 application/x-ruby
+0	string		#!/usr/bin/env\ ruby               application/x-ruby
+0	string		#!\ /usr/bin/env\ ruby             application/x-ruby
+
 # Type: Lua scripting language
 # URL:  http://www.lua.org/
 # From: Reuben Thomas <rrt@sc3d.org>
@@ -339,6 +396,9 @@
 0       string          \037\213        application/x-gzip
 
 0		string			PK\003\004		application/zip
+
+# ACE archive
+7      string        **ACE**     application/x-ace
 
 # RAR archiver (Greg Roelofs, newt@uchicago.edu)
 0	string		Rar!		application/x-rar
@@ -377,8 +437,13 @@
 257	string		ustar\0		application/x-tar	posix
 257	string		ustar\040\040\0		application/x-tar	gnu
 
+# The SVR4 "cpio(4)" hints that there are additional formats, but they
+# are defined as "short"s; I think all the new formats are
+# character-header formats and thus are strings, not numbers.
 0	short		070707		application/x-cpio
-0	short		0143561		application/x-cpio	swapped
+0	short		0143561		application/x-cpio
+0   string      070701      application/x-cpio
+0   string      070702      application/x-cpio
 
 0	string		=<ar>		application/x-archive
 0	string		\!<arch>	application/x-archive
@@ -438,14 +503,23 @@
 #------------------------------------------------------------------------------
 # html:  file(1) magic for HTML (HyperText Markup Language) docs
 #
-# from Michael Piefel <piefel@debian.org>
+# from Daniel Quinlan <quinlan@yggdrasil.com>
 #
-0	string/cB	\<!DOCTYPE\ html	text/html
-0	string/cb	\<head			text/html
-0	string/cb	\<title			text/html
-0	string/bc	\<html			text/html
-0	string		\<!--			text/html
-0	string/c	\<h1			text/html
+0	string		\<HEAD	text/html
+0	string		\<head	text/html
+0	string		\<BODY	text/html
+0	string		\<body	text/html
+0	string		\<TITLE	text/html
+0	string		\<title	text/html
+0       string          \<html	text/html
+0       string          \<HTML	text/html
+0	string		\<!--	text/html
+0	string		\<h1	text/html
+0	string		\<H1	text/html
+0	string		\<!doctype\ HTML	text/html
+0	string		\<!DOCTYPE\ HTML	text/html
+0	string		\<!doctype\ html	text/html
+0	string		\<!DOCTYPE\ html	text/html
 
 #------------------------------------------------------------------------------
 # images:  file(1) magic for image formats (see also "c-lang" for XPM bitmaps)
@@ -518,8 +592,10 @@
 #0	string		CP		color pointer
 #0	string		BA		bitmap array
 
-# CDROM Filesystems
-32769    string    CD001     application/x-iso9660-image
+#------------------------------------------------------------------------------
+# CD image files (ISO is imported from file 4.07)
+32769	string		CD001			application/x-iso
+32633	string		CD001			application/x-iso
 
 # Newer StuffIt archives (grant@netbsd.org)
 0	string		StuffIt			application/x-stuffit
@@ -571,19 +647,20 @@
 512	string		\354\245\301			application/msword
 0	string		\333\245-\0\0\0			application/msword
 
-
-
 #------------------------------------------------------------------------------
 # printer:  file(1) magic for printer-formatted files
 #
 
 # PostScript
 0	string		%!		application/postscript
+>15	string		EPS		image/x-eps
 0	string		\004%!		application/postscript
+>16	string		EPS		image/x-eps
 
 # Acrobat
 # (due to clamen@cs.cmu.edu)
 0	string		%PDF-		application/pdf
+0	string		\n%PDF-		application/pdf
 
 #------------------------------------------------------------------------------
 # sc:  file(1) magic for "sc" spreadsheet
@@ -816,6 +893,10 @@
 #
 #0	leshort		0x0006		application/x-dbt
 
+# SQLite database files
+0	string		**\ This\ file\ contains\ an\ SQLite	application/x-sqlite2
+0	string		SQLite\ format\ 3	application/x-sqlite3
+
 # Debian has entries for the old PGP formats:
 # pgp:  file(1) magic for Pretty Good Privacy
 # see http://lists.gnupg.org/pipermail/gnupg-devel/1999-September/016052.html
@@ -979,6 +1060,27 @@
 # http://www.djvuzone.org/
 0	string		AT&TFORM	image/vnd.djvu
 
+#------------------------------------------------------------------------------
+# DjVu (Leon Bottou <leonb@research.att.com>):
+#
+4      string          FORM
+>12    string          DJVU             image/x-djvu
+>12    string          DJVM             image/x-djvu
+>12    string          BM44             image/x-djvu
+>12    string          PM44             image/x-djvu
+
+#------------------------------------------------------------------------------
+# adi: file(1) magic for ADi's objects
+# From Gregory McGarry <g.mcgarry@ieee.org>
+#
+0	leshort		0x521c		application/x-executable # COFF DSP21k
+>18	lelong		&02		application/x-executable # executable,
+>18	lelong		^02
+>>18	lelong		&01		application/x-executable # static object,
+>>18	lelong		^01		application/x-executable # relocatable object,
+>18	lelong		&010		application/x-executable # stripped
+>18	lelong		^010		application/x-executable # not stripped
+
 # Danny Milosavljevic <danny.milo@gmx.net>
 # this are adrift (adventure game standard) game files, extension .taf
 # depending on version magic continues with 0x93453E6139FA (V 4.0)
@@ -1007,7 +1109,12 @@
 # From: Won-Kyu Park <wkpark@kldp.org>
 512	string		R\0o\0o\0t\0	application/x-hwp
 
-0	string/c	BEGIN:VCARD	text/x-vcard
+# vcard / vcalendar
+0	string		BEGIN:VCALENDAR	text/x-vcalendar
+0	string		begin:vcalendar	text/x-vcalendar
+0	string		BEGIN:VCARD	text/x-vcard
+0	string		begin:vcard	text/x-vcard
+
 0	string		WordPro\0	application/vnd.lotus-wordpro
 0	string		WordPro\r\373	application/vnd.lotus-wordpro
 0	string		CPC\262		image/x-cpi

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
+import javax.annotation.Nullable;
 
 /**
  * A single MagicMime entry from a magic.mime file. This entry can contain
@@ -45,7 +45,7 @@ class MagicMimeEntry {
     public static final int BYTE_TYPE = 7;
     public static final int UNKNOWN_TYPE = 20;
 
-    private ArrayList subEntries = new ArrayList();
+    private ArrayList<MagicMimeEntry> subEntries = new ArrayList<>();
     private int checkBytesFrom;
     private int type;
     private String typeStr;
@@ -59,14 +59,14 @@ class MagicMimeEntry {
 
     boolean isBetween; // used for range checking strings.
 
-    public MagicMimeEntry(ArrayList entries)
+    MagicMimeEntry(ArrayList entries)
             throws InvalidMagicMimeEntryException {
         this(0, null, entries);
     }
 
     private MagicMimeEntry(int level, MagicMimeEntry parent, ArrayList entries)
             throws InvalidMagicMimeEntryException {
-        if (entries == null || entries.size() == 0) {
+        if (entries == null || entries.isEmpty()) {
             return;
         }
 
@@ -82,7 +82,7 @@ class MagicMimeEntry {
         }
         entries.remove(0);
 
-        while (entries.size() > 0) {
+        while (!entries.isEmpty()) {
             int thisLevel = howManyGreaterThans((String) entries.get(0));
             if (thisLevel > level) {
                 new MagicMimeEntry(thisLevel, this, entries);
@@ -101,7 +101,7 @@ class MagicMimeEntry {
         System.out.println(tabs + toString());
         int len = subEntries.size();
         for (int i = 0; i < len; i++) {
-            MagicMimeEntry me = (MagicMimeEntry) subEntries.get(i);
+            MagicMimeEntry me = subEntries.get(i);
             me.traverseAndPrint(tabs + "\t");
         }
     }
@@ -142,14 +142,14 @@ class MagicMimeEntry {
         String[] tokens = trimmed.split("\t");
 
         // Now strip the empty entries
-        Vector v = new Vector();
+        List<String> v = new ArrayList<>();
         for (int i = 0; i < tokens.length; i++) {
-            if (!"".equals(tokens[i])) {
+            if (tokens[i] != null && !tokens[i].isEmpty()) {
                 v.add(tokens[i]);
             }
         }
         tokens = new String[v.size()];
-        tokens = (String[]) v.toArray(tokens);
+        tokens = v.toArray(tokens);
 
         if (tokens.length > 0) {
             String tok = tokens[0].trim();
@@ -189,7 +189,7 @@ class MagicMimeEntry {
                             .getOperationForStringField(content);
             }
 
-            if (content.length() > 0
+            if (!content.isEmpty()
                 && content.charAt(0) == operation.getOperationID())
                 content = content.substring(1);
 
@@ -227,7 +227,7 @@ class MagicMimeEntry {
      */
     private void initContentNumber() {
         contentNumber = 0;
-        if (content.length() == 0)
+        if (content.isEmpty())
             return;
 
         // check to already get exception during parsing rather than during
@@ -279,7 +279,7 @@ class MagicMimeEntry {
             return STRING_TYPE;
         } else if (tok.startsWith("belong")) {
             return BELONG_TYPE;
-        } else if (tok.equals("short")) {
+        } else if ("short".equals(tok)) {
             return SHORT_TYPE;
         } else if (tok.startsWith("lelong")) {
             return LELONG_TYPE;
@@ -287,7 +287,7 @@ class MagicMimeEntry {
             return BESHORT_TYPE;
         } else if (tok.startsWith("leshort")) {
             return LESHORT_TYPE;
-        } else if (tok.equals("byte")) {
+        } else if ("byte".equals(tok)) {
             return BYTE_TYPE;
         }
 
@@ -314,8 +314,7 @@ class MagicMimeEntry {
         int bytesToRead = getInputStreamMarkLength();
         in.mark(bytesToRead);
         try {
-            byte[] content = new byte[bytesToRead];
-
+            byte[] data = new byte[bytesToRead];
             // Since an InputStream might return only some data (not all
             // requested), we have to read in a loop until
             // either EOF is reached or the desired number of bytes have been
@@ -323,20 +322,20 @@ class MagicMimeEntry {
             int offset = 0;
             int restBytesToRead = bytesToRead;
             while (restBytesToRead > 0) {
-                int bytesRead = in.read(content, offset, restBytesToRead);
+                int bytesRead = in.read(data, offset, restBytesToRead);
                 if (bytesRead < 0)
                     break; // EOF
 
                 offset += bytesRead;
                 restBytesToRead -= bytesRead;
             }
-
-            return getMatch(content);
+            return getMatch(data);
         } finally {
             in.reset();
         }
     }
 
+    @Nullable
     MagicMimeEntry getMatch(byte[] content) throws IOException {
         ByteBuffer buf = readBuffer(content);
         if (buf == null)
@@ -346,27 +345,24 @@ class MagicMimeEntry {
         boolean matches = match(buf);
         if (matches) {
             int subLen = subEntries.size();
-            MimeType mimeType = getMimeType();
+            MimeType mt = getMimeType();
             if (subLen > 0) {
                 for (int k = 0; k < subLen; k++) {
-                    MagicMimeEntry me = (MagicMimeEntry) subEntries.get(k);
+                    MagicMimeEntry me = subEntries.get(k);
                     MagicMimeEntry matchingEntry = me.getMatch(content);
                     if (matchingEntry != null) {
                         return matchingEntry;
                     }
                 }
-                if (mimeType != null) {
-                    return this;
-                }
-            } else {
-                if (mimeType != null)
-                    return this;
+            }
+            if (mt != null) {
+                return this;
             }
         }
-
         return null;
     }
 
+    @Nullable
     MagicMimeEntry getMatch(RandomAccessFile raf) throws IOException {
         ByteBuffer buf = readBuffer(raf);
         if (buf == null) {
@@ -374,41 +370,37 @@ class MagicMimeEntry {
         }
         boolean matches = match(buf);
         if (matches) {
-            MimeType mimeType = getMimeType();
-            if (subEntries.size() > 0) {
+            MimeType mt = getMimeType();
+            if (!subEntries.isEmpty()) {
                 for (int i = 0; i < subEntries.size(); i++) {
-                    MagicMimeEntry me = (MagicMimeEntry) subEntries.get(i);
+                    MagicMimeEntry me = subEntries.get(i);
                     MagicMimeEntry matchingEntry = me.getMatch(raf);
                     if (matchingEntry != null) {
                         return matchingEntry;
                     }
                 }
-                if (mimeType != null) {
-                    return this;
-                }
-            } else {
-                if (mimeType != null)
-                    return this;
+            }
+            if (mt != null) {
+                return this;
             }
         }
-
         return null;
     }
 
     /*
      * private methods for reading to local buffer
      */
-    private ByteBuffer readBuffer(byte[] content) throws IOException {
+    private ByteBuffer readBuffer(byte[] content) {
         int startPos = getCheckBytesFrom();
         if (content == null || startPos > content.length) {
             return null;
         }
 
-        ByteBuffer buf = null;
+        ByteBuffer buf;
         try {
             switch (getType()) {
-                case MagicMimeEntry.STRING_TYPE: {
-                    int len = 0;
+                case STRING_TYPE:
+                    int len;
                     // The following is not documented in the Magic(5)
                     // documentation.
                     // This is an extension to the magic rules and is provided by
@@ -426,33 +418,28 @@ class MagicMimeEntry {
                     buf = ByteBuffer.allocate(len);
                     buf.put(content, startPos, len);
                     break;
-                }
 
-                case MagicMimeEntry.SHORT_TYPE:
-                case MagicMimeEntry.LESHORT_TYPE:
-                case MagicMimeEntry.BESHORT_TYPE: {
+                case SHORT_TYPE:
+                case LESHORT_TYPE:
+                case BESHORT_TYPE:
                     buf = ByteBuffer.allocate(2);
                     buf.put(content, startPos, 2);
                     break;
-                }
 
-                case MagicMimeEntry.LELONG_TYPE:
-                case MagicMimeEntry.BELONG_TYPE: {
+                case LELONG_TYPE:
+                case BELONG_TYPE:
                     buf = ByteBuffer.allocate(4);
                     buf.put(content, startPos, 4);
                     break;
-                }
 
-                case MagicMimeEntry.BYTE_TYPE: {
+                case BYTE_TYPE:
                     buf = ByteBuffer.allocate(1);
                     buf.put(content, startPos, 1);
                     break;
-                }
 
-                default: {
+                default:
                     buf = null;
                     break;
-                }
             }
         } catch (IndexOutOfBoundsException iobe) {
             // Content passed in is to small for the comparison so just ignore this match
@@ -468,7 +455,7 @@ class MagicMimeEntry {
         raf.seek(startPos);
         ByteBuffer buf;
         switch (getType()) {
-            case MagicMimeEntry.STRING_TYPE: {
+            case STRING_TYPE:
                 int len = 0;
                 // The following is not documented in the Magic(5) documentation.
                 // This is an extension to the magic rules and is provided by this
@@ -486,33 +473,28 @@ class MagicMimeEntry {
                 buf = ByteBuffer.allocate(len);
                 raf.read(buf.array(), 0, len);
                 break;
-            }
 
-            case MagicMimeEntry.SHORT_TYPE:
-            case MagicMimeEntry.LESHORT_TYPE:
-            case MagicMimeEntry.BESHORT_TYPE: {
+            case SHORT_TYPE:
+            case LESHORT_TYPE:
+            case BESHORT_TYPE:
                 buf = ByteBuffer.allocate(2);
                 raf.read(buf.array(), 0, 2);
                 break;
-            }
 
-            case MagicMimeEntry.LELONG_TYPE:
-            case MagicMimeEntry.BELONG_TYPE: {
+            case LELONG_TYPE:
+            case BELONG_TYPE:
                 buf = ByteBuffer.allocate(4);
                 raf.read(buf.array(), 0, 4);
                 break;
-            }
 
-            case MagicMimeEntry.BYTE_TYPE: {
+            case BYTE_TYPE:
                 buf = ByteBuffer.allocate(1);
                 raf.read(buf.array(), 0, 1);
                 break;
-            }
 
-            default: {
+            default:
                 buf = null;
                 break;
-            }
         }
 
         return buf;
@@ -531,7 +513,7 @@ class MagicMimeEntry {
 
     private int _getInputStreamMarkLength() {
         switch (getType()) {
-            case MagicMimeEntry.STRING_TYPE: {
+            case STRING_TYPE:
                 int len = 0;
                 // Lets check if its a between test
                 int index = typeStr.indexOf(">");
@@ -546,26 +528,21 @@ class MagicMimeEntry {
                         len = getContent().length();
                 }
                 return getCheckBytesFrom() + len + 1;
-            }
 
-            case MagicMimeEntry.SHORT_TYPE:
-            case MagicMimeEntry.LESHORT_TYPE:
-            case MagicMimeEntry.BESHORT_TYPE: {
+            case SHORT_TYPE:
+            case LESHORT_TYPE:
+            case BESHORT_TYPE:
                 return getCheckBytesFrom() + 2;
-            }
 
-            case MagicMimeEntry.LELONG_TYPE:
-            case MagicMimeEntry.BELONG_TYPE: {
+            case LELONG_TYPE:
+            case BELONG_TYPE:
                 return getCheckBytesFrom() + 4;
-            }
 
-            case MagicMimeEntry.BYTE_TYPE: {
+            case BYTE_TYPE:
                 return getCheckBytesFrom() + 1;
-            }
 
-            default: {
+            default:
                 return 0;
-            }
         }
     }
 
@@ -573,52 +550,46 @@ class MagicMimeEntry {
      * private methods used for matching different types
      */
     private boolean match(ByteBuffer buf) throws IOException {
-        boolean matches = true;
+        boolean matches;
         ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
 
         switch (getType()) {
-            case MagicMimeEntry.STRING_TYPE: {
+            case STRING_TYPE:
                 matches = matchString(buf);
                 break;
-            }
 
-            case MagicMimeEntry.SHORT_TYPE: {
+            case SHORT_TYPE:
                 matches = matchShort(buf, byteOrder);
                 break;
-            }
 
-            case MagicMimeEntry.LESHORT_TYPE:
-            case MagicMimeEntry.BESHORT_TYPE: {
-                if (getType() == MagicMimeEntry.LESHORT_TYPE) {
+            case LESHORT_TYPE:
+            case BESHORT_TYPE:
+                if (getType() == LESHORT_TYPE) {
                     byteOrder = ByteOrder.LITTLE_ENDIAN;
                 }
                 matches = matchShort(buf, byteOrder);
                 break;
-            }
 
-            case MagicMimeEntry.LELONG_TYPE:
-            case MagicMimeEntry.BELONG_TYPE: {
-                if (getType() == MagicMimeEntry.LELONG_TYPE) {
+            case LELONG_TYPE:
+            case BELONG_TYPE:
+                if (getType() == LELONG_TYPE) {
                     byteOrder = ByteOrder.LITTLE_ENDIAN;
                 }
                 matches = matchLong(buf, byteOrder);
                 break;
-            }
 
-            case MagicMimeEntry.BYTE_TYPE: {
+            case BYTE_TYPE:
                 matches = matchByte(buf);
                 break;
-            }
 
-            default: {
+            default:
                 matches = false;
                 break;
-            }
         }
         return matches;
     }
 
-    private boolean matchString(ByteBuffer bbuf) throws IOException {
+    private boolean matchString(ByteBuffer bbuf) {
         if (isBetween) {
             String buffer = new String(bbuf.array());
             return buffer.contains(getContent());
@@ -663,7 +634,7 @@ class MagicMimeEntry {
         }
     }
 
-    private boolean matchByte(ByteBuffer bbuf) throws IOException {
+    private boolean matchByte(ByteBuffer bbuf) {
         short found = (short) ((bbuf.get(0) & 0xff) & (short) getMask(typeStr));
 
         if (operation.equals(MagicMimeEntryOperation.EQUALS)) {
@@ -837,13 +808,13 @@ class MagicMimeEntry {
         return new String(ret);
     }
 
-    public boolean containsMimeType(String mimeType) {
-        if (this.mimeType != null && this.mimeType.equals(mimeType))
+    public boolean containsMimeType(String mt) {
+        if (this.mimeType != null && this.mimeType.equals(mt))
             return true;
 
         for (Iterator it = subEntries.iterator(); it.hasNext(); ) {
             MagicMimeEntry subEntry = (MagicMimeEntry) it.next();
-            if (subEntry.containsMimeType(mimeType))
+            if (subEntry.containsMimeType(mt))
                 return true;
         }
         return false;

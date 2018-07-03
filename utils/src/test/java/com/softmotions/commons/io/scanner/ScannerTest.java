@@ -1,21 +1,20 @@
 package com.softmotions.commons.io.scanner;
 
-import com.softmotions.commons.cont.ArrayUtils;
-import com.softmotions.commons.cont.Pair;
-import com.softmotions.commons.io.watcher.FSWatcher;
-import com.softmotions.commons.io.watcher.FSWatcherCollectEventHandler;
-
-import org.apache.commons.io.FileUtils;
-import org.testng.annotations.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.softmotions.commons.cont.ArrayUtils;
+import com.softmotions.commons.cont.Pair;
+import com.softmotions.commons.io.watcher.FSWatcher;
+import com.softmotions.commons.io.watcher.FSWatcherCollectEventHandler;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -145,8 +144,8 @@ public class ScannerTest {
         Thread.sleep(500);
 
         Files.delete(tdir.resolve("h/a/b/bar2.txt"));
-        FileUtils.writeStringToFile(tdir.resolve("foo.txt").toFile(), "message");
-        FileUtils.writeStringToFile(tdir.resolve("foo.php").toFile(), "message");
+        FileUtils.writeStringToFile(tdir.resolve("foo.txt").toFile(), "message", "utf-8");
+        FileUtils.writeStringToFile(tdir.resolve("foo.php").toFile(), "message", "utf-8");
 
 
         FileUtils.deleteDirectory(tdir.resolve("h/a").toFile());

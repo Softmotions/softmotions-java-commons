@@ -1,5 +1,6 @@
 package com.softmotions.commons.zip;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.zip.ZipException;
@@ -24,6 +25,9 @@ public class ExtraFieldUtils {
         register(AsiExtraField.class);
     }
 
+    private ExtraFieldUtils() {
+    }
+
     /**
      * Create an instance of the approriate ExtraField, falls back to {@link
      * UnrecognizedExtraField UnrecognizedExtraField}.
@@ -36,16 +40,18 @@ public class ExtraFieldUtils {
      * @throws IllegalAccessException if cant create implementation
      * @since 1.1
      */
-    public static ZipExtraField createExtraField(final ZipShort headerID)
-            throws InstantiationException, IllegalAccessException {
-        final Class clazz =
-                (Class) c_implementations.get(headerID);
-        if (clazz != null) {
-            return (ZipExtraField) clazz.newInstance();
+    public static ZipExtraField createExtraField(final ZipShort headerID) throws ZipException {
+        try {
+            final Class clazz = (Class) c_implementations.get(headerID);
+            if (clazz != null) {
+                return (ZipExtraField) clazz.getConstructor().newInstance();
+            }
+            final UnrecognizedExtraField unrecognized = new UnrecognizedExtraField();
+            unrecognized.setHeaderID(headerID);
+            return unrecognized;
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            throw new ZipException(e.getMessage());
         }
-        final UnrecognizedExtraField unrecognized = new UnrecognizedExtraField();
-        unrecognized.setHeaderID(headerID);
-        return unrecognized;
     }
 
     /**
@@ -118,15 +124,9 @@ public class ExtraFieldUtils {
             if (start + 4 + length > data.length) {
                 throw new ZipException("data starting at " + start + " is in unknown format");
             }
-            try {
-                ZipExtraField ze = createExtraField(headerID);
-                ze.parseFromLocalFileData(data, start + 4, length);
-                v.add(ze);
-            } catch (InstantiationException ie) {
-                throw new ZipException(ie.getMessage());
-            } catch (IllegalAccessException iae) {
-                throw new ZipException(iae.getMessage());
-            }
+            ZipExtraField ze = createExtraField(headerID);
+            ze.parseFromLocalFileData(data, start + 4, length);
+            v.add(ze);
             start += (length + 4);
         }
         if (start != data.length) {// array not exhausted
@@ -147,17 +147,12 @@ public class ExtraFieldUtils {
      * @since 1.1
      */
     public static void register(final Class clazz) {
+        ZipExtraField ze;
         try {
-            ZipExtraField ze = (ZipExtraField) clazz.newInstance();
-            c_implementations.put(ze.getHeaderID(), clazz);
-        } catch (ClassCastException cc) {
-            throw new RuntimeException(clazz +
-                                       " doesn\'t implement ZipExtraField");
-        } catch (InstantiationException ie) {
-            throw new RuntimeException(clazz + " is not a concrete class");
-        } catch (IllegalAccessException ie) {
-            throw new RuntimeException(clazz +
-                                       "\'s no-arg constructor is not public");
+            ze = (ZipExtraField) clazz.getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
+        c_implementations.put(ze.getHeaderID(), clazz);
     }
 }

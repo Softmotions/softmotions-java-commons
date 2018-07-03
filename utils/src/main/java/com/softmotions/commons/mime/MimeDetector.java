@@ -44,7 +44,7 @@ public abstract class MimeDetector {
      * @return
      * @
      */
-    public final Collection getMimeTypes(final String fileName) {
+    public final Collection<MimeType> getMimeTypes(final String fileName) {
         return getMimeTypesFileName(fileName);
     }
 
@@ -55,7 +55,7 @@ public abstract class MimeDetector {
      * @return
      * @
      */
-    public final Collection getMimeTypes(final File file) {
+    public final Collection<MimeType> getMimeTypes(final File file) {
         return getMimeTypesFile(file);
     }
 
@@ -66,7 +66,7 @@ public abstract class MimeDetector {
      * @return
      * @
      */
-    public final Collection getMimeTypes(final URL url) {
+    public final Collection<MimeType> getMimeTypes(final URL url) {
         return getMimeTypesURL(url);
     }
 
@@ -77,7 +77,7 @@ public abstract class MimeDetector {
      * @return
      * @
      */
-    public final Collection getMimeTypes(final byte[] data) {
+    public final Collection<MimeType> getMimeTypes(final byte[] data) {
         return getMimeTypesByteArray(data);
     }
 
@@ -89,7 +89,7 @@ public abstract class MimeDetector {
      * @return
      * @
      */
-    public final Collection getMimeTypes(final InputStream in) {
+    public final Collection<MimeType> getMimeTypes(final InputStream in) {
         // Enforces that the InputStream supports the mark() and reset() methods
         if (!in.markSupported()) {
             throw new UnsupportedOperationException("The InputStream must support the mark() and reset() methods.");
