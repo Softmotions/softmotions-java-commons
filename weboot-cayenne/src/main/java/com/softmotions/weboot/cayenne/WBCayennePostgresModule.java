@@ -1,8 +1,11 @@
 package com.softmotions.weboot.cayenne;
 
+import java.sql.Array;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -39,7 +42,42 @@ public class WBCayennePostgresModule implements Module {
               .add(new JacksonJSONType(ObjectNode.class.getName()))
               .add(new JacksonJSONType(ArrayNode.class.getName()))
               .add(new JacksonJSONType(JsonNode.class.getName()))
-              .add(new UUIDType());
+              .add(new UUIDType())
+              .add(new StringArrayType());
+    }
+
+    private static class StringArrayType implements ExtendedType<String[]> {
+
+        @Override
+        public String getClassName() {
+            return String[].class.getName();
+        }
+
+        @Override
+        public void setJdbcObject(PreparedStatement ps, String[] value, int pos, int type, int scale) throws Exception {
+            Connection conn = ps.getConnection();
+            Array arr = conn.createArrayOf("text", value == null ? new String[0] : value);
+            ps.setArray(pos, arr);
+        }
+
+        @Override
+        public String[] materializeObject(ResultSet rs, int index, int type) throws Exception {
+            Array arr = rs.getArray(index);
+            if (arr == null) return new String[0];
+            return (String[]) arr.getArray();
+        }
+
+        @Override
+        public String[] materializeObject(CallableStatement rs, int index, int type) throws Exception {
+            Array arr = rs.getArray(index);
+            if (arr == null) return new String[0];
+            return (String[]) arr.getArray();
+        }
+
+        @Override
+        public String toString(String[] value) {
+            return Arrays.toString(value);
+        }
     }
 
     private static class UUIDType implements ExtendedType {
@@ -60,7 +98,7 @@ public class WBCayennePostgresModule implements Module {
                 ps.setObject(pos, value);
             }
         }
-        
+
         @Override
         public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
             return rs.getObject(index);
@@ -70,7 +108,7 @@ public class WBCayennePostgresModule implements Module {
         public Object materializeObject(CallableStatement rs, int index, int type) throws Exception {
             return rs.getObject(index);
         }
-        
+
         @Override
         public String toString(Object value) {
             if (value == null) {
@@ -79,7 +117,7 @@ public class WBCayennePostgresModule implements Module {
             return value.toString();
         }
     }
-    
+
     private class JacksonJSONType implements ExtendedType {
 
         private final String type;
