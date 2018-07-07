@@ -61,11 +61,12 @@ public class WBLiquibaseModule extends AbstractModule {
         if (lbCfg != null && lbCfg.getBoolean("eager-initialization", false)) {
             binder().requestInjection(new Object() {
                 @Inject
-                void registerService(LiquibaseInitializer initializer) {
+                void registerService(LiquibaseInitializer initializer) throws Exception {
                     try {
                         initializer.start();
                     } catch (Exception e) {
                         log.error("Error during liquibase initialization", e);
+                        throw e;
                     }
                 }
             });
