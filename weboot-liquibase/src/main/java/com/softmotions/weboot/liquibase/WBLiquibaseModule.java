@@ -92,14 +92,14 @@ public class WBLiquibaseModule extends AbstractModule {
         }
 
         @Start(order = 10)
-        public void scheduledStart() throws Exception {
+        public void scheduledStart() {
             HierarchicalConfiguration<ImmutableNode> lbCfg = cfg.xcfg().configurationAt("liquibase");
             if (lbCfg != null && !lbCfg.getBoolean("eager-initialization", false)) {
                 start();
             }
         }
 
-        public void start() throws Exception {
+        public void start() {
             HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
             HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
             if (lbCfg == null) {

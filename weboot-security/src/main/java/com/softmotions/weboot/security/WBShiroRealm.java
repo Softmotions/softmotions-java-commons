@@ -64,9 +64,9 @@ public class WBShiroRealm extends AuthorizingRealm {
             throw new UnknownAccountException();
         }
         if (getCredentialsMatcher() instanceof WBShiroPasswordMatcher) {
-            return new SimpleAuthenticationInfo(username, user, getName());
+            return new SimpleAuthenticationInfo(user, user, getName());
         }
-        return new SimpleAuthenticationInfo(username, user.getPassword(), getName());
+        return new SimpleAuthenticationInfo(user, user.getPassword(), getName());
     }
 
     @Override
