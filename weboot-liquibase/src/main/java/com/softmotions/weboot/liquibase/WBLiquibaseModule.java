@@ -61,11 +61,12 @@ public class WBLiquibaseModule extends AbstractModule {
         if (lbCfg != null && lbCfg.getBoolean("eager-initialization", false)) {
             binder().requestInjection(new Object() {
                 @Inject
-                void registerService(LiquibaseInitializer initializer) {
+                void registerService(LiquibaseInitializer initializer) throws Exception {
                     try {
                         initializer.start();
                     } catch (Exception e) {
                         log.error("Error during liquibase initialization", e);
+                        throw e;
                     }
                 }
             });
@@ -91,14 +92,14 @@ public class WBLiquibaseModule extends AbstractModule {
         }
 
         @Start(order = 10)
-        public void scheduledStart() throws Exception {
+        public void scheduledStart() {
             HierarchicalConfiguration<ImmutableNode> lbCfg = cfg.xcfg().configurationAt("liquibase");
             if (lbCfg != null && !lbCfg.getBoolean("eager-initialization", false)) {
                 start();
             }
         }
 
-        public void start() throws Exception {
+        public void start() {
             HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
             HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
             if (lbCfg == null) {

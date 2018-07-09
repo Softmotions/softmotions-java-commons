@@ -38,7 +38,7 @@ public class PropertyCondition extends ConditionBase implements Condition {
         String p = getProject().getProperty(property);
         boolean res;
         if (value != null) {
-            res = !invert ? value.equals(p) : !value.equals(p);
+            res = !invert == value.equals(p);
         } else {
             res = !invert ? p != null : p == null;
         }

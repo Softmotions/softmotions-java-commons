@@ -325,7 +325,6 @@
         <module>weboot-ds</module>
         <module>weboot-liquibase</module>
         <module>weboot-scheduler</module>
-        <module>weboot-mongo</module>
         <module>weboot-executor</module>
         <module>weboot-i18n</module>
         <module>weboot-mail</module>
