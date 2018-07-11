@@ -78,6 +78,7 @@ public class JaxrsMethodValidator {
         registerValidator("date", new DateValidator());
         registerValidator("oneOf", new OneOfValidator());
         registerValidator("httpUrl", new HttpUrlValidator());
+        registerValidator("lengthRange", new LengthRangeValidator());
     }
 
 
@@ -486,6 +487,28 @@ public class JaxrsMethodValidator {
                 return false;
             }
             return true;
+        }
+    }
+
+    public static class LengthRangeValidator implements Validator {
+        @Override
+        public boolean validate(@Nullable Object value, String... args) {
+            if (value == null) {
+                return true;
+            }
+            int min = 0;
+            int max = Integer.MAX_VALUE;
+            if (args.length > 0) {
+                min = Integer.parseInt(args[0]);
+                if (args.length > 1) {
+                    max = Integer.parseInt(args[1]);
+                }
+                String sval = value.toString();
+                return sval.length() >= min && sval.length() <= max;
+            } else {
+                log.warn("Missing arguments for lengthRange validator");
+                return false;
+            }
         }
     }
 }

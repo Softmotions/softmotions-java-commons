@@ -1,5 +1,6 @@
 package com.softmotions.weboot.jaxrs.validator;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,6 +12,11 @@ public class MethodValidationException extends RuntimeException {
 
     public List<MethodValidationError> getErrors() {
         return errors;
+    }
+
+    public MethodValidationException(MethodValidationError error) {
+        super(error.toString());
+        this.errors = Collections.singletonList(error);
     }
 
     public MethodValidationException(List<MethodValidationError> errors) {
