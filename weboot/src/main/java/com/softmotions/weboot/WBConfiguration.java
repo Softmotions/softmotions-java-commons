@@ -84,9 +84,9 @@ public abstract class WBConfiguration extends ServicesConfiguration {
 
     @Nullable
     public String getLogoutRedirect() {
-        String ret = xcfg().getString("logout-redirect");
+        String ret = xcfg().getString("logout-redirect", null);
         if (StringUtils.isBlank(ret)) {
-            return xcfg.getString("site.root");
+            return xcfg.getString("site.root", null);
         }
         return ret;
     }
@@ -157,7 +157,7 @@ public abstract class WBConfiguration extends ServicesConfiguration {
     }
 
     private void normalizePrefix(String property) {
-        String val = xcfg().getString(property);
+        String val = xcfg().getString(property, null);
         if (StringUtils.isBlank(val) || "/".equals(val)) {
             val = "";
         } else {
