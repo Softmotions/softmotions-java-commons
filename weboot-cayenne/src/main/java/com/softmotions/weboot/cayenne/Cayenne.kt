@@ -4,6 +4,8 @@ import org.apache.cayenne.DataRow
 import org.apache.cayenne.ObjectContext
 import org.apache.cayenne.exp.Expression
 import org.apache.cayenne.exp.ExpressionFactory
+import org.apache.cayenne.exp.Property
+import org.apache.cayenne.query.ColumnSelect
 import org.apache.cayenne.query.ObjectSelect
 import org.apache.cayenne.query.SQLSelect
 import org.apache.cayenne.query.SelectById
@@ -13,23 +15,31 @@ inline fun <reified T : Any> ObjectContext.new(): T {
 }
 
 inline fun <reified T : Any> objectSelect(expr: Expression? = null, exprStr: String? = null): ObjectSelect<T?> {
-    if (exprStr != null) {
-        return ObjectSelect.query<T>(T::class.java, ExpressionFactory.exp(exprStr))
+    return if (exprStr != null) {
+        ObjectSelect.query<T>(T::class.java, ExpressionFactory.exp(exprStr))
     } else if (expr != null) {
-        return ObjectSelect.query<T>(T::class.java, expr)
+        ObjectSelect.query<T>(T::class.java, expr)
     } else {
-        return ObjectSelect.query<T>(T::class.java)
+        ObjectSelect.query<T>(T::class.java)
     }
 }
 
 inline fun <reified T : Any> objectDataRowSelect(expr: Expression? = null, exprStr: String? = null): ObjectSelect<DataRow?> {
-    if (exprStr != null) {
-        return ObjectSelect.dataRowQuery(T::class.java, ExpressionFactory.exp(exprStr))
+    return if (exprStr != null) {
+        ObjectSelect.dataRowQuery(T::class.java, ExpressionFactory.exp(exprStr))
     } else if (expr != null) {
-        return ObjectSelect.dataRowQuery(T::class.java, expr)
+        ObjectSelect.dataRowQuery(T::class.java, expr)
     } else {
-        return ObjectSelect.dataRowQuery(T::class.java)
+        ObjectSelect.dataRowQuery(T::class.java)
     }
+}
+
+inline fun <reified T : Any, E> columnSelect(column: Property<E>): ColumnSelect<E?> {
+    return ObjectSelect.columnQuery(T::class.java, column)
+}
+
+inline fun <reified T : Any> columnSelect(column: Property<*>, vararg restof: Property<*>): ColumnSelect<Array<Any>> {
+    return ObjectSelect.columnQuery(T::class.java, column, *restof)
 }
 
 inline fun <reified T : Any> sqlScalarSelect(sql: String): SQLSelect<T?> {
