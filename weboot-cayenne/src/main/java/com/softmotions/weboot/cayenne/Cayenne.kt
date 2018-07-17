@@ -15,22 +15,18 @@ inline fun <reified T : Any> ObjectContext.new(): T {
 }
 
 inline fun <reified T : Any> objectSelect(expr: Expression? = null, exprStr: String? = null): ObjectSelect<T?> {
-    return if (exprStr != null) {
-        ObjectSelect.query<T>(T::class.java, ExpressionFactory.exp(exprStr))
-    } else if (expr != null) {
-        ObjectSelect.query<T>(T::class.java, expr)
-    } else {
-        ObjectSelect.query<T>(T::class.java)
+    return when {
+        exprStr != null -> ObjectSelect.query<T>(T::class.java, ExpressionFactory.exp(exprStr))
+        expr != null -> ObjectSelect.query<T>(T::class.java, expr)
+        else -> ObjectSelect.query<T>(T::class.java)
     }
 }
 
 inline fun <reified T : Any> objectDataRowSelect(expr: Expression? = null, exprStr: String? = null): ObjectSelect<DataRow?> {
-    return if (exprStr != null) {
-        ObjectSelect.dataRowQuery(T::class.java, ExpressionFactory.exp(exprStr))
-    } else if (expr != null) {
-        ObjectSelect.dataRowQuery(T::class.java, expr)
-    } else {
-        ObjectSelect.dataRowQuery(T::class.java)
+    return when {
+        exprStr != null -> ObjectSelect.dataRowQuery(T::class.java, ExpressionFactory.exp(exprStr))
+        expr != null -> ObjectSelect.dataRowQuery(T::class.java, expr)
+        else -> ObjectSelect.dataRowQuery(T::class.java)
     }
 }
 
@@ -38,7 +34,7 @@ inline fun <reified T : Any, E> columnSelect(column: Property<E>): ColumnSelect<
     return ObjectSelect.columnQuery(T::class.java, column)
 }
 
-inline fun <reified T : Any> columnSelect(column: Property<*>, vararg restof: Property<*>): ColumnSelect<Array<Any>> {
+inline fun <reified T : Any> columnSelect(column: Property<*>, vararg restof: Property<*>): ColumnSelect<Array<Any?>> {
     return ObjectSelect.columnQuery(T::class.java, column, *restof)
 }
 
