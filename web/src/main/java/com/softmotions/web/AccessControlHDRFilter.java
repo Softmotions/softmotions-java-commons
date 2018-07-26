@@ -46,9 +46,14 @@ public class AccessControlHDRFilter implements Filter {
         if (enabled && value != null) {
             HttpServletRequest hreq = (HttpServletRequest) req;
             HttpServletResponse hresp = (HttpServletResponse) resp;
-            hresp.setHeader("Access-Control-Allow-Origin", value);
-
             String origin = hreq.getHeader("Origin");
+            
+            if ("origin".equals(value)) {
+                hresp.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "*");
+            } else {
+                hresp.setHeader("Access-Control-Allow-Origin", value);
+            }
+            hresp.setHeader("Access-Control-Allow-Credentials", "true");
             String rheaders = hreq.getHeader("Access-Control-Request-Headers");
             if (rheaders != null) {
                 hresp.setHeader("Access-Control-Allow-Headers", rheaders);
