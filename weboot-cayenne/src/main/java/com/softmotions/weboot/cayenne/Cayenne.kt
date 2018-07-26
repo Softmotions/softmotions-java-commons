@@ -30,7 +30,7 @@ inline fun <reified T : Any> objectDataRowSelect(expr: Expression? = null, exprS
     }
 }
 
-inline fun <reified T : Any, E> columnSelect(column: Property<E>): ColumnSelect<E?> {
+inline fun <reified T : Any, E> singleColumnSelect(column: Property<E>): ColumnSelect<E?> {
     return ObjectSelect.columnQuery(T::class.java, column)
 }
 
