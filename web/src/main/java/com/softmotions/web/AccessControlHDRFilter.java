@@ -24,11 +24,13 @@ public class AccessControlHDRFilter implements Filter {
 
     private boolean enabled;
 
+    private boolean handleOptions;
+
     private String exposeHeaders;
 
 
     @Override
-    public void init(FilterConfig config) throws ServletException {
+    public void init(FilterConfig config) {
         value = config.getInitParameter("headerValue");
         if (config.getInitParameter("enabled") != null) {
             enabled = BooleanUtils.toBoolean(config.getInitParameter("enabled"));
@@ -39,6 +41,9 @@ public class AccessControlHDRFilter implements Filter {
         if (config.getInitParameter("exposeHeaders") != null) {
             exposeHeaders = config.getInitParameter("exposeHeaders");
         }
+        if (config.getInitParameter("handleOptions") != null) {
+            handleOptions = BooleanUtils.toBoolean(config.getInitParameter("handleOptions"));
+        }
     }
 
     @Override
@@ -47,7 +52,7 @@ public class AccessControlHDRFilter implements Filter {
             HttpServletRequest hreq = (HttpServletRequest) req;
             HttpServletResponse hresp = (HttpServletResponse) resp;
             String origin = hreq.getHeader("Origin");
-            
+
             if ("origin".equals(value)) {
                 hresp.setHeader("Access-Control-Allow-Origin", origin != null ? origin : "*");
             } else {
@@ -64,6 +69,11 @@ public class AccessControlHDRFilter implements Filter {
             }
             if (exposeHeaders != null && (rheaders != null || rmethod != null || origin != null)) {
                 hresp.setHeader("Access-Control-Expose-Headers", exposeHeaders);
+            }
+            if (handleOptions && "OPTIONS".equals(hreq.getMethod())) {
+                hresp.setStatus(HttpServletResponse.SC_OK);
+                hresp.getWriter().flush();
+                return;
             }
         }
         chain.doFilter(req, resp);
