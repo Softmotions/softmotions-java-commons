@@ -4,13 +4,10 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
@@ -36,7 +33,7 @@ public class AbstractWS implements WSContext {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final AtomicReference<Set<Session>> sessionHolder = new AtomicReference<>();
+    private final Set<Session> sessions = ConcurrentHashMap.newKeySet();
 
     private final Map<String, List<WSHNode>> handlers = new ConcurrentHashMap<>();
 
@@ -93,22 +90,12 @@ public class AbstractWS implements WSContext {
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
-        Set<Session> openSessions = session.getOpenSessions();
-        if (!openSessions.contains(session)) {
-            openSessions = new HashSet<>(openSessions);
-            openSessions.add(session);
-        }
-        sessionHolder.set(openSessions);
+        sessions.add(session);
     }
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-        Set<Session> openSessions = session.getOpenSessions();
-        if (openSessions.contains(session)) {
-            openSessions = new HashSet<>(openSessions);
-            openSessions.remove(session);
-        }
-        sessionHolder.set(session.getOpenSessions());
+        sessions.remove(session);
     }
 
     @OnError
@@ -118,8 +105,7 @@ public class AbstractWS implements WSContext {
 
     @Override
     public Set<Session> getAllSessions() {
-        Set<Session> sessions = sessionHolder.get();
-        return sessions != null ? sessions : Collections.emptySet();
+        return sessions;
     }
 
     protected void sendToAll(String text, Set<Session> sessions) {
