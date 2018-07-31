@@ -348,7 +348,7 @@ public class JaxrsMethodValidator {
                     if (value != null) {
                         JsonNode at = jsonBody.at((field.charAt(0) != '/') ? '/' + field : field);
                         validatedValues.put(rawField, at);
-                        if (!at.isMissingNode()) {
+                        if (!at.isMissingNode() && !at.isNull()) {
                             value = at.asText();
                         } else {
                             value = null;
