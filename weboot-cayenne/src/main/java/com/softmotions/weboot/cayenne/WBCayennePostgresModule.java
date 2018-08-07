@@ -1,5 +1,6 @@
 package com.softmotions.weboot.cayenne;
 
+import java.math.BigInteger;
 import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -43,7 +44,53 @@ public class WBCayennePostgresModule implements Module {
               .add(new JacksonJSONType(ArrayNode.class.getName()))
               .add(new JacksonJSONType(JsonNode.class.getName()))
               .add(new UUIDType())
-              .add(new StringArrayType());
+              .add(new StringArrayType())
+              .add(new BigIntegerType());
+    }
+
+    private static class BigIntegerType implements ExtendedType<BigInteger> {
+        
+        @Override
+        public String getClassName() {
+            return BigInteger.class.getName();
+        }
+
+        @Override
+        public void setJdbcObject(PreparedStatement ps, BigInteger value, int pos, int type, int scale) throws Exception {
+            if (value == null) {
+                ps.setNull(pos, type);
+            } else {
+                ps.setString(pos, value.toString());
+            }
+        }
+
+        @Override
+        public BigInteger materializeObject(ResultSet rs, int index, int type) throws Exception {
+            String val = rs.getString(index);
+            if (val == null) {
+                return null;
+            } else {
+                return new BigInteger(val);
+            }
+        }
+
+        @Override
+        public BigInteger materializeObject(CallableStatement rs, int index, int type) throws Exception {
+            String val = rs.getString(index);
+            if (val == null) {
+                return null;
+            } else {
+                return new BigInteger(val);
+            }
+        }
+
+        @Override
+        public String toString(BigInteger value) {
+            if (value == null) {
+                return "NULL";
+            }
+            return value.toString();
+        }
     }
 
     private static class StringArrayType implements ExtendedType<String[]> {
