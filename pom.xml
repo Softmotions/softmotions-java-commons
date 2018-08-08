@@ -29,6 +29,29 @@
         <shiro.version>1.4.0</shiro.version>
     </properties>
 
+    <modules>
+        <module>ant</module>
+        <module>utils</module>
+        <module>runner</module>
+        <module>web</module>
+        <module>weboot</module>
+        <module>web-realms</module>
+        <module>weboot-mybatis</module>
+        <module>weboot-cayenne</module>
+        <module>weboot-ds</module>
+        <module>weboot-liquibase</module>
+        <module>weboot-scheduler</module>
+        <module>weboot-executor</module>
+        <module>weboot-i18n</module>
+        <module>weboot-mail</module>
+        <module>weboot-templates</module>
+        <module>weboot-validators</module>
+        <module>weboot-jaxrs</module>
+        <module>weboot-testing</module>
+        <module>weboot-security</module>
+        <module>weboot-repository</module>
+    </modules>
+
     <repositories>
         <repository>
             <id>central</id>
@@ -312,27 +335,5 @@
             <artifactId>kotlin-stdlib-jdk8</artifactId>
         </dependency>
     </dependencies>
-
-    <modules>
-        <module>ant</module>
-        <module>utils</module>
-        <module>runner</module>
-        <module>web</module>
-        <module>weboot</module>
-        <module>web-realms</module>
-        <module>weboot-mybatis</module>
-        <module>weboot-cayenne</module>
-        <module>weboot-ds</module>
-        <module>weboot-liquibase</module>
-        <module>weboot-scheduler</module>
-        <module>weboot-executor</module>
-        <module>weboot-i18n</module>
-        <module>weboot-mail</module>
-        <module>weboot-templates</module>
-        <module>weboot-validators</module>
-        <module>weboot-jaxrs</module>
-        <module>weboot-testing</module>
-        <module>weboot-security</module>
-    </modules>
 
 </project>
