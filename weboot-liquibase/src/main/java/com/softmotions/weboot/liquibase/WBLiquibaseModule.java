@@ -31,7 +31,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.multibindings.Multibinder;
 import com.softmotions.commons.ServicesConfiguration;
-import com.softmotions.commons.lifecycle.Start;
 
 /**
  * Liquibase Guice integration.
@@ -54,52 +53,16 @@ public class WBLiquibaseModule extends AbstractModule {
             log.warn("No WBLiquibaseModule module configuration found. Skipping.");
             return;
         }
-        bind(LiquibaseInitializer.class).asEagerSingleton();
         Multibinder.newSetBinder(binder(), WBLiquibaseExtraConfigSupplier.class);
-
-        HierarchicalConfiguration<ImmutableNode> lbCfg = cfg.xcfg().configurationAt("liquibase");
-        if (lbCfg != null && lbCfg.getBoolean("eager-initialization", false)) {
-            binder().requestInjection(new Object() {
-                @Inject
-                void registerService(LiquibaseInitializer initializer) throws Exception {
-                    try {
-                        initializer.start();
-                    } catch (Exception e) {
-                        log.error("Error during liquibase initialization", e);
-                        throw e;
-                    }
-                }
-            });
-        }
+        binder().requestInjection(new LiquibaseInitializer());
     }
 
     public static class LiquibaseInitializer {
 
-
-        private final DataSource ds;
-
-        private final ServicesConfiguration cfg;
-
-        private final Set<WBLiquibaseExtraConfigSupplier> extraConfigSuppliers;
-
         @Inject
-        public LiquibaseInitializer(DataSource ds,
-                                    ServicesConfiguration cfg,
-                                    Set<WBLiquibaseExtraConfigSupplier> extraConfigSuppliers) {
-            this.ds = ds;
-            this.cfg = cfg;
-            this.extraConfigSuppliers = extraConfigSuppliers;
-        }
-
-        @Start(order = 10)
-        public void scheduledStart() {
-            HierarchicalConfiguration<ImmutableNode> lbCfg = cfg.xcfg().configurationAt("liquibase");
-            if (lbCfg != null && !lbCfg.getBoolean("eager-initialization", false)) {
-                start();
-            }
-        }
-
-        public void start() {
+        public void start(DataSource ds,
+                          ServicesConfiguration cfg,
+                          Set<WBLiquibaseExtraConfigSupplier> extraConfigSuppliers) throws Exception {
             HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
             HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
             if (lbCfg == null) {
@@ -194,10 +157,6 @@ public class WBLiquibaseModule extends AbstractModule {
                     log.info("Executing Liquibase update");
                     liquibase.update("");
                 }
-
-            } catch (Exception e) {
-                log.error("Failed to initiate WBLiquibaseModule", e);
-                throw new RuntimeException(e);
             }
         }
     }
