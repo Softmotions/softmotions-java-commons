@@ -37,7 +37,7 @@ public class AbstractWS implements WSContext {
 
     private final Map<String, List<WSHNode>> handlers = new ConcurrentHashMap<>();
 
-    private final ObjectMapper mapper;
+    protected final ObjectMapper mapper;
 
     protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset) {
         this.mapper = mapper;
