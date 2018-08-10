@@ -74,14 +74,22 @@ public class AbstractWS implements WSContext {
                     ObjectNode n = mapper.createObjectNode();
                     n.put("key", h.action.key().isEmpty() ? key : h.action.key());
                     n.putPOJO("data", res);
+                    onWSHandlerResponse(n);
                     synchronized (session) {
                         session.getBasicRemote().sendText(mapper.writeValueAsString(n));
                     }
                 }
             } catch (Exception e) {
-                log.error("", e);
+                onWSHandlerException(session, e);
             }
         });
+    }
+
+    protected void onWSHandlerResponse(ObjectNode n) {
+    }
+
+    protected void onWSHandlerException(Session session, Exception e) {
+        log.error("", e);
     }
 
     protected JsonNode error(String msg) {
@@ -109,7 +117,7 @@ public class AbstractWS implements WSContext {
     }
 
     protected void sendToAll(String text, Set<Session> sessions) {
-        for (Session session : sessions) {
+        for (Session session : sessions.toArray(new Session[0])) {
             try {
                 synchronized (session) {
                     session.getAsyncRemote().sendText(text);
@@ -224,5 +232,4 @@ public class AbstractWS implements WSContext {
             this.action = action;
         }
     }
-
 }
