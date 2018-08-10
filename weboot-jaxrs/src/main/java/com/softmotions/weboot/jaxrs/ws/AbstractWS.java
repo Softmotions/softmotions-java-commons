@@ -80,7 +80,7 @@ public class AbstractWS implements WSContext {
                     }
                 }
             } catch (Exception e) {
-                onWSHandlerException(session, e);
+                onWSHandlerException(session, h, e);
             }
         });
     }
@@ -88,7 +88,7 @@ public class AbstractWS implements WSContext {
     protected void onWSHandlerResponse(ObjectNode n) {
     }
 
-    protected void onWSHandlerException(Session session, Exception e) {
+    protected void onWSHandlerException(Session session, WSHNode node, Exception e) {
         log.error("", e);
     }
 
@@ -220,10 +220,10 @@ public class AbstractWS implements WSContext {
         }
     }
 
-    private class WSHNode {
-        final WSHandler handler;
-        final Method method;
-        final WSAction action;
+    protected class WSHNode {
+        protected final WSHandler handler;
+        protected final Method method;
+        protected final WSAction action;
 
         WSHNode(WSAction action, WSHandler handler, Method method) {
             log.info("Registering handler: {}::{}#{}()", action.value(), handler.getClass().getName(), method.getName());
