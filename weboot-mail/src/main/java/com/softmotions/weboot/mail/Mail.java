@@ -13,7 +13,7 @@ import jodd.mail.EmailAttachment;
 import jodd.mail.EmailAttachmentBuilder;
 import jodd.mail.MailException;
 import jodd.mail.SendMailSession;
-import jodd.mail.SendMailSessionProvider;
+import jodd.mail.SmtpServer;
 
 import com.google.inject.Provider;
 import com.softmotions.weboot.executor.TaskExecutor;
@@ -25,7 +25,7 @@ public class Mail extends Email {
 
     private static final Logger log = LoggerFactory.getLogger(Mail.class);
 
-    private final SendMailSessionProvider sendMailSessionProvider;
+    private final Provider<SmtpServer> sendMailSessionProvider;
 
     private final Provider<TaskExecutor> taskExecutorProvider;
 
@@ -34,7 +34,7 @@ public class Mail extends Email {
     private final MailModule.MailServiceImpl service;
 
     public Mail(MailModule.MailServiceImpl service,
-                SendMailSessionProvider sendMailSessionProvider,
+                Provider<SmtpServer> sendMailSessionProvider,
                 Provider<TaskExecutor> taskExecutorProvider,
                 boolean emulation) {
         this.sendMailSessionProvider = sendMailSessionProvider;
@@ -301,7 +301,7 @@ public class Mail extends Email {
         if (emulation) {
             return;
         }
-        SendMailSession session = sendMailSessionProvider.createSession();
+        SendMailSession session = sendMailSessionProvider.get().createSession();
         try {
             session.open();
             session.sendMail(this);

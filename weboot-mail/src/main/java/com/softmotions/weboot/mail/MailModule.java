@@ -68,7 +68,7 @@ public class MailModule extends AbstractModule {
 
         final Provider<TaskExecutor> executorProvider;
 
-        final SmtpServer smtpServer;
+        final Provider<SmtpServer> smtpServer;
 
         final Stack<Mail> history = new Stack<>();
 
@@ -77,8 +77,7 @@ public class MailModule extends AbstractModule {
         @Inject
         MailServiceImpl(HierarchicalConfiguration<ImmutableNode> xcfg,
                         Provider<TaskExecutor> executorProvider,
-                        @Named("com.softmotions.weboot.mail.MailModule")
-                        SmtpServer smtpServer) {
+                        @Named("com.softmotions.weboot.mail.MailModule") Provider<SmtpServer> smtpServer) {
             this.xcfg = xcfg;
             this.executorProvider = executorProvider;
             this.smtpServer = smtpServer;
@@ -99,7 +98,7 @@ public class MailModule extends AbstractModule {
 
         @Override
         public SendMailSession createSession() {
-            return smtpServer.createSession();
+            return smtpServer.get().createSession();
         }
 
         @Override
