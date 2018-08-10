@@ -221,9 +221,9 @@ public class AbstractWS implements WSContext {
     }
 
     protected class WSHNode {
-        protected final WSHandler handler;
-        protected final Method method;
-        protected final WSAction action;
+        public final WSHandler handler;
+        public final Method method;
+        public final WSAction action;
 
         WSHNode(WSAction action, WSHandler handler, Method method) {
             log.info("Registering handler: {}::{}#{}()", action.value(), handler.getClass().getName(), method.getName());
