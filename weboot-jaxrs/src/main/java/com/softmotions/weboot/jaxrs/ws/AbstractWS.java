@@ -88,7 +88,7 @@ public class AbstractWS implements WSContext {
     protected void onWSHandlerResponse(ObjectNode n) {
     }
 
-    protected void onWSHandlerException(Session session, String key, WSHNode node, Exception e) {
+    protected void onWSHandlerException(Session session, String key, WSHNode node, Throwable e) {
         log.error("", e);
     }
 
