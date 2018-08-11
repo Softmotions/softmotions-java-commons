@@ -143,6 +143,8 @@ public class TomcatRunner {
 
         private Realm realm;
 
+        private boolean scanClassPath;
+
 
         public Builder withInitParameter(String name, String value) {
             if (initPararams == null) {
@@ -210,6 +212,10 @@ public class TomcatRunner {
             return this;
         }
 
+        public Builder setScanClassPath(boolean scanClassPath) {
+            this.scanClassPath = scanClassPath;
+            return this;
+        }
 
         public TomcatRunner build() throws Exception {
             TomcatRunner runner = new TomcatRunner();
