@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Realm;
@@ -72,11 +73,14 @@ public class TomcatRunner {
         jarScanner.setScanClassPath(b.scanClassPath);
         jarScanner.setScanBootstrapClassPath(b.scanBootstrapClassPath);
         jarScanner.setScanAllDirectories(b.scanAllDirectories);
-
+        jarScanner.setScanManifest(b.scanManifest);
+        if (b.jarScanFilter != null) {
+            jarScanner.setJarScanFilter((jarScanType, jarName) -> b.jarScanFilter.test(jarName));
+        }
         if (b.contextResources != null && !b.contextResources.isEmpty()) {
             tomcat.enableNaming();
             NamingResourcesImpl namingResources = context.getNamingResources();
-            b.contextResources.forEach(namingResources::addResource);   
+            b.contextResources.forEach(namingResources::addResource);
         }
         if (b.realm != null) {
             log.info("Use context realm: {}", b.realm);
@@ -149,6 +153,10 @@ public class TomcatRunner {
         private boolean scanBootstrapClassPath;
 
         private boolean scanAllDirectories = true;
+
+        private boolean scanManifest = true;
+
+        private Predicate<String> jarScanFilter;
 
 
         public Builder withInitParameter(String name, String value) {
@@ -229,6 +237,16 @@ public class TomcatRunner {
 
         public Builder setScanAllDirectories(boolean scanAllDirectories) {
             this.scanAllDirectories = scanAllDirectories;
+            return this;
+        }
+
+        public Builder setScanManifest(boolean scanManifest) {
+            this.scanManifest = scanManifest;
+            return this;
+        }
+
+        public Builder setJarScanFilter(Predicate<String> jarScanFilter) {
+            this.jarScanFilter = jarScanFilter;
             return this;
         }
 
