@@ -68,14 +68,15 @@ public class TomcatRunner {
         log.info("Context path: '{}'", b.contextPath);
         context = tomcat.addWebapp(b.contextPath, new File(b.resourcesBase).getAbsolutePath());
 
-        //todo review
         StandardJarScanner jarScanner = (StandardJarScanner) context.getJarScanner();
-        jarScanner.setScanClassPath(false);
+        jarScanner.setScanClassPath(b.scanClassPath);
+        jarScanner.setScanBootstrapClassPath(b.scanBootstrapClassPath);
+        jarScanner.setScanAllDirectories(b.scanAllDirectories);
 
         if (b.contextResources != null && !b.contextResources.isEmpty()) {
             tomcat.enableNaming();
             NamingResourcesImpl namingResources = context.getNamingResources();
-            b.contextResources.forEach(namingResources::addResource);
+            b.contextResources.forEach(namingResources::addResource);   
         }
         if (b.realm != null) {
             log.info("Use context realm: {}", b.realm);
@@ -144,6 +145,10 @@ public class TomcatRunner {
         private Realm realm;
 
         private boolean scanClassPath;
+
+        private boolean scanBootstrapClassPath;
+
+        private boolean scanAllDirectories = true;
 
 
         public Builder withInitParameter(String name, String value) {
@@ -214,6 +219,16 @@ public class TomcatRunner {
 
         public Builder setScanClassPath(boolean scanClassPath) {
             this.scanClassPath = scanClassPath;
+            return this;
+        }
+
+        public Builder setScanBootstrapClassPath(boolean scanBootstrapClassPath) {
+            this.scanBootstrapClassPath = scanBootstrapClassPath;
+            return this;
+        }
+
+        public Builder setScanAllDirectories(boolean scanAllDirectories) {
+            this.scanAllDirectories = scanAllDirectories;
             return this;
         }
 
