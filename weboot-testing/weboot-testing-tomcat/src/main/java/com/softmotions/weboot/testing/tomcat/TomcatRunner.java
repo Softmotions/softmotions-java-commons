@@ -83,6 +83,10 @@ public class TomcatRunner {
         }
     }
 
+    public Context getContext() {
+        return context;
+    }
+
     public void start() throws Exception {
         tomcat.start();
         log.info("Tomcat server started");
