@@ -76,7 +76,7 @@ public class AbstractWS implements WSContext {
                     n.putPOJO("data", res);
                     onWSHandlerResponse(n);
                     synchronized (session) {
-                        session.getBasicRemote().sendText(mapper.writeValueAsString(n));
+                        session.getAsyncRemote().sendText(mapper.writeValueAsString(n));
                     }
                 }
             } catch (Exception e) {
@@ -120,7 +120,7 @@ public class AbstractWS implements WSContext {
         for (Session session : sessions.toArray(new Session[0])) {
             try {
                 synchronized (session) {
-                    session.getAsyncRemote().sendText(text);
+                    session.getBasicRemote().sendText(text);
                 }
             } catch (Exception e) {
                 log.error("", e);
