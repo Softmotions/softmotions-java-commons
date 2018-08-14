@@ -12,10 +12,11 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import org.apache.cayenne.access.types.ExtendedType;
-import org.apache.cayenne.configuration.Constants;
 import org.apache.cayenne.di.Binder;
 import org.apache.cayenne.di.Module;
 import org.postgresql.util.PGobject;
+
+import static org.apache.cayenne.configuration.server.ServerModule.contributeUserTypes;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,17 +40,17 @@ public class WBCayennePostgresModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        binder.bindList(ExtendedType.class, Constants.SERVER_DEFAULT_TYPES_LIST)
-              .add(new JacksonJSONType(ObjectNode.class.getName()))
-              .add(new JacksonJSONType(ArrayNode.class.getName()))
-              .add(new JacksonJSONType(JsonNode.class.getName()))
-              .add(new UUIDType())
-              .add(new StringArrayType())
-              .add(new BigIntegerType());
+        contributeUserTypes(binder)
+                .add(new JacksonJSONType(ObjectNode.class.getName()))
+                .add(new JacksonJSONType(ArrayNode.class.getName()))
+                .add(new JacksonJSONType(JsonNode.class.getName()))
+                .add(new UUIDType())
+                .add(new StringArrayType())
+                .add(new BigIntegerType());
     }
 
     private static class BigIntegerType implements ExtendedType<BigInteger> {
-        
+
         @Override
         public String getClassName() {
             return BigInteger.class.getName();
@@ -97,7 +98,7 @@ public class WBCayennePostgresModule implements Module {
 
         @Override
         public String getClassName() {
-            return String[].class.getName();
+            return "java.lang.String[]";
         }
 
         @Override
