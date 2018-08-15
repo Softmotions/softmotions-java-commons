@@ -64,11 +64,11 @@ public class WBLiquibaseModule extends AbstractModule {
                           ServicesConfiguration cfg,
                           Set<WBLiquibaseExtraConfigSupplier> extraConfigSuppliers) throws Exception {
             HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
-            HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
-            if (lbCfg == null) {
+            if (xcfg.configurationsAt("liquibase").isEmpty()) {
                 log.warn("No <liquibase> configuration found");
                 return;
             }
+            HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
             String changelogResource = lbCfg.getString("changelog");
             if (changelogResource == null) {
                 throw new RuntimeException("Missing required attribute 'changelog' in <liquibase> configuration tag");
