@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.softmotions.commons.cont.CollectionUtils;
+import com.softmotions.commons.lifecycle.Start;
 import com.softmotions.weboot.i18n.I18n;
 
 /**
@@ -55,8 +56,8 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
 
         List<String> directives =
                 xcfg.getList("templates.directives")
-                    .stream().map(String::valueOf)
-                    .collect(Collectors.toList());
+                        .stream().map(String::valueOf)
+                        .collect(Collectors.toList());
 
         String loader = xcfg.getString("templates.loader");
 
@@ -86,6 +87,16 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
             }
             engine = new VelocityEngine(props);
             engine.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, this);
+        } finally {
+            Thread.currentThread().setContextClassLoader(old);
+        }
+    }
+
+    @Start
+    public void init() {
+        ClassLoader old = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(TemplateServiceImpl.class.getClassLoader());
             engine.init();
         } finally {
             Thread.currentThread().setContextClassLoader(old);
@@ -219,8 +230,8 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
         @Override
         public String[] keys() {
             return Arrays.stream(vctx.getKeys())
-                         .map(String::valueOf)
-                         .toArray(String[]::new);
+                    .map(String::valueOf)
+                    .toArray(String[]::new);
         }
 
         @Override
