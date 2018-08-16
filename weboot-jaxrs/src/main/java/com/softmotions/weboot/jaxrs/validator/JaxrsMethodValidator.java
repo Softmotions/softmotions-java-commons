@@ -79,6 +79,7 @@ public class JaxrsMethodValidator {
         registerValidator("oneOf", new OneOfValidator());
         registerValidator("httpUrl", new HttpUrlValidator());
         registerValidator("lengthRange", new LengthRangeValidator());
+        registerValidator("uuid", new UUIDValidator());
     }
 
 
@@ -403,6 +404,21 @@ public class JaxrsMethodValidator {
     ///////////////////////////////////////////////////////////
     //                      Validators                       //
     ///////////////////////////////////////////////////////////
+
+
+    public static class UUIDValidator implements Validator {
+        private static final Pattern UUID_RE = Pattern.compile("^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$");
+
+        @Override
+        public boolean validate(@Nullable Object value, String... args) {
+            if (value == null) {
+                return true;
+            }
+            Matcher m = UUID_RE.matcher(value.toString());
+            return m.matches();
+        }
+    }
+
 
     public static class CyrillicValidator implements Validator {
 
