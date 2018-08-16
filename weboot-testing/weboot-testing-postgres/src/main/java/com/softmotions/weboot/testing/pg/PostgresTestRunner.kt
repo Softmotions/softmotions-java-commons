@@ -16,7 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 open class PostgresTestRunner(private val dbName: String,
                               private val dbPort: Int = 9231,
-                              private val dbBin: String = "/usr/lib/postgresql/9.6/bin") : DatabaseTestRunner {
+                              private val dbBin: String = "/usr/lib/postgresql/9.6/bin",
+                              private val dbDirPrefix: String =  "/dev/shm") : DatabaseTestRunner {
 
     private val log = LoggerFactory.getLogger(PostgresTestRunner::class.java)
 
@@ -45,7 +46,7 @@ open class PostgresTestRunner(private val dbName: String,
         val started = AtomicBoolean(false)
         val locale = "en_US.UTF-8"
 
-        dbDir = "/dev/shm/${dbName}${System.currentTimeMillis()}"
+        dbDir = "${dbDirPrefix}/${dbName}${System.currentTimeMillis()}"
         log.info("Setup database, dir: $dbDir")
         with(dbRunner) {
             cmd("mkdir -p $dbDir")
