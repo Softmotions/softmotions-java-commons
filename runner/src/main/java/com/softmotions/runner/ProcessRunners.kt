@@ -51,14 +51,14 @@ object ProcessRunners {
         private fun newParallelThreadExecutor(): ExecutorService {
             Executors.newCachedThreadPool()
             return ThreadPoolExecutor(0, Math.max(Runtime.getRuntime().availableProcessors(), 2),
-                    5L, TimeUnit.SECONDS,
-                    LinkedBlockingQueue<Runnable>(1024 * 1024))
+                                      5L, TimeUnit.SECONDS,
+                                      LinkedBlockingQueue<Runnable>(1024 * 1024))
         }
 
         private fun newSingleThreadExecutor(): ExecutorService {
             return ThreadPoolExecutor(0, 1,
-                    1, TimeUnit.MINUTES,
-                    LinkedBlockingQueue<Runnable>(1024 * 1024))
+                                      1, TimeUnit.MINUTES,
+                                      LinkedBlockingQueue<Runnable>(1024 * 1024))
         }
 
         override val tasksNum: Int
@@ -78,9 +78,9 @@ object ProcessRunners {
                           Boolean, outputFn: ((line: String) -> Unit)?): ProcessRun {
 
             return cmd(cmdLine,
-                    failOnExitCode = failOnExitCode,
-                    failOnTimeout = failOnTimeout,
-                    outputFn = outputFn)
+                       failOnExitCode = failOnExitCode,
+                       failOnTimeout = failOnTimeout,
+                       outputFn = outputFn)
         }
 
         override fun cmd(cmdLine: String,
@@ -90,7 +90,7 @@ object ProcessRunners {
                          failOnTimeout: Boolean,
                          stderrFn: ((line: String) -> Unit)?,
                          outputFn: ((String) -> Unit)?): ProcessRun {
-            
+
             return spec(
                     ProcessSpec(
                             cmdLine = cmdLine,
@@ -147,12 +147,9 @@ object ProcessRunners {
 
         override fun reset(maxWait: TimeSpec,
                            signal: UnixSignal?,
-                           block: ((ProcessRunner) -> Unit)?): Boolean {
-            val ret = halt(maxWait, signal) {
-                executor = newExecutor()
-                block?.invoke(this)
-            }
-            return ret
+                           block: ((ProcessRunner) -> Unit)?): Boolean = halt(maxWait, signal) {
+            executor = newExecutor()
+            block?.invoke(this)
         }
 
         internal inner class ProcessTask(val spec: ProcessSpec,
@@ -205,7 +202,7 @@ object ProcessRunners {
 
             override fun writeln(data: CharSequence, flush: Boolean): ProcessRun {
                 return write(data = (if (data is String) data else data.toString()) + "\n",
-                        flush = true)
+                             flush = true)
             }
 
             override fun writeEnd(): ProcessRun {
