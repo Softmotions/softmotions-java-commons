@@ -15,7 +15,7 @@ import kotlin.properties.Delegates
  */
 object ProcessRunners {
 
-    private val log = loggerFor<ProcessRunners>()
+    private val log = loggerFor()
 
     private val outputTasksPool = Executors.newCachedThreadPool()
 
@@ -52,7 +52,7 @@ object ProcessRunners {
             Executors.newCachedThreadPool()
             return ThreadPoolExecutor(0, Math.max(Runtime.getRuntime().availableProcessors(), 2),
                     5L, TimeUnit.SECONDS,
-                    LinkedBlockingQueue<Runnable>(1024 * 1024));
+                    LinkedBlockingQueue<Runnable>(1024 * 1024))
         }
 
         private fun newSingleThreadExecutor(): ExecutorService {
@@ -177,7 +177,7 @@ object ProcessRunners {
                 clist = if (spec.cmdLine != null) {
                     CmdArgumentsTokenizer.tokenize(spec.cmdLine)
                 } else {
-                    listOf<String>(spec.exec as String, *spec.args)
+                    listOf(spec.exec as String, *spec.args)
                 }
                 command = clist.joinToString(" ")
                 val pb = ProcessBuilder(clist)
@@ -200,7 +200,7 @@ object ProcessRunners {
                 if (flush) {
                     os.flush()
                 }
-                return this;
+                return this
             }
 
             override fun writeln(data: CharSequence, flush: Boolean): ProcessRun {
@@ -209,7 +209,7 @@ object ProcessRunners {
             }
 
             override fun writeEnd(): ProcessRun {
-                process.outputStream?.close();
+                process.outputStream?.close()
                 return this
             }
 
@@ -232,9 +232,9 @@ object ProcessRunners {
                     if (!startMon.get()) { // wait to to process start
                         val mon = startMon as java.lang.Object
                         if (wait != null) {
-                            val ts = System.currentTimeMillis();
+                            val ts = System.currentTimeMillis()
                             mon.wait(wait.toMillis())
-                            val te = System.currentTimeMillis();
+                            val te = System.currentTimeMillis()
                             return@synchronized if (wait.toMillis() - (te - ts) > 0) {
                                 TimeSpec(
                                         wait.toMillis() - (te - ts),
@@ -251,7 +251,7 @@ object ProcessRunners {
 
                 if (pwait == null && wait != null) { // wait time elapsed
                     if (spec.failOnTimeout) {
-                        throw ProcessWaitTimeoutException("${clist.joinToString(" ")}")
+                        throw ProcessWaitTimeoutException(clist.joinToString(" "))
                     }
                     return false
                 }
@@ -279,7 +279,7 @@ object ProcessRunners {
                     }
                 } catch (te: TimeoutException) {
                     if (spec.failOnTimeout) {
-                        throw ProcessWaitTimeoutException("${clist.joinToString(" ")}")
+                        throw ProcessWaitTimeoutException(clist.joinToString(" "))
                     }
                 } catch (ee: ExecutionException) {
                     throw ee.cause ?: ee
@@ -287,7 +287,7 @@ object ProcessRunners {
                     throw ce.cause ?: ce
                 }
                 if (spec.failOnTimeout && !ret) {
-                    throw ProcessWaitTimeoutException("${clist.joinToString(" ")}")
+                    throw ProcessWaitTimeoutException(clist.joinToString(" "))
                 }
 
                 block?.invoke(this)
@@ -304,14 +304,13 @@ object ProcessRunners {
                         val ttype = if (spec.redirectErrorStream) "STDALL" else "STDOUT"
                         val tname = "${Thread.currentThread().name}-$ttype:${clist.firstOrNull()}"
                         outputTasks += CompletableFuture.runAsync(
-                                OutputLineHandler(this, stdout, process.inputStream, tname),
+                                OutputLineHandler(stdout, process.inputStream, tname),
                                 outputTasksPool)
                     }
                     if (stderr != null && !spec.redirectErrorStream && process.errorStream != null) {
                         outputTasks += CompletableFuture.runAsync(
-                                OutputLineHandler(this, stderr, process.errorStream,
-                                        "${Thread.currentThread().name}-STDERR:${clist.firstOrNull()}"),
-                                outputTasksPool);
+                                OutputLineHandler(stderr, process.errorStream, "${Thread.currentThread().name}-STDERR:${clist.firstOrNull()}"),
+                                outputTasksPool)
                     }
                     synchronized(startMon) {
                         startMon.set(true)
@@ -361,8 +360,7 @@ object ProcessRunners {
                 }
             }
 
-            inner class OutputLineHandler(val process: ProcessTask,
-                                          val handler: OutputHandler,
+            inner class OutputLineHandler(val handler: OutputHandler,
                                           val istream: InputStream,
                                           val tname: String) : Runnable {
 
