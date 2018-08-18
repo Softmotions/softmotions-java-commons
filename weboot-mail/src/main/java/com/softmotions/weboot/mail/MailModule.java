@@ -41,11 +41,11 @@ public class MailModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        HierarchicalConfiguration<ImmutableNode> mailCfg = cfg.xcfg().configurationAt("mail");
-        if (mailCfg == null) {
+        if (cfg.xcfg().configurationsAt("mail").isEmpty()) {
             log.warn("No <mail> configuration found");
             return;
         }
+        HierarchicalConfiguration<ImmutableNode> mailCfg = cfg.xcfg().configurationsAt("mail").iterator().next();
         String host = mailCfg.getString("smtp.server");
         if (host == null) {
             throw new RuntimeException("No smtp server configured, check the <mail> configuration");
