@@ -17,6 +17,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,22 +44,31 @@ public class AbstractWS implements WSContext {
         this.mapper = mapper;
         for (WSHandler h : hset) {
             Arrays.stream(h.getClass().getMethods())
-                  .filter(m -> {
-                      Class<?>[] ptypes = m.getParameterTypes();
-                      return ptypes.length == 1
-                             && ptypes[0] == WSRequestContext.class
-                             && ClassUtils.getAnnotation(m, WSAction.class) != null;
-                  })
-                  .forEach(m -> {
-                      WSAction annotation = ClassUtils.getAnnotation(m, WSAction.class);
-                      handlers.computeIfAbsent(annotation.value(), s -> new ArrayList<>())
-                              .add(new WSHNode(annotation, h, m));
-                  });
+                    .filter(m -> {
+                        Class<?>[] ptypes = m.getParameterTypes();
+                        return ptypes.length == 1
+                               && ptypes[0] == WSRequestContext.class
+                               && ClassUtils.getAnnotation(m, WSAction.class) != null;
+                    })
+                    .forEach(m -> {
+                        WSAction annotation = ClassUtils.getAnnotation(m, WSAction.class);
+                        handlers.computeIfAbsent(annotation.value(), s -> new ArrayList<>())
+                                .add(new WSHNode(annotation, h, m));
+                    });
         }
     }
 
     @OnMessage
     public void handleMessage(Session session, JsonNode request) {
+        Object sobj = session.getUserProperties().get(WS_SUBJECT_PROP_KEY);
+        if (sobj instanceof Subject) {
+            ((Subject) sobj).associateWith(() -> handleMessageImpl(session, request)).run();
+        } else {
+            handleMessageImpl(session, request);
+        }
+    }
+
+    public void handleMessageImpl(Session session, JsonNode request) {
         String key = StringUtils.trimToEmpty(request.path("key").asText());
         List<WSHNode> hlist = handlers.get(key);
         if (hlist == null || hlist.isEmpty()) {

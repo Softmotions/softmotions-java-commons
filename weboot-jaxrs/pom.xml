@@ -26,6 +26,10 @@
             <version>1.0.0.Final</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-websocket-api</artifactId>
         </dependency>
