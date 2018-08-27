@@ -76,7 +76,7 @@ public class AbstractWS implements WSContext {
                     n.putPOJO("data", res);
                     onWSHandlerResponse(n);
                     synchronized (session) {
-                        session.getAsyncRemote().sendText(mapper.writeValueAsString(n));
+                        session.getBasicRemote().sendText(mapper.writeValueAsString(n));
                     }
                 }
             } catch (Exception e) {
