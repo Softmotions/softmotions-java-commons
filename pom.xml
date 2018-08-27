@@ -27,6 +27,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <testng.version>6.14.3</testng.version>
         <shiro.version>1.4.0</shiro.version>
+        <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
     </properties>
 
     <modules>
@@ -298,6 +299,11 @@
                 <groupId>org.apache.shiro</groupId>
                 <artifactId>shiro-ehcache</artifactId>
                 <version>${shiro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jsonwebtoken.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
