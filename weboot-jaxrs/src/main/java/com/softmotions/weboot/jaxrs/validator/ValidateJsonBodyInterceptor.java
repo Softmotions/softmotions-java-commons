@@ -50,7 +50,7 @@ public class ValidateJsonBodyInterceptor implements MethodInterceptor {
         List<MethodValidationError> errors =
                 methodValidator.validateMethod(groups, rules, method, arguments, vref::set);
         if (!errors.isEmpty()) {
-            throw new MethodValidationException(errors);
+            throw new MethodValidationException(method, errors);
         }
         return Objects.requireNonNull(vref.get());
     }
