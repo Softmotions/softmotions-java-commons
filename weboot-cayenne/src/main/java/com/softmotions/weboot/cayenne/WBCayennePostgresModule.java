@@ -1,5 +1,6 @@
 package com.softmotions.weboot.cayenne;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Array;
 import java.sql.CallableStatement;
@@ -46,7 +47,8 @@ public class WBCayennePostgresModule implements Module {
                 .add(new JacksonJSONType(JsonNode.class.getName()))
                 .add(new UUIDType())
                 .add(new StringArrayType())
-                .add(new BigIntegerType());
+                .add(new BigIntegerType())
+                .add(new BigDecimalType());
     }
 
     private static class BigIntegerType implements ExtendedType<BigInteger> {
@@ -87,6 +89,51 @@ public class WBCayennePostgresModule implements Module {
 
         @Override
         public String toString(BigInteger value) {
+            if (value == null) {
+                return "NULL";
+            }
+            return value.toString();
+        }
+    }
+
+    private static class BigDecimalType implements ExtendedType<BigDecimal> {
+
+        @Override
+        public String getClassName() {
+            return BigDecimal.class.getName();
+        }
+
+        @Override
+        public void setJdbcObject(PreparedStatement ps, BigDecimal value, int pos, int type, int scale) throws Exception {
+            if (value == null) {
+                ps.setNull(pos, type);
+            } else {
+                ps.setString(pos, value.toString());
+            }
+        }
+
+        @Override
+        public BigDecimal materializeObject(ResultSet rs, int index, int type) throws Exception {
+            String val = rs.getString(index);
+            if (val == null) {
+                return null;
+            } else {
+                return new BigDecimal(val);
+            }
+        }
+
+        @Override
+        public BigDecimal materializeObject(CallableStatement rs, int index, int type) throws Exception {
+            String val = rs.getString(index);
+            if (val == null) {
+                return null;
+            } else {
+                return new BigDecimal(val);
+            }
+        }
+
+        @Override
+        public String toString(BigDecimal value) {
             if (value == null) {
                 return "NULL";
             }
