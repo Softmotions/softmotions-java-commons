@@ -2,6 +2,7 @@ package com.softmotions.weboot.cayenne
 
 import org.apache.cayenne.DataRow
 import org.apache.cayenne.ObjectContext
+import org.apache.cayenne.configuration.server.ServerRuntime
 import org.apache.cayenne.exp.Expression
 import org.apache.cayenne.exp.ExpressionFactory
 import org.apache.cayenne.exp.Property
@@ -9,6 +10,11 @@ import org.apache.cayenne.query.ColumnSelect
 import org.apache.cayenne.query.ObjectSelect
 import org.apache.cayenne.query.SQLSelect
 import org.apache.cayenne.query.SelectById
+import org.apache.cayenne.tx.BaseTransaction
+import org.apache.cayenne.tx.TransactionDescriptor
+import org.apache.cayenne.tx.TransactionManager
+import org.apache.cayenne.tx.TransactionPropagation
+import java.sql.Connection
 
 inline fun <reified T : Any> ObjectContext.new(): T {
     return this.newObject(T::class.java)
@@ -90,4 +96,23 @@ inline fun <reified T : Any> selectOneDataRowById(octx: ObjectContext, id: Any):
     return SelectById.dataRowQuery(T::class.java, id).selectOne(octx)
 }
 
+
+///////////////////////////////////////////////////////////////////////////
+//                           Server runtime                              //
+///////////////////////////////////////////////////////////////////////////
+
+val NEW_TX_DESCRIPTOR = TransactionDescriptor(
+        Connection.TRANSACTION_SERIALIZABLE,
+        TransactionPropagation.REQUIRES_NEW  // require new transaction for every operation
+)
+
+fun <T> ServerRuntime.performInNewTransaction(action: () -> T): T {
+    val txm = this.injector.getInstance(TransactionManager::class.java)
+    return txm.performInTransaction(action, NEW_TX_DESCRIPTOR)
+}
+
+fun ServerRuntime.isInTransaction(): Boolean {
+    val tx = BaseTransaction.getThreadTransaction()
+    return tx != null
+}
 
