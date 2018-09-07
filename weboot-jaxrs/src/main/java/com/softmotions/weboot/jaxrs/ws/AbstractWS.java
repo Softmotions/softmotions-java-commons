@@ -76,10 +76,9 @@ public class AbstractWS implements WSContext {
             return;
         }
         hlist.forEach(h -> {
+            WSRequestContext wctx = new WSRequestContextImpl(session, (ObjectNode) request);
             try {
-                Object res =
-                        h.method.invoke(h.handler,
-                                        new WSRequestContextImpl(session, (ObjectNode) request));
+                Object res = h.method.invoke(h.handler, wctx);
                 if (res != null) {
                     ObjectNode n = mapper.createObjectNode();
                     n.put("key", h.action.key().isEmpty() ? key : h.action.key());
@@ -90,7 +89,7 @@ public class AbstractWS implements WSContext {
                     }
                 }
             } catch (Exception e) {
-                onWSHandlerException(session, h.action.key().isEmpty() ? key : h.action.key(), h, e);
+                onWSHandlerException(wctx, h.action.key().isEmpty() ? key : h.action.key(), h, e);
             }
         });
     }
@@ -98,7 +97,7 @@ public class AbstractWS implements WSContext {
     protected void onWSHandlerResponse(ObjectNode n) {
     }
 
-    protected void onWSHandlerException(Session session, String key, WSHNode node, Throwable e) {
+    protected void onWSHandlerException(WSRequestContext wctx, String key, WSHNode node, Throwable e) {
         log.error("", e);
     }
 
