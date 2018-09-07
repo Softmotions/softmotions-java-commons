@@ -8,7 +8,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marks method as WS action to handle a message. Messages are expected in JSON format
- * {"query":{"action":"$actionName"}}, with additional data passed within "query" object.
+ * {"key":<keyname>, <data>}, with additional data passed within "query" object.
  * Method
  *
  * @author Vyacheslav Tyutyunkov (tve@softmotions.com)
