@@ -63,27 +63,27 @@ public class WBCayennePostgresModule implements Module {
             if (value == null) {
                 ps.setNull(pos, type);
             } else {
-                ps.setString(pos, value.toString());
+                ps.setBigDecimal(pos, new BigDecimal(value));
             }
         }
 
         @Override
         public BigInteger materializeObject(ResultSet rs, int index, int type) throws Exception {
-            String val = rs.getString(index);
+            BigDecimal val = rs.getBigDecimal(index);
             if (val == null) {
                 return null;
             } else {
-                return new BigInteger(val);
+                return val.toBigIntegerExact();
             }
         }
 
         @Override
         public BigInteger materializeObject(CallableStatement rs, int index, int type) throws Exception {
-            String val = rs.getString(index);
+            BigDecimal val = rs.getBigDecimal(index);
             if (val == null) {
                 return null;
             } else {
-                return new BigInteger(val);
+                return val.toBigIntegerExact();
             }
         }
 
@@ -108,27 +108,27 @@ public class WBCayennePostgresModule implements Module {
             if (value == null) {
                 ps.setNull(pos, type);
             } else {
-                ps.setString(pos, value.toString());
+                ps.setBigDecimal(pos, value);
             }
         }
 
         @Override
         public BigDecimal materializeObject(ResultSet rs, int index, int type) throws Exception {
-            String val = rs.getString(index);
+            BigDecimal val = rs.getBigDecimal(index);
             if (val == null) {
                 return null;
             } else {
-                return new BigDecimal(val);
+                return val;
             }
         }
 
         @Override
         public BigDecimal materializeObject(CallableStatement rs, int index, int type) throws Exception {
-            String val = rs.getString(index);
+            BigDecimal val = rs.getBigDecimal(index);
             if (val == null) {
                 return null;
             } else {
-                return new BigDecimal(val);
+                return val;
             }
         }
 
