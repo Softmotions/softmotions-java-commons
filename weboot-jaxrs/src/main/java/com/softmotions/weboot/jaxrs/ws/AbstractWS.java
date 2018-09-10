@@ -179,6 +179,11 @@ public class AbstractWS implements WSContext {
     }
 
     @Override
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    @Override
     public CompletableFuture sendToAsync(Session session, String text) {
         return CompletableFuture.runAsync(() -> {
             try {
@@ -248,6 +253,11 @@ public class AbstractWS implements WSContext {
         @Override
         public CompletableFuture sendToAsync(Session sess, String text) {
             return AbstractWS.this.sendToAsync(sess, text);
+        }
+
+        @Override
+        public Executor getExecutor() {
+            return AbstractWS.this.executor;
         }
 
         private WSRequestContextImpl(Session session, ObjectNode request) {
