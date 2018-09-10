@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
@@ -84,9 +86,7 @@ public class AbstractWS implements WSContext {
                     n.put("key", h.action.key().isEmpty() ? key : h.action.key());
                     n.putPOJO("data", res);
                     onWSHandlerResponse(n);
-                    synchronized (session) {
-                        session.getBasicRemote().sendText(mapper.writeValueAsString(n));
-                    }
+                    sendToAsync(session, mapper.writeValueAsString(n));
                 }
             } catch (Exception e) {
                 onWSHandlerException(wctx, h.action.key().isEmpty() ? key : h.action.key(), h, e);
@@ -128,9 +128,7 @@ public class AbstractWS implements WSContext {
     protected void sendToAll(String text, Set<Session> sessions) {
         for (Session session : sessions.toArray(new Session[0])) {
             try {
-                synchronized (session) {
-                    session.getBasicRemote().sendText(text);
-                }
+                sendToAsync(session, text);
             } catch (Exception e) {
                 log.error("", e);
             }
@@ -170,6 +168,22 @@ public class AbstractWS implements WSContext {
         sendToAllAsJSON(key, data, getAllSessions());
     }
 
+    @Override
+    public CompletableFuture sendToAsync(Session session, String text) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                synchronized (session) {
+                    if (session.isOpen()) {
+                        session.getBasicRemote().sendText(text);
+                    }
+                }
+            } catch (IOException e) {
+                log.error("", e);
+                throw new CompletionException(e);
+            }
+        });
+    }
+
     private class WSRequestContextImpl implements WSRequestContext {
 
         private final Session session;
@@ -198,9 +212,7 @@ public class AbstractWS implements WSContext {
 
         @Override
         public void send(String text) throws IOException {
-            synchronized (session) {
-                session.getBasicRemote().sendText(text);
-            }
+            AbstractWS.this.sendToAsync(session, text);
         }
 
         @Override
@@ -221,6 +233,11 @@ public class AbstractWS implements WSContext {
         @Override
         public void sendToAllAsJSON(String key, Object data) {
             AbstractWS.this.sendToAllAsJSON(key, data, getAllSessions());
+        }
+
+        @Override
+        public CompletableFuture sendToAsync(Session sess, String text) {
+            return AbstractWS.this.sendToAsync(sess, text);
         }
 
         private WSRequestContextImpl(Session session, ObjectNode request) {

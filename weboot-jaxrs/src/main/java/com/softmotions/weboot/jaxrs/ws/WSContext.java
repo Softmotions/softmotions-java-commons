@@ -1,6 +1,7 @@
 package com.softmotions.weboot.jaxrs.ws;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import javax.websocket.Session;
 
 /**
@@ -17,4 +18,6 @@ public interface WSContext {
     void sendToAllAsJSON(Object data);
 
     void sendToAllAsJSON(String key, Object data);
+
+    CompletableFuture sendToAsync(Session sess, String text);
 }
