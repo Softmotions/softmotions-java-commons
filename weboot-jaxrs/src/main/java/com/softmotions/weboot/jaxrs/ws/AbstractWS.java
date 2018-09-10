@@ -10,6 +10,9 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
+import javax.annotation.Nullable;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
@@ -42,8 +45,11 @@ public class AbstractWS implements WSContext {
 
     protected final ObjectMapper mapper;
 
-    protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset) {
+    protected final Executor executor;
+
+    protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset, @Nullable Executor executor) {
         this.mapper = mapper;
+        this.executor = (executor != null ? executor : ForkJoinPool.commonPool());
         for (WSHandler h : hset) {
             Arrays.stream(h.getClass().getMethods())
                     .filter(m -> {
@@ -58,6 +64,10 @@ public class AbstractWS implements WSContext {
                                 .add(new WSHNode(annotation, h, m));
                     });
         }
+    }
+
+    protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset) {
+        this(mapper, hset, null);
     }
 
     @OnMessage
@@ -181,7 +191,7 @@ public class AbstractWS implements WSContext {
                 log.error("", e);
                 throw new CompletionException(e);
             }
-        });
+        }, executor);
     }
 
     private class WSRequestContextImpl implements WSRequestContext {
