@@ -46,6 +46,8 @@ public class WBCayennePostgresModule implements Module {
                 .add(new JacksonJSONType(ArrayNode.class.getName()))
                 .add(new JacksonJSONType(JsonNode.class.getName()))
                 .add(new UUIDType())
+                .add(new LongArrayType())
+                .add(new IntArrayType())
                 .add(new StringArrayType())
                 .add(new BigIntegerType())
                 .add(new BigDecimalType());
@@ -138,6 +140,72 @@ public class WBCayennePostgresModule implements Module {
                 return "NULL";
             }
             return value.toString();
+        }
+    }
+
+    private static class LongArrayType implements ExtendedType<Long[]> {
+        @Override
+        public String getClassName() {
+            return "java.lang.Long[]";
+        }
+
+        @Override
+        public void setJdbcObject(PreparedStatement ps, Long[] value, int pos, int type, int scale) throws Exception {
+            Connection conn = ps.getConnection();
+            Array arr = conn.createArrayOf("bigint", value == null ? new Long[0] : value);
+            ps.setArray(pos, arr);
+        }
+
+        @Override
+        public Long[] materializeObject(ResultSet rs, int index, int type) throws Exception {
+            Array arr = rs.getArray(index);
+            if (arr == null) return new Long[0];
+            return (Long[]) arr.getArray();
+        }
+
+        @Override
+        public Long[] materializeObject(CallableStatement rs, int index, int type) throws Exception {
+            Array arr = rs.getArray(index);
+            if (arr == null) return new Long[0];
+            return (Long[]) arr.getArray();
+        }
+
+        @Override
+        public String toString(Long[] value) {
+            return Arrays.toString(value);
+        }
+    }
+
+    private static class IntArrayType implements ExtendedType<Integer[]> {
+        @Override
+        public String getClassName() {
+            return "java.lang.Integer[]";
+        }
+
+        @Override
+        public void setJdbcObject(PreparedStatement ps, Integer[] value, int pos, int type, int scale) throws Exception {
+            Connection conn = ps.getConnection();
+            Array arr = conn.createArrayOf("int", value == null ? new Long[0] : value);
+            ps.setArray(pos, arr);
+        }
+
+        @Override
+        public Integer[] materializeObject(ResultSet rs, int index, int type) throws Exception {
+            Array arr = rs.getArray(index);
+            if (arr == null) return new Integer[0];
+            return (Integer[]) arr.getArray();
+        }
+
+        @Override
+        public Integer[] materializeObject(CallableStatement rs, int index, int type) throws Exception {
+            Array arr = rs.getArray(index);
+            if (arr == null) return new Integer[0];
+            return (Integer[]) arr.getArray();
+        }
+
+        @Override
+        public String toString(Integer[] value) {
+            return Arrays.toString(value);
         }
     }
 

@@ -106,9 +106,19 @@ val NEW_TX_DESCRIPTOR = TransactionDescriptor(
         TransactionPropagation.REQUIRES_NEW  // require new transaction for every operation
 )
 
+val MANDATORY_TX_DESCRIPTOR = TransactionDescriptor(
+        Connection.TRANSACTION_SERIALIZABLE,
+        TransactionPropagation.MANDATORY
+)
+
 fun <T> ServerRuntime.performInNewTransaction(action: () -> T): T {
     val txm = this.injector.getInstance(TransactionManager::class.java)
     return txm.performInTransaction(action, NEW_TX_DESCRIPTOR)
+}
+
+fun <T> ServerRuntime.performInMandatoryTransaction(action: () -> T): T {
+    val txm = this.injector.getInstance(TransactionManager::class.java)
+    return txm.performInTransaction(action, MANDATORY_TX_DESCRIPTOR)
 }
 
 fun ServerRuntime.isInTransaction(): Boolean {
