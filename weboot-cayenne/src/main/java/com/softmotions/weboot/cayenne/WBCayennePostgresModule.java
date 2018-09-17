@@ -7,6 +7,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
@@ -50,8 +51,54 @@ public class WBCayennePostgresModule implements Module {
                 .add(new IntArrayType())
                 .add(new StringArrayType())
                 .add(new BigIntegerType())
-                .add(new BigDecimalType());
+                .add(new BigDecimalType())
+                .add(new DurationType());
     }
+
+    private static class DurationType implements ExtendedType<Duration> {
+        @Override
+        public String getClassName() {
+            return Duration.class.getName();
+        }
+
+        @Override
+        public void setJdbcObject(PreparedStatement ps, Duration value, int pos, int type, int scale) throws Exception {
+            if (value == null) {
+                ps.setNull(pos, type);
+            } else {
+                ps.setLong(pos, value.toMillis());
+            }
+        }
+
+        @Override
+        public Duration materializeObject(ResultSet rs, int index, int type) throws Exception {
+            Object v = rs.getObject(index);
+            if (v == null) {
+                return null;
+            } else {
+                return Duration.ofMillis(((Number) v).longValue());
+            }
+        }
+
+        @Override
+        public Duration materializeObject(CallableStatement rs, int index, int type) throws Exception {
+            Object v = rs.getObject(index);
+            if (v == null) {
+                return null;
+            } else {
+                return Duration.ofMillis(((Number) v).longValue());
+            }
+        }
+
+        @Override
+        public String toString(Duration value) {
+            if (value == null) {
+                return "NULL";
+            }
+            return value.toString();
+        }
+    }
+
 
     private static class BigIntegerType implements ExtendedType<BigInteger> {
 
