@@ -2,6 +2,7 @@ package com.softmotions.weboot.mail;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
 import javax.mail.internet.InternetAddress;
 
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import jodd.mail.SendMailSession;
 import jodd.mail.SmtpServer;
 
 import com.google.inject.Provider;
-import com.softmotions.weboot.executor.TaskExecutor;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -27,7 +27,7 @@ public class Mail extends Email {
 
     private final Provider<SmtpServer> sendMailSessionProvider;
 
-    private final Provider<TaskExecutor> taskExecutorProvider;
+    private final Executor executor;
 
     private final boolean emulation;
 
@@ -35,10 +35,10 @@ public class Mail extends Email {
 
     public Mail(MailModule.MailServiceImpl service,
                 Provider<SmtpServer> sendMailSessionProvider,
-                Provider<TaskExecutor> taskExecutorProvider,
+                Executor executor,
                 boolean emulation) {
         this.sendMailSessionProvider = sendMailSessionProvider;
-        this.taskExecutorProvider = taskExecutorProvider;
+        this.executor = executor;
         this.emulation = emulation;
         this.service = service;
     }
@@ -319,7 +319,6 @@ public class Mail extends Email {
             send(text);
             return;
         }
-        TaskExecutor executor = taskExecutorProvider.get();
         executor.execute(() -> {
             try {
                 send(text);
