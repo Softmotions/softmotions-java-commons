@@ -1,18 +1,13 @@
 package com.softmotions.weboot.jaxrs.ws;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
-import javax.annotation.Nullable;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
@@ -39,17 +34,14 @@ public class AbstractWS implements WSContext {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final Set<Session> sessions = ConcurrentHashMap.newKeySet();
+    private final Map<Session, AsyncSessionWrapper> sessions = new ConcurrentHashMap<>();
 
     private final Map<String, List<WSHNode>> handlers = new ConcurrentHashMap<>();
 
     protected final ObjectMapper mapper;
 
-    protected final Executor executor;
-
-    protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset, @Nullable Executor executor) {
+    protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset) {
         this.mapper = mapper;
-        this.executor = (executor != null ? executor : ForkJoinPool.commonPool());
         for (WSHandler h : hset) {
             Arrays.stream(h.getClass().getMethods())
                     .filter(m -> {
@@ -64,10 +56,6 @@ public class AbstractWS implements WSContext {
                                 .add(new WSHNode(annotation, h, m));
                     });
         }
-    }
-
-    protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset) {
-        this(mapper, hset, null);
     }
 
     @OnMessage
@@ -96,7 +84,7 @@ public class AbstractWS implements WSContext {
                     n.put("key", h.action.key().isEmpty() ? key : h.action.key());
                     n.putPOJO("data", res);
                     onWSHandlerResponse(n);
-                    sendToAsync(session, mapper.writeValueAsString(n));
+                    sendTo(mapper.writeValueAsString(n), session);
                 }
             } catch (Exception e) {
                 onWSHandlerException(wctx, h.action.key().isEmpty() ? key : h.action.key(), h, e);
@@ -117,7 +105,7 @@ public class AbstractWS implements WSContext {
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
-        sessions.add(session);
+        sessions.computeIfAbsent(session, s -> new AsyncSessionWrapper(s, mapper));
     }
 
     @OnClose
@@ -132,71 +120,37 @@ public class AbstractWS implements WSContext {
 
     @Override
     public Set<Session> getAllSessions() {
-        return sessions;
+        return sessions.keySet();
     }
 
-    protected void sendToAll(String text, Set<Session> sessions) {
-        for (Session session : sessions.toArray(new Session[0])) {
+    @Override
+    public void sendToAll(Object msg) {
+        sendToAll(msg, getAllSessions());
+    }
+
+    @Override
+    public void sendTo(Object msg, Session sess) {
+        AsyncSessionWrapper sw = sessions.get(sess);
+        if (sw != null) {
+            sw.send(msg);
+        }
+    }
+
+    protected void sendToAll(Object msg, Set<Session> sess) {
+        if (!(msg instanceof WSMessage) && !(msg instanceof String) && !(msg instanceof ByteBuffer)) {
             try {
-                sendToAsync(session, text);
+                msg = mapper.writeValueAsString(msg);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        for (Session session : sess.toArray(new Session[0])) {
+            try {
+                sendTo(msg, session);
             } catch (Exception e) {
                 log.error("", e);
             }
         }
-    }
-
-    protected void sendToAllAsJSON(Object node, Set<Session> sessions) {
-        String buf;
-        try {
-            buf = mapper.writeValueAsString(node);
-        } catch (JsonProcessingException e) {
-            log.error("", e);
-            throw new RuntimeException(e);
-        }
-        sendToAll(buf, sessions);
-    }
-
-    protected void sendToAllAsJSON(String key, Object data, Set<Session> sessions) {
-        ObjectNode n = mapper.createObjectNode();
-        n.put("key", key);
-        n.putPOJO("data", data);
-        sendToAllAsJSON(n, sessions);
-    }
-
-    @Override
-    public void sendToAll(String text) {
-        sendToAll(text, getAllSessions());
-    }
-
-    @Override
-    public void sendToAllAsJSON(Object data) {
-        sendToAllAsJSON(data, getAllSessions());
-    }
-
-    @Override
-    public void sendToAllAsJSON(String key, Object data) {
-        sendToAllAsJSON(key, data, getAllSessions());
-    }
-
-    @Override
-    public Executor getExecutor() {
-        return executor;
-    }
-
-    @Override
-    public CompletableFuture sendToAsync(Session session, String text) {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                synchronized (session) {
-                    if (session.isOpen()) {
-                        session.getBasicRemote().sendText(text);
-                    }
-                }
-            } catch (IOException e) {
-                log.error("", e);
-                throw new CompletionException(e);
-            }
-        }, executor);
     }
 
     private class WSRequestContextImpl implements WSRequestContext {
@@ -216,48 +170,32 @@ public class AbstractWS implements WSContext {
         }
 
         @Override
-        public void sendError(String msg) throws IOException {
-            sendAsJSON(error(msg));
-        }
-
-        @Override
         public Set<Session> getAllSessions() {
             return getSession().getOpenSessions();
         }
 
         @Override
-        public void send(String text) throws IOException {
-            AbstractWS.this.sendToAsync(session, text);
+        public void sendToAll(Object msg) {
+            AbstractWS.this.sendToAll(msg);
         }
 
         @Override
-        public void sendAsJSON(Object data) throws IOException {
-            send(mapper.writeValueAsString(data));
+        public void sendTo(Object msg, Session sess) {
+            AbstractWS.this.sendTo(msg, sess);
         }
 
         @Override
-        public void sendToAll(String text) {
-            AbstractWS.this.sendToAll(text, getAllSessions());
+        public void send(Object msg) {
+            sendTo(msg, session);
         }
 
         @Override
-        public void sendToAllAsJSON(Object data) {
-            AbstractWS.this.sendToAllAsJSON(data, getAllSessions());
-        }
-
-        @Override
-        public void sendToAllAsJSON(String key, Object data) {
-            AbstractWS.this.sendToAllAsJSON(key, data, getAllSessions());
-        }
-
-        @Override
-        public CompletableFuture sendToAsync(Session sess, String text) {
-            return AbstractWS.this.sendToAsync(sess, text);
-        }
-
-        @Override
-        public Executor getExecutor() {
-            return AbstractWS.this.executor;
+        public void sendError(String msg) {
+            try {
+                send(mapper.writeValueAsString(error(msg)));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         private WSRequestContextImpl(Session session, ObjectNode request) {
