@@ -7,7 +7,7 @@ import javax.websocket.Session;
 /**
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
-public class ByteBufferWSMessage implements WSMessage {
+public class ByteBufferWSMessage extends AbstractWSMessage {
 
     private final ByteBuffer data;
 
@@ -22,6 +22,9 @@ public class ByteBufferWSMessage implements WSMessage {
 
     @Override
     public void send(Session session, SendHandler handler) {
-        session.getAsyncRemote().sendBinary(data, handler);
+        session.getAsyncRemote().sendBinary(data, result -> {
+            complete(result);
+            handler.onResult(result);
+        });
     }
 }

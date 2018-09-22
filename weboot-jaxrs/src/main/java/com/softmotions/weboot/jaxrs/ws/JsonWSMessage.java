@@ -12,12 +12,11 @@ public class JsonWSMessage extends StringWSMessage {
     }
 
     public JsonWSMessage(String key, Object obj, ObjectMapper mapper) throws Exception {
-        super(key != null ?
-              mapper.writeValueAsString(mapper.createObjectNode()
-                                                .put("key", key)
-                                                .putPOJO("data", obj))
-                          :
-              mapper.writeValueAsString(obj)
+        super(key != null
+              ? mapper.writeValueAsString(mapper.createObjectNode()
+                                                  .put("key", key)
+                                                  .putPOJO("data", obj))
+              : mapper.writeValueAsString(obj)
         );
     }
 }

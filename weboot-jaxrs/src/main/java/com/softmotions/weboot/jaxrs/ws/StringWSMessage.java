@@ -7,7 +7,7 @@ import javax.websocket.Session;
 /**
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
-public class StringWSMessage implements WSMessage {
+public class StringWSMessage extends AbstractWSMessage {
 
     private final String data;
 
@@ -25,6 +25,9 @@ public class StringWSMessage implements WSMessage {
 
     @Override
     public void send(Session session, SendHandler handler) {
-        session.getAsyncRemote().sendText(data, handler);
+        session.getAsyncRemote().sendText(data, result -> {
+            complete(result);
+            handler.onResult(result);
+        });
     }
 }

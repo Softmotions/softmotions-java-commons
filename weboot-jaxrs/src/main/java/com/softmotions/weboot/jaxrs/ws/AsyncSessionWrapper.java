@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.websocket.CloseReason;
 import javax.websocket.Session;
 
@@ -41,14 +43,16 @@ public final class AsyncSessionWrapper {
         this.mapper = mapper;
     }
 
-    void close() {
-        send(new CloseWSMessage());
+    @Nullable
+    public WSMessage close() {
+        return send(new CloseWSMessage());
     }
 
-    void send(Object msg) {
+    @Nullable
+    public WSMessage send(Object msg) {
         synchronized (queue) {
             if (!sess.isOpen() || isClosing) {
-                return;
+                return null;
             }
             if (msg instanceof CloseWSMessage) {
                 isClosing = true;
@@ -57,39 +61,56 @@ public final class AsyncSessionWrapper {
                 if (queue.size() > maxPendingMessages || bytesToSend.get() > maxPendingBytes) {
                     isClosing = true;
                     closeAsync(CloseReason.CloseCodes.VIOLATED_POLICY, "Pending messages/bytes exceeded limits");
+                    return null;
                 } else {
-                    WSMessage wmsg = toWSMessage(msg);
-                    queue.add(wmsg);
-                    bytesToSend.addAndGet(wmsg.getDataLength());
+                    WSMessage wm = toWSMessage(msg);
+                    queue.add(wm);
+                    bytesToSend.addAndGet(wm.getDataLength());
+                    return wm;
                 }
             } else {
                 isSending = true;
-                sendAsync(msg);
             }
         }
+        return sendAsync(msg);
     }
 
-    private void sendAsync(Object msg) {
-        toWSMessage(msg).send(sess, res -> {
-            if (!res.isOK()) {
+    @Nullable
+    private WSMessage sendAsync(Object msg) {
+        if (!sess.isOpen()) {
+            synchronized (queue) {
                 isClosing = true;
-                closeAsync(CloseReason.CloseCodes.CLOSED_ABNORMALLY,
-                           res.getException() != null ? res.getException().getMessage() : "");
-                return;
+                return null;
             }
-            if (!queue.isEmpty()) {
-                WSMessage wm = queue.remove();
-                bytesToSend.addAndGet(-wm.getDataLength());
-                sendAsync(wm);
-            } else {
-                isSending = false;
+        }
+        AbstractWSMessage wm = toWSMessage(msg);
+        long wmlen = wm.getDataLength();
+        wm.send(sess, res -> {
+            synchronized (queue) {
+                bytesToSend.addAndGet(-wmlen);
+                if (!res.isOK()) {
+                    isClosing = true;
+                    closeAsync(CloseReason.CloseCodes.CLOSED_ABNORMALLY,
+                               res.getException() != null ? res.getException().getMessage() : "");
+                    return;
+                }
+                if (!queue.isEmpty()) {
+                    sendAsync(queue.remove());
+                } else {
+                    isSending = false;
+                }
             }
         });
+        return wm;
     }
 
-    private WSMessage toWSMessage(Object msg) {
-        if (msg instanceof WSMessage) {
-            return (WSMessage) msg;
+    @Nonnull
+    private AbstractWSMessage toWSMessage(Object msg) {
+        if (msg == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
+        if (msg instanceof AbstractWSMessage) {
+            return (AbstractWSMessage) msg;
         } else if (msg instanceof String || msg instanceof Number) {
             return new StringWSMessage(String.valueOf(msg));
         } else if (msg instanceof JsonNode) {
@@ -101,7 +122,7 @@ public final class AsyncSessionWrapper {
         } else if (msg instanceof ByteBuffer) {
             return new ByteBufferWSMessage((ByteBuffer) msg);
         } else {
-            throw new IllegalArgumentException("Unsupported message type");
+            throw new IllegalArgumentException("Unsupported message type: " + msg.getClass());
         }
     }
 
