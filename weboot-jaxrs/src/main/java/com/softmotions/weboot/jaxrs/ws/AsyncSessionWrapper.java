@@ -106,9 +106,7 @@ public final class AsyncSessionWrapper {
     private void closeAsync(CloseReason.CloseCode code, String msg) {
         ForkJoinPool.commonPool().submit(() -> {
             try {
-                sess.close(new CloseReason(
-                        CloseReason.CloseCodes.CLOSED_ABNORMALLY,
-                        msg == null ? "" : msg));
+                sess.close(new CloseReason(code, msg == null ? "" : msg));
             } catch (IOException ignored) {
             }
         });
