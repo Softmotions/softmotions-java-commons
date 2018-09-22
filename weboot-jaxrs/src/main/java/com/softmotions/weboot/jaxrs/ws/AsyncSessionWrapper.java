@@ -72,8 +72,10 @@ public final class AsyncSessionWrapper {
     private void sendAsync(Object msg) {
         toWSMessage(msg).send(sess, res -> {
             if (!res.isOK()) {
+                isClosing = true;
                 closeAsync(CloseReason.CloseCodes.CLOSED_ABNORMALLY,
                            res.getException() != null ? res.getException().getMessage() : "");
+                return;
             }
             if (!queue.isEmpty()) {
                 WSMessage wm = queue.remove();
