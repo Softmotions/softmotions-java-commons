@@ -2,6 +2,7 @@ package com.softmotions.weboot.mail;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.tree.ImmutableNode;
@@ -19,7 +20,6 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.cont.Stack;
-import com.softmotions.weboot.executor.TaskExecutor;
 
 /**
  * Mail service module.
@@ -66,7 +66,7 @@ public class MailModule extends AbstractModule {
 
         final HierarchicalConfiguration<ImmutableNode> xcfg;
 
-        final Provider<TaskExecutor> executorProvider;
+        final Executor executor;
 
         final Provider<SmtpServer> smtpServer;
 
@@ -76,10 +76,10 @@ public class MailModule extends AbstractModule {
 
         @Inject
         MailServiceImpl(HierarchicalConfiguration<ImmutableNode> xcfg,
-                        Provider<TaskExecutor> executorProvider,
+                        Executor executor,
                         @Named("com.softmotions.weboot.mail.MailModule") Provider<SmtpServer> smtpServer) {
             this.xcfg = xcfg;
-            this.executorProvider = executorProvider;
+            this.executor = executor;
             this.smtpServer = smtpServer;
         }
 
@@ -104,7 +104,7 @@ public class MailModule extends AbstractModule {
         @Override
         public Mail newMail() {
             Mail mail = new Mail(this,
-                                 smtpServer, executorProvider,
+                                 smtpServer, executor,
                                  xcfg.getBoolean("mail.emulation", false));
             String val = xcfg.getString("mail.from");
             if (!StringUtils.isBlank(val)) {

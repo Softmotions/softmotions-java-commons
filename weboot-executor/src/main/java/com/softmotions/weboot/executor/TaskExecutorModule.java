@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
@@ -79,23 +79,31 @@ public class TaskExecutorModule extends AbstractModule {
                                            60L, TimeUnit.SECONDS,
                                            workQueue));
             if (name == null) {
+                bind(Executor.class).toInstance(executor);
                 bind(TaskExecutor.class).toInstance(executor);
-
             }
+            bind(Executor.class)
+                    .annotatedWith(Names.named(name != null ? name : "default"))
+                    .toInstance(executor);
             bind(TaskExecutor.class)
                     .annotatedWith(Names.named(name != null ? name : "default"))
                     .toInstance(executor);
         }
 
         if (!hasDefault) { // bind default executor
-
             int threads = Runtime.getRuntime().availableProcessors();
             log.info("Using {} threads for tasks executor: {}", threads, "default");
             DelegateTaskExecutor executor = new DelegateTaskExecutor(
                     new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(),
                                            60L, TimeUnit.SECONDS,
                                            new LinkedBlockingQueue<>()));
+
+            bind(Executor.class).toInstance(executor);
             bind(TaskExecutor.class).toInstance(executor);
+
+            bind(Executor.class)
+                    .annotatedWith(Names.named("default"))
+                    .toInstance(executor);
             bind(TaskExecutor.class)
                     .annotatedWith(Names.named("default"))
                     .toInstance(executor);
