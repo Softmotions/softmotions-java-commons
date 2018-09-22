@@ -27,6 +27,8 @@ public class CloseWSMessage extends AbstractWSMessage {
                     complete(new SendResult());
                 }
             });
+        } else {
+            complete(new SendResult());
         }
     }
 }
