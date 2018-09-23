@@ -3,11 +3,13 @@ package com.softmotions.weboot.jaxrs.ws;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.websocket.CloseReason;
+import javax.websocket.SendResult;
 import javax.websocket.Session;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,7 +34,7 @@ public final class AsyncSessionWrapper {
 
     private volatile boolean isClosing;
 
-    private AtomicLong bytesToSend = new AtomicLong(0);
+    private final AtomicLong bytesToSend = new AtomicLong(0);
 
     private long maxPendingMessages = DEFAULT_MAX_PENDING_MESSAGES;
 
@@ -44,15 +46,15 @@ public final class AsyncSessionWrapper {
     }
 
     @Nullable
-    public WSMessage close() {
+    public CompletableFuture<SendResult> close() {
         return send(new CloseWSMessage());
     }
 
     @Nullable
-    public WSMessage send(Object msg) {
+    public CompletableFuture<SendResult> send(Object msg) {
         synchronized (queue) {
             if (!sess.isOpen() || isClosing) {
-                return null;
+                return sessionClosedFuture();
             }
             if (msg instanceof CloseWSMessage) {
                 isClosing = true;
@@ -60,13 +62,17 @@ public final class AsyncSessionWrapper {
             if (isSending) {
                 if (queue.size() > maxPendingMessages || bytesToSend.get() > maxPendingBytes) {
                     isClosing = true;
-                    closeAsync(CloseReason.CloseCodes.VIOLATED_POLICY, "Pending messages/bytes exceeded limits");
-                    return null;
+                    String err =
+                            String.format("Pending messages/bytes exceeded limits: " +
+                                          "queue size: %d pending bytes: %d",
+                                          queue.size(), bytesToSend.get());
+                    closeAsync(CloseReason.CloseCodes.VIOLATED_POLICY, err);
+                    return CompletableFuture.failedFuture(new Exception(err));
                 } else {
                     WSMessage wm = toWSMessage(msg);
                     queue.add(wm);
                     bytesToSend.addAndGet(wm.getDataLength());
-                    return wm;
+                    return wm.getCompletionFuture();
                 }
             } else {
                 isSending = true;
@@ -76,11 +82,11 @@ public final class AsyncSessionWrapper {
     }
 
     @Nullable
-    private WSMessage sendAsync(Object msg) {
+    private CompletableFuture<SendResult> sendAsync(Object msg) {
         if (!sess.isOpen()) {
             synchronized (queue) {
                 isClosing = true;
-                return null;
+                return sessionClosedFuture();
             }
         }
         AbstractWSMessage wm = toWSMessage(msg);
@@ -101,7 +107,7 @@ public final class AsyncSessionWrapper {
                 }
             }
         });
-        return wm;
+        return wm.getCompletionFuture();
     }
 
     @Nonnull
@@ -124,6 +130,10 @@ public final class AsyncSessionWrapper {
         } else {
             throw new IllegalArgumentException("Unsupported message type: " + msg.getClass());
         }
+    }
+
+    private CompletableFuture<SendResult> sessionClosedFuture() {
+        return CompletableFuture.failedFuture(new Exception("Session closed"));
     }
 
     private void closeAsync(CloseReason.CloseCode code, String msg) {

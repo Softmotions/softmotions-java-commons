@@ -9,8 +9,6 @@
         <version>1.4-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-weboot-jaxrs</artifactId>
-    <version>1.5-SNAPSHOT</version>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
@@ -23,7 +21,7 @@
         <dependency>
             <groupId>softmotions</groupId>
             <artifactId>softmotions-weboot-i18n</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -47,5 +45,4 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
     </dependencies>
-
 </project>
