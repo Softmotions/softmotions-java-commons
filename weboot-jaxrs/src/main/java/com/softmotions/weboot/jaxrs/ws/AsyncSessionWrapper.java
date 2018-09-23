@@ -50,11 +50,11 @@ public final class AsyncSessionWrapper {
         return send(new CloseWSMessage());
     }
 
-    @Nullable
+    @Nonnull
     public CompletableFuture<SendResult> send(Object msg) {
         synchronized (queue) {
             if (!sess.isOpen() || isClosing) {
-                return sessionClosedFuture();
+                return sessionClosingFuture();
             }
             if (msg instanceof CloseWSMessage) {
                 isClosing = true;
@@ -81,12 +81,14 @@ public final class AsyncSessionWrapper {
         return sendAsync(msg);
     }
 
-    @Nullable
+    @Nonnull
     private CompletableFuture<SendResult> sendAsync(Object msg) {
         if (!sess.isOpen()) {
             synchronized (queue) {
-                isClosing = true;
-                return sessionClosedFuture();
+                if (!sess.isOpen()) {
+                    isClosing = true;
+                    return sessionClosingFuture();
+                }
             }
         }
         AbstractWSMessage wm = toWSMessage(msg);
@@ -132,7 +134,7 @@ public final class AsyncSessionWrapper {
         }
     }
 
-    private CompletableFuture<SendResult> sessionClosedFuture() {
+    private CompletableFuture<SendResult> sessionClosingFuture() {
         return CompletableFuture.failedFuture(new Exception("Session closed"));
     }
 

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
@@ -14,6 +15,7 @@ import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.websocket.SendResult;
 import javax.websocket.Session;
 
 import org.apache.commons.lang3.StringUtils;
@@ -124,32 +126,46 @@ public class AbstractWS implements WSContext {
     }
 
     @Override
-    public void sendToAll(Object msg) {
-        sendToAll(msg, getAllSessions());
+    public CompletableFuture<Void> sendToAll(Object msg) {
+        return sendToAll(msg, getAllSessions());
     }
 
     @Override
-    public void sendTo(Object msg, Session sess) {
+    public CompletableFuture<SendResult> sendTo(Object msg, Session sess) {
         AsyncSessionWrapper sw = sessions.get(sess);
         if (sw != null) {
-            sw.send(msg);
+            return sw.send(msg);
+        } else {
+            return CompletableFuture.failedFuture(new Exception("Unknown session"));
         }
     }
 
-    protected void sendToAll(Object msg, Set<Session> sess) {
-        if (!(msg instanceof WSMessage) && !(msg instanceof String) && !(msg instanceof ByteBuffer)) {
+    protected CompletableFuture<Void> sendToAll(Object msg, Set<Session> sess) {
+        if (!(msg instanceof WSMessage)
+            && !(msg instanceof String)
+            && !(msg instanceof Number)
+            && !(msg instanceof ByteBuffer)) {
             try {
                 msg = mapper.writeValueAsString(msg);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         }
+        List<CompletableFuture<SendResult>> all = new ArrayList<>(sess.size());
         for (Session session : sess.toArray(new Session[0])) {
             try {
-                sendTo(msg, session);
+                CompletableFuture<SendResult> f = sendTo(msg, session);
+                if (!f.isCompletedExceptionally() || !f.isCancelled()) {
+                    all.add(f);
+                }
             } catch (Exception e) {
                 log.error("", e);
             }
+        }
+        if (!all.isEmpty()) {
+            return CompletableFuture.allOf(all.toArray(new CompletableFuture[0]));
+        } else {
+            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -175,13 +191,13 @@ public class AbstractWS implements WSContext {
         }
 
         @Override
-        public void sendToAll(Object msg) {
-            AbstractWS.this.sendToAll(msg);
+        public CompletableFuture<Void> sendToAll(Object msg) {
+            return AbstractWS.this.sendToAll(msg);
         }
 
         @Override
-        public void sendTo(Object msg, Session sess) {
-            AbstractWS.this.sendTo(msg, sess);
+        public CompletableFuture<SendResult> sendTo(Object msg, Session sess) {
+            return AbstractWS.this.sendTo(msg, sess);
         }
 
         @Override
