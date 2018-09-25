@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 
 import com.google.inject.Binder;
@@ -113,9 +112,9 @@ public class ServicesConfiguration implements Module {
             xcfg = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
                     .configure(
                             params.xml()
-                                  .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
-                                  .setURL(cfgUrl)
-                                  .setValidating(false))
+                                    .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                                    .setURL(cfgUrl)
+                                    .setValidating(false))
                     .getConfiguration();
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
@@ -181,7 +180,7 @@ public class ServicesConfiguration implements Module {
                     configurator.setContext(context);
                     context.reset();
                     configurator.doConfigure(url);
-                } catch (JoranException ignored) {
+                } catch (Exception ignored) {
                     // StatusPrinter will handle this
                 }
                 usedCustomLoggingConfig = true;
