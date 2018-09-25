@@ -42,6 +42,8 @@ public class ServicesConfiguration implements Module {
 
     protected HierarchicalConfiguration<ImmutableNode> xcfg;
 
+    protected FileBasedConfigurationBuilder<XMLConfiguration> xcfgBuilder;
+
     protected final File tmpdir = new File(System.getProperty("java.io.tmpdir"));
 
     private boolean usedCustomLoggingConfig;
@@ -108,14 +110,9 @@ public class ServicesConfiguration implements Module {
             rl.setLevel(Level.ERROR);
         }
         try {
-            Parameters params = new Parameters();
-            xcfg = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
-                    .configure(
-                            params.xml()
-                                    .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
-                                    .setURL(cfgUrl)
-                                    .setValidating(false))
-                    .getConfiguration();
+            xcfgBuilder = new FileBasedConfigurationBuilder<>(XMLConfiguration.class);
+            configure(cfgUrl);
+            xcfg = xcfgBuilder.getConfiguration();
         } catch (ConfigurationException e) {
             throw new RuntimeException(e);
         } finally {
@@ -125,6 +122,15 @@ public class ServicesConfiguration implements Module {
             }
         }
         init(cfgUrl);
+    }
+
+    protected void configure(URL cfgUrl) {
+        Parameters params = new Parameters();
+        xcfgBuilder.configure(
+                params.xml()
+                        .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                        .setURL(cfgUrl)
+                        .setValidating(false));
     }
 
     private String preprocessConfigData(String cdata) {
