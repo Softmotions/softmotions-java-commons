@@ -26,15 +26,15 @@ inline fun HierarchicalConfiguration<ImmutableNode>.removeFirst(at: String, filt
 
 fun HierarchicalConfiguration<ImmutableNode>.filterByAttrs(at: String, vararg pairs: Pair<String, String>): List<HierarchicalConfiguration<ImmutableNode>> {
     return configurationsAt(at).filter { cfg ->
-        pairs.all { cfg.getString(it.first, "") == it.second }
+        pairs.all { cfg.getString("[@${it.first}]", "") == it.second }
     }
 }
 
 fun HierarchicalConfiguration<ImmutableNode>.addIfMissing(at: String, vararg pairs: Pair<String, String>) {
     filterByAttrs(at, *pairs).firstOrNull() ?: kotlin.run {
         val idx = at.lastIndexOf('.')
-        addNode(if (idx != -1) at.substring(idx + 1) else at,
-                if (idx != -1) at.substring(0, idx) else at,
+        addNode(if (idx != -1) at.substring(0, idx) else "",
+                if (idx != -1) at.substring(idx + 1) else at,
                 *pairs)
     }
 }
