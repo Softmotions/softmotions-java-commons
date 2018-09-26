@@ -24,6 +24,12 @@ inline fun HierarchicalConfiguration<ImmutableNode>.removeFirst(at: String, filt
     }
 }
 
+fun HierarchicalConfiguration<ImmutableNode>.removeFirst(at: String, vararg pairs: Pair<String, String>) {
+    removeFirst(at) { sub ->
+        pairs.all { sub.getString("[@${it.first}]", "") == it.second }
+    }
+}
+
 fun HierarchicalConfiguration<ImmutableNode>.filterByAttrs(at: String, vararg pairs: Pair<String, String>): List<HierarchicalConfiguration<ImmutableNode>> {
     return configurationsAt(at).filter { cfg ->
         pairs.all { cfg.getString("[@${it.first}]", "") == it.second }
