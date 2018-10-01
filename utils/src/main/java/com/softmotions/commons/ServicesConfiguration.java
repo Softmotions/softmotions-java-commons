@@ -134,12 +134,26 @@ public class ServicesConfiguration implements Module {
     }
 
     private String preprocessConfigData(String cdata) {
-        Pattern p = Pattern.compile("\\{(((env|sys):)?[A-Za-z\\_\\.]+)\\}");
+        Pattern p = Pattern.compile("(.)?\\{(((env|sys):)?[A-Za-z_.]+)}");
         Matcher m = p.matcher(cdata);
         StringBuffer sb = new StringBuffer(cdata.length());
         while (m.find()) {
-            String s = StringUtils.replaceEach(substituteConfigKey(m.group(1)), new String[]{"\\"}, new String[]{"\\\\"});
-            m.appendReplacement(sb, s != null ? s : m.group());
+            String mg = m.group();
+            String pc = m.group(1);
+            if ("$".equals(pc)) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(mg));
+            } else {
+                String s = StringUtils.replaceEach(substituteConfigKey(m.group(2)), new String[]{"\\"}, new String[]{"\\\\"});
+                if (s != null) {
+                    if (pc != null) {
+                        m.appendReplacement(sb, Matcher.quoteReplacement(pc + s));
+                    } else {
+                        m.appendReplacement(sb, Matcher.quoteReplacement(s));
+                    }
+                } else {
+                    m.appendReplacement(sb, Matcher.quoteReplacement(mg));
+                }
+            }
         }
         m.appendTail(sb);
         return sb.toString();
