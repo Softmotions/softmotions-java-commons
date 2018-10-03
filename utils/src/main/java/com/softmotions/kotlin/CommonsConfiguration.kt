@@ -17,7 +17,7 @@ fun HierarchicalConfiguration<ImmutableNode>.toMap(): MutableMap<String, String>
 }
 
 inline fun HierarchicalConfiguration<ImmutableNode>.removeFirst(at: String, filter: (sub: HierarchicalConfiguration<ImmutableNode>) -> Boolean) {
-    configurationsAt(at).forEachIndexed { idx, sub ->
+    configurationsAt(at, true).forEachIndexed { idx, sub ->
         if (filter(sub)) {
             this.clearTree("${at}(${idx})")
             sub.clear()
@@ -32,14 +32,17 @@ fun HierarchicalConfiguration<ImmutableNode>.removeFirst(at: String, vararg pair
     }
 }
 
-fun HierarchicalConfiguration<ImmutableNode>.filterByAttrs(at: String, vararg pairs: Pair<String, String>): List<HierarchicalConfiguration<ImmutableNode>> {
-    return configurationsAt(at).filter { cfg ->
+fun HierarchicalConfiguration<ImmutableNode>.filterByAttrs(at: String?,
+                                                           supportUpdates: Boolean = false,
+                                                           vararg pairs: Pair<String, String>): List<HierarchicalConfiguration<ImmutableNode>> {
+    return configurationsAt(at, supportUpdates).filter { cfg ->
         pairs.all { cfg.getString("[@${it.first}]", "") == it.second }
     }
 }
 
-fun HierarchicalConfiguration<ImmutableNode>.addIfMissing(at: String, vararg pairs: Pair<String, String>) {
-    filterByAttrs(at, *pairs).firstOrNull() ?: kotlin.run {
+fun HierarchicalConfiguration<ImmutableNode>.addIfMissing(at: String,
+                                                          vararg pairs: Pair<String, String>) {
+    filterByAttrs(at, true, *pairs).firstOrNull() ?: kotlin.run {
         val idx = at.lastIndexOf('.')
         addNode(if (idx != -1) at.substring(0, idx) else "",
                 if (idx != -1) at.substring(idx + 1) else at,
