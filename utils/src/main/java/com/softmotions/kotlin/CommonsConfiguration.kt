@@ -52,3 +52,11 @@ fun HierarchicalConfiguration<ImmutableNode>.addNode(at: String, name: String, v
         pairs.forEach { nb.addAttribute(it.first, it.second) }
     }.create()))
 }
+
+fun HierarchicalConfiguration<ImmutableNode>.addNodeWithChilds(at: String, name: String, vararg pairs: Pair<String, String>) {
+    addNodes(at, listOf(ImmutableNode.Builder().name(name).also { nb ->
+        pairs.forEach {
+            nb.addChild(ImmutableNode.Builder().name(it.first).value(it.second).create())
+        }
+    }.create()))
+}
