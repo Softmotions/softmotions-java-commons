@@ -46,6 +46,21 @@ fun <T> Element.set(v: T) {
 
 data class Attribute(val name: String, val value: Any? = null)
 
+
+fun <T> AConfig.batch(action: () -> T): T {
+    lock.withLock {
+        val prev = autosave
+        autosave = false
+        try {
+            return action().also {
+                save()
+            }
+        } finally {
+            autosave = prev
+        }
+    }
+}
+
 /**
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
@@ -80,7 +95,7 @@ class AConfig(val file: File,
     }
 
     operator fun <T> set(pattern: String, v: T) = lock.withLock {
-        var n = document.firstChildElement { true }!! // root element
+        var n = document.firstChildElement { true }!! // root
         pattern.split('.').forEach { s ->
             n = n.firstChildElement { it.nodeName == s } ?: run {
                 n.appendChild(document.createElementNS(n.namespaceURI, s)) as Element
@@ -93,7 +108,7 @@ class AConfig(val file: File,
     }
 
     operator fun get(pattern: String): String? = lock.withLock {
-        var n = document.firstChildElement { true }!! // root element
+        var n = document.firstChildElement { true }!! // root
         pattern.split('.').forEach { s ->
             n = n.firstChildElement { it.nodeName == s } ?: return null
         }
