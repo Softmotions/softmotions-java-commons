@@ -34,6 +34,7 @@
         <module>ant</module>
         <module>utils</module>
         <module>runner</module>
+        <module>aconfig</module>
         <module>web</module>
         <module>weboot</module>
         <module>web-realms</module>
