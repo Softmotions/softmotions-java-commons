@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
+import org.w3c.dom.Node;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -68,7 +69,7 @@ public class I18n {
 
     public I18n(XConfig xcfg, String[] extraBundles) {
         forceDefaultLocaleForRequests = xcfg.boolPattern("force-default-locale-for-requests", false);
-        var blist = xcfg.arrPattern("messages.bundle");
+        var blist = xcfg.nodesPattern("messages.bundle");
         ArrayList<String> rnames = new ArrayList<>();
         if (extraBundles != null && extraBundles.length > 0) {
             for (String v : extraBundles) {
@@ -77,8 +78,8 @@ public class I18n {
                 }
             }
         }
-        for (Object v : blist) {
-            String sv = (v != null) ? v.toString() : null;
+        for (Node v : blist) {
+            String sv = (v != null) ? v.getTextContent() : null;
             if (StringUtils.isBlank(sv) || rnames.contains(sv)) {
                 continue;
             }
