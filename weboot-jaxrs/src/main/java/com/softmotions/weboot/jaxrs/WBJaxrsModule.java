@@ -42,9 +42,9 @@ public class WBJaxrsModule extends AbstractModule {
         bind(ResteasyUTF8CharsetFilter.class).in(Singleton.class);
         // todo review it
         if (cfg != null && MessageException.APP_ID == null) {
-            String appId = cfg.xcfg().getString("messages.appId", "");
+            String appId = cfg.xcfg().text("messages.appId");
             if (StringUtils.isBlank(appId)) {
-                appId = cfg.xcfg().getString("app-name", "Softmotions");
+                appId = cfg.xcfg().textPattern("app-name", "Softmotions");
             }
             MessageException.APP_ID = appId;
         }

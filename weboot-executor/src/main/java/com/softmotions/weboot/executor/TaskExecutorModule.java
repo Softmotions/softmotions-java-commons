@@ -14,8 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +40,8 @@ public class TaskExecutorModule extends AbstractModule {
     protected void configure() {
 
         boolean hasDefault = false;
-        for (HierarchicalConfiguration<ImmutableNode> ecfg : cfg.xcfg().configurationsAt("executor")) {
-            String name = ecfg.getString("name", null);
+        for (var ecfg : cfg.xcfg().subPattern("executor")) {
+            String name = ecfg.text("name");
             if ("default".equals(name)) {
                 name = null;
             }
@@ -54,16 +52,16 @@ public class TaskExecutorModule extends AbstractModule {
                 hasDefault = true;
             }
             int threads;
-            if ("allcores".equalsIgnoreCase(ecfg.getString("threads-num"))) {
+            if ("allcores".equalsIgnoreCase(ecfg.text("threads-num"))) {
                 threads = Runtime.getRuntime().availableProcessors();
             } else {
-                threads = Math.max(1, ecfg.getInt("threads-num",
-                                                  Runtime.getRuntime().availableProcessors()));
+                threads = Math.max(1, ecfg.numberPattern("threads-num",
+                                                         (long) Runtime.getRuntime().availableProcessors()).intValue());
             }
             log.info("Using {} threads for tasks executor: {}", threads, (name != null ? name : "default"));
             BlockingQueue<Runnable> workQueue;
-            Integer queueSize = ecfg.getInteger("queue-size", null);
-            if (queueSize == null || queueSize < 0) {
+            int queueSize = ecfg.numberPattern("queue-size", -1L).intValue();
+            if (queueSize < 0) {
                 log.info("Using unbounded queue for tasks executor");
                 workQueue = new LinkedBlockingQueue<>();
             } else if (queueSize == 0) {

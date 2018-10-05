@@ -18,8 +18,6 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections4.map.Flat3Map;
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.ShiroException;
@@ -81,13 +79,13 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
     @Override
     public void initServlets(WBServletModule m) {
         WBConfiguration env = m.getConfiguration();
-        String dbJndiName = env.xcfg().getString("security.dbJndiName");
-        String dbJVMName = env.xcfg().getString("security.dbJVMName");
-        String webAccessControlAllow = env.xcfg().getString("security.web-access-control-allow");
+        String dbJndiName = env.xcfg().text("security.dbJndiName");
+        String dbJVMName = env.xcfg().text("security.dbJVMName");
+        String webAccessControlAllow = env.xcfg().text("security.web-access-control-allow");
         if (appId == null) {
-            appId = env.xcfg().getString("messages.appId", "");
+            appId = env.xcfg().text("messages.appId");
             if (StringUtils.isBlank(appId)) {
-                appId = env.xcfg().getString("app-name", "App");
+                appId = env.xcfg().textPattern("app-name", "App");
             }
         }
         WSUserDatabase udb = null;
@@ -160,16 +158,16 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
             if (usersDb != null) {
                 return usersDb;
             }
-            HierarchicalConfiguration<ImmutableNode> xcfg = env.xcfg();
-            String dbJVMName = xcfg.getString("security.dbJVMName");
-            String jndiName = xcfg.getString("security.dbJndiName");
+            var xcfg = env.xcfg();
+            String dbJVMName = xcfg.text("security.dbJVMName");
+            String jndiName = xcfg.text("security.dbJndiName");
 
             if (!StringUtils.isBlank(dbJVMName)) {
                 log.info("Locating users database with JVM name: {}", dbJVMName);
                 // XMLDB
-                String xmldb = xcfg.getString("security.xml-user-database");
+                String xmldb = xcfg.text("security.xml-user-database");
                 if (xmldb != null) {
-                    String placeTo = xcfg.getString("security.xml-user-database[@placeTo]", null);
+                    String placeTo = xcfg.textXPath("security/xml-user-database/@placeTo", null);
                     if (placeTo != null) {
                         File placeToFile = new File(placeTo);
                         if (placeToFile.exists()) {
@@ -197,7 +195,7 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
                         }
                     }
                     log.info("XML users database locations: {}", xmldb);
-                    String hashAlg = xcfg.getString("security.password-hash-algorithm", "");
+                    String hashAlg = xcfg.textPattern("security.password-hash-algorithm", "");
                     log.info("Password save hash algorithm: {}", hashAlg.isEmpty() ? "plain text" : hashAlg);
                     usersDb = new XMLWSUserDatabase(dbJVMName, xmldb, true, hashAlg);
                     JVMResources.set(dbJVMName, usersDb);

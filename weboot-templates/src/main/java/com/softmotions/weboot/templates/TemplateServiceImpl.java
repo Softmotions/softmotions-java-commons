@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Inject;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -27,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.softmotions.commons.cont.CollectionUtils;
 import com.softmotions.commons.lifecycle.Start;
 import com.softmotions.weboot.i18n.I18n;
+import com.softmotions.xconfig.XConfig;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -47,19 +46,19 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
 
 
     @Inject
-    public TemplateServiceImpl(I18n i18n, HierarchicalConfiguration<ImmutableNode> xcfg) {
+    public TemplateServiceImpl(I18n i18n, XConfig xcfg) {
         this.i18n = i18n;
-        this.templatesBase = xcfg.getString("templates.base", "/");
+        this.templatesBase = xcfg.textPattern("templates.base", "/");
         if (!templatesBase.endsWith("/")) {
             templatesBase += '/';
         }
 
         List<String> directives =
-                xcfg.getList("templates.directives")
-                        .stream().map(String::valueOf)
+                Arrays.stream(xcfg.arrPattern("templates.directives"))
+                        .map(String::valueOf)
                         .collect(Collectors.toList());
 
-        String loader = xcfg.getString("templates.loader");
+        String loader = xcfg.text("templates.loader");
 
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         try {

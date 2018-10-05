@@ -10,8 +10,6 @@ import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -65,11 +63,11 @@ public class WBCayenneModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        if (cfg.xcfg().configurationsAt("cayenne").isEmpty()) {
+        if (!cfg.xcfg().hasPattern("cayenne")) {
             log.warn("No WBCayenneModule module configuration found. Skipping.");
             return;
         }
-        String cfgLocation = cfg.xcfg().getString("cayenne.config");
+        String cfgLocation = cfg.xcfg().text("cayenne.config");
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <cayenne> element");
         }
@@ -123,10 +121,10 @@ public class WBCayenneModule extends AbstractModule {
             ClassLoader cl = ObjectUtils.firstNonNull(
                     Thread.currentThread().getContextClassLoader(),
                     getClass().getClassLoader());
-            List<HierarchicalConfiguration<ImmutableNode>> mconfigs = cfg.xcfg().configurationsAt("cayenne.modules.module");
+            var mconfigs = cfg.xcfg().subPattern("cayenne.modules.module");
             List<org.apache.cayenne.di.Module> modules = new ArrayList<>(mconfigs.size());
-            for (final HierarchicalConfiguration<ImmutableNode> mcfg : mconfigs) {
-                String mclassName = mcfg.getString("class");
+            for (var mcfg : mconfigs) {
+                String mclassName = mcfg.text("class");
                 if (StringUtils.isBlank(mclassName)) {
                     continue;
                 }
@@ -163,11 +161,11 @@ public class WBCayenneModule extends AbstractModule {
             }
 
             runtime = ServerRuntime.builder()
-                                   .addConfigs(cfgLocation)
-                                   .addModules(modules)
-                                   .addModules(extraCayenneModules)
-                                   .dataSource(dataSource)
-                                   .build();
+                    .addConfigs(cfgLocation)
+                    .addModules(modules)
+                    .addModules(extraCayenneModules)
+                    .dataSource(dataSource)
+                    .build();
 
             log.info("WBCayenneModule cayenne runtime configured");
         }

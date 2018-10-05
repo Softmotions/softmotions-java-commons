@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,7 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.cont.Stack;
+import com.softmotions.xconfig.XConfig;
 
 /**
  * Mail service module.
@@ -41,20 +40,20 @@ public class MailModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        if (cfg.xcfg().configurationsAt("mail").isEmpty()) {
+        if (!cfg.xcfg().hasPattern("mail")) {
             log.warn("No <mail> configuration found");
             return;
         }
-        HierarchicalConfiguration<ImmutableNode> mailCfg = cfg.xcfg().configurationsAt("mail").iterator().next();
-        String host = mailCfg.getString("smtp.server");
+        var mailCfg = cfg.xcfg().subPattern("mail").get(0);
+        String host = mailCfg.text("smtp.server");
         if (host == null) {
             throw new RuntimeException("No smtp server configured, check the <mail> configuration");
         }
-        int port = mailCfg.getInt("smtp.port", 25);
+        int port = mailCfg.numberPattern("smtp.port", 25L).intValue();
         smtpServer = SmtpServer.create(host, port);
-        if (!StringUtils.isBlank(mailCfg.getString("smtp.user"))) {
-            smtpServer.authenticateWith(StringUtils.trim(mailCfg.getString("smtp.user")),
-                                        StringUtils.trim(mailCfg.getString("smtp.password")));
+        if (!StringUtils.isBlank(mailCfg.text("smtp.user"))) {
+            smtpServer.authenticateWith(StringUtils.trim(mailCfg.text("smtp.user")),
+                                        StringUtils.trim(mailCfg.text("smtp.password")));
         }
 
         bind(SmtpServer.class).annotatedWith(Names.named("com.softmotions.weboot.mail.MailModule")).toInstance(smtpServer);
@@ -64,7 +63,7 @@ public class MailModule extends AbstractModule {
 
     static class MailServiceImpl implements MailService {
 
-        final HierarchicalConfiguration<ImmutableNode> xcfg;
+        final XConfig xcfg;
 
         final Executor executor;
 
@@ -75,7 +74,7 @@ public class MailModule extends AbstractModule {
         final Object lock = new Object();
 
         @Inject
-        MailServiceImpl(HierarchicalConfiguration<ImmutableNode> xcfg,
+        MailServiceImpl(XConfig xcfg,
                         Executor executor,
                         @Named("com.softmotions.weboot.mail.MailModule") Provider<SmtpServer> smtpServer) {
             this.xcfg = xcfg;
@@ -84,7 +83,7 @@ public class MailModule extends AbstractModule {
         }
 
         void onMailSent(Mail mail) {
-            int numHist = xcfg.getInt("mail.keep-history", 0);
+            int numHist = xcfg.numberPattern("mail.keep-history", 0L).intValue();
             if (numHist < 1) {
                 return;
             }
@@ -105,16 +104,16 @@ public class MailModule extends AbstractModule {
         public Mail newMail() {
             Mail mail = new Mail(this,
                                  smtpServer, executor,
-                                 xcfg.getBoolean("mail.emulation", false));
-            String val = xcfg.getString("mail.from");
+                                 xcfg.boolPattern("mail.emulation", false));
+            String val = xcfg.text("mail.from");
             if (!StringUtils.isBlank(val)) {
                 mail.from(val);
             }
-            val = xcfg.getString("mail.subject");
+            val = xcfg.text("mail.subject");
             if (!StringUtils.isBlank(val)) {
                 mail.subject(val);
             }
-            val = xcfg.getString("mail.bcc");
+            val = xcfg.text("mail.bcc");
             if (!StringUtils.isBlank(val)) {
                 mail.bcc(val);
             }

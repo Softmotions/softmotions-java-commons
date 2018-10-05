@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -20,13 +19,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.resourceloading.AggregateResourceBundleLocator;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.softmotions.xconfig.XConfig;
 
 /**
  * Localization support.
@@ -68,9 +66,9 @@ public class I18n {
 
     private boolean forceDefaultLocaleForRequests;
 
-    public I18n(HierarchicalConfiguration<ImmutableNode> xcfg, String[] extraBundles) {
-        forceDefaultLocaleForRequests = xcfg.getBoolean("force-default-locale-for-requests", false);
-        List<Object> blist = xcfg.getList("messages.bundle");
+    public I18n(XConfig xcfg, String[] extraBundles) {
+        forceDefaultLocaleForRequests = xcfg.boolPattern("force-default-locale-for-requests", false);
+        var blist = xcfg.arrPattern("messages.bundle");
         ArrayList<String> rnames = new ArrayList<>();
         if (extraBundles != null && extraBundles.length > 0) {
             for (String v : extraBundles) {
@@ -91,7 +89,7 @@ public class I18n {
     }
 
     @Inject
-    public I18n(HierarchicalConfiguration<ImmutableNode> xcfg) {
+    public I18n(XConfig xcfg) {
         this(xcfg, null);
     }
 

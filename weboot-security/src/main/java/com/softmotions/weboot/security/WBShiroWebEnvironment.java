@@ -20,7 +20,7 @@ public class WBShiroWebEnvironment extends IniWebEnvironment {
     public void setServletContext(ServletContext sctx) {
         super.setServletContext(sctx);
         ServicesConfiguration env = (ServicesConfiguration) sctx.getAttribute(WBServletListener.WEBOOT_CFG_SCTX_KEY);
-        String configLocations = env.xcfg().getString("security.shiro-config-locations", "/WEB-INF/shiro.ini");
+        String configLocations = env.xcfg().textPattern("security.shiro-config-locations", "/WEB-INF/shiro.ini");
         log.info("Shiro config locations: {}", configLocations);
         setConfigLocations(configLocations);
     }

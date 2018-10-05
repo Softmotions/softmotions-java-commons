@@ -23,14 +23,14 @@ constructor(env: ServicesConfiguration) : WBRepository {
         private val log = loggerFor()
     }
 
-    private val root: Path = env.xcfg().getString("repository.fs.root").toPath()
+    private val root: Path = env.xcfg().textPattern("repository.fs.root", ".")!!.toPath()
 
     private val seq = AtomicLong(0)
 
     private val sf = root.resolve("next.txt").toFile()
 
     init {
-        if (env.xcfg().getBoolean("repository.fs.cleanup", false)) {
+        if (env.xcfg().boolPattern("repository.fs.cleanup", false)) {
             log.warn("Deleting fs repository: ${root}")
             root.toFile().deleteRecursively()
         }

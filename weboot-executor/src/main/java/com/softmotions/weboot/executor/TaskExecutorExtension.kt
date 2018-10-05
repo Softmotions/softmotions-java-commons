@@ -11,7 +11,7 @@ import java.util.concurrent.Future
  *
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
-public fun executor(name: String? = null, block: () -> Unit): Future<*> {
+fun executor(name: String? = null, block: () -> Unit): Future<*> {
     val injector = JVMResources.getOrFail<Injector>("com.softmotions.weboot.WBServletListener.Injector")
     val executor = if (name == null) {
         injector.getInstance(TaskExecutor::class.java)

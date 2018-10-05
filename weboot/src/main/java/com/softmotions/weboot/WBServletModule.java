@@ -8,8 +8,6 @@ import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,6 +17,7 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 import com.softmotions.commons.ServicesConfiguration;
+import com.softmotions.xconfig.XConfig;
 
 /**
  * Weboot engine servlet module.
@@ -56,9 +55,9 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                 Thread.currentThread().getContextClassLoader(),
                 getClass().getClassLoader()
         );
-        List<HierarchicalConfiguration<ImmutableNode>> mconfigs = cfg.xcfg().configurationsAt("modules.module");
-        for (final HierarchicalConfiguration<ImmutableNode> mcfg : mconfigs) {
-            String mclassName = mcfg.getString(".");
+        List<XConfig> mconfigs = cfg.xcfg().subPattern("modules.module");
+        for (final XConfig mcfg : mconfigs) {
+            String mclassName = mcfg.text(".");
             if (StringUtils.isBlank(mclassName)) {
                 continue;
             }

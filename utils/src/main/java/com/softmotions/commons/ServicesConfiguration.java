@@ -4,14 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import javax.annotation.Nullable;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Parameters;
-import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
-import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -26,9 +20,10 @@ import ch.qos.logback.core.util.StatusPrinter;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.softmotions.aconfig.AConfig;
 import com.softmotions.commons.io.DirUtils;
 import com.softmotions.commons.io.Loader;
+import com.softmotions.xconfig.XConfig;
+import com.softmotions.xconfig.XConfigBuilder;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -37,7 +32,7 @@ public class ServicesConfiguration implements Module {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected AConfig xcfg;
+    protected XConfig xcfg;
 
     protected final File tmpdir = new File(System.getProperty("java.io.tmpdir"));
 
@@ -52,7 +47,7 @@ public class ServicesConfiguration implements Module {
         load(location);
     }
 
-    public ServicesConfiguration(String location, AConfig xcfg) {
+    public ServicesConfiguration(String location, XConfig xcfg) {
         load(location, xcfg);
     }
 
@@ -60,7 +55,7 @@ public class ServicesConfiguration implements Module {
         load(cfgUrl);
     }
 
-    public ServicesConfiguration(URL cfgUrl, AConfig xcfg) {
+    public ServicesConfiguration(URL cfgUrl, XConfig xcfg) {
         load(cfgUrl, xcfg);
     }
 
@@ -72,7 +67,7 @@ public class ServicesConfiguration implements Module {
         load(cfgUrl);
     }
 
-    protected void load(String location, AConfig xcfg) {
+    protected void load(String location, XConfig xcfg) {
         this.xcfg = xcfg;
         URL cfgUrl = Loader.getResourceAsUrl(location, getClass());
         if (cfgUrl == null) {
@@ -81,34 +76,28 @@ public class ServicesConfiguration implements Module {
         load(cfgUrl, xcfg);
     }
 
-    protected void load(URL cfgUrl, AConfig xcfg) {
+    protected void load(URL cfgUrl, XConfig xcfg) {
         this.xcfg = xcfg;
         init(cfgUrl);
     }
 
     protected void load(URL cfgUrl) {
         log.info("Using configuration: {}", cfgUrl);
-
-
-//        try (InputStream is = cfgUrl.openStream()) {
-//            JVMResources.set(cfgUrl.toString(), preprocessConfigData(IOUtils.toString(is, "UTF-8")));
-//            cfgUrl = new URL("jvmr:" + cfgUrl);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-
         Level oldLevel = null;
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
             LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
             ch.qos.logback.classic.Logger rl = ctx.getLogger("ROOT");
             oldLevel = rl.getLevel();
-            rl.setLevel(Level.ERROR);
+            rl.setLevel(Level.INFO);
         }
         try {
-            xcfgBuilder = new FileBasedConfigurationBuilder<>(XMLConfiguration.class);
-            configure(cfgUrl);
-            xcfg = xcfgBuilder.getConfiguration();
-        } catch (ConfigurationException e) {
+            xcfg = new XConfigBuilder(cfgUrl)
+                    .substitutor(key -> {
+                        String v = substituteConfigKey(key);
+                        return v != null ? v : XConfigBuilder.Companion.basicSubstitutor(key);
+                    })
+                    .create();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             if (oldLevel != null) {
@@ -119,34 +108,17 @@ public class ServicesConfiguration implements Module {
         init(cfgUrl);
     }
 
-    protected void configure(URL cfgUrl) {
-        Parameters params = new Parameters();
-        xcfgBuilder.configure(
-                params.xml()
-                        .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
-                        .setURL(cfgUrl)
-                        .setValidating(false));
-    }
 
-
+    @Nullable
     protected String substituteConfigKey(String key) {
         switch (key) {
-            case "cwd":
-                return System.getProperty("user.dir");
-            case "home":
-                return System.getProperty("user.home");
             case "tmp":
                 return getTmpdir().getAbsolutePath();
             case "newtmp":
                 return getSessionTmpdir().getAbsolutePath();
             default:
-                if (key.startsWith("env:")) {
-                    return System.getenv(key.substring("env:".length()));
-                } else if (key.startsWith("sys:")) {
-                    return System.getProperty(key.substring("sys:".length()));
-                }
+                return null;
         }
-        return null;
     }
 
     public boolean isUsedCustomLoggingConfig() {
@@ -156,7 +128,7 @@ public class ServicesConfiguration implements Module {
     protected void init(URL cfgUrl) {
         try {
             //init logging
-            String lref = xcfg().getString("logging-ref");
+            String lref = xcfg().text("logging-ref");
             if (!StringUtils.isBlank(lref) && LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
                 String pdir = FilenameUtils.getFullPath(cfgUrl.getPath());
                 String lcfg = pdir + lref;
@@ -180,7 +152,7 @@ public class ServicesConfiguration implements Module {
             log.info("Using TMP dir: {}", tmpdir.getAbsolutePath());
             DirUtils.ensureDir(tmpdir, true);
 
-            if (xcfg().getBoolean("newtmp-cleanup-on-exit", true)) {
+            if (xcfg().boolPattern("newtmp-cleanup-on-exit", true)) {
                 Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -199,10 +171,9 @@ public class ServicesConfiguration implements Module {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    public HierarchicalConfiguration<ImmutableNode> xcfg() {
+    public XConfig xcfg() {
         return xcfg;
     }
 

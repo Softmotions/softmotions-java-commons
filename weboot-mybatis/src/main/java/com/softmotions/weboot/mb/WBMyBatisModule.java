@@ -10,8 +10,6 @@ import java.util.Properties;
 import java.util.Set;
 import javax.sql.DataSource;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.mapping.Environment;
@@ -44,20 +42,20 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
     @Override
     protected void configure() {
         Multibinder.newSetBinder(binder(), WBMyBatisExtraConfigSupplier.class);
-        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
-        if (xcfg.configurationsAt("mybatis").isEmpty()) {
+        var xcfg = cfg.xcfg();
+        if (!xcfg.hasPattern("mybatis")) {
             return;
         }
-        String dbenv = xcfg.getString("mybatis.dbenv", "development");
+        String dbenv = xcfg.textPattern("mybatis.dbenv", "development");
         setEnvironmentId(dbenv);
-        String cfgLocation = xcfg.getString("mybatis.config");
+        String cfgLocation = xcfg.text("mybatis.config");
         if (cfgLocation == null) {
             throw new RuntimeException("Missing required 'config' attribute in the <mybatis> element");
         }
         log.info("MyBatis config: {}", cfgLocation);
         setClassPathResource(cfgLocation);
         super.configure();
-        if (xcfg.getBoolean("mybatis.bindDatasource", false)) {
+        if (xcfg.boolPattern("mybatis.bindDatasource", false)) {
             bind(DataSource.class).toProvider(DataSourceProvider.class);
         }
         bind(WBMyBatisModule.class).toInstance(this);
@@ -73,9 +71,9 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
     }
 
     protected SqlSessionFactory initialize(Set<WBMyBatisExtraConfigSupplier> extraConfigSuppliers) throws Exception {
-        HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
+        var xcfg = cfg.xcfg();
         Properties props = new Properties();
-        String propsStr = xcfg.getString("mybatis.extra-properties");
+        String propsStr = xcfg.text("mybatis.extra-properties");
         if (!StringUtils.isBlank(propsStr)) {
             try {
                 props.load(new StringReader(propsStr));
@@ -86,7 +84,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
             }
         }
 
-        String propsFile = xcfg.getString("mybatis.propsFile");
+        String propsFile = xcfg.text("mybatis.propsFile");
         if (!StringUtils.isBlank(propsFile)) {
             log.info("MyBatis loading the properties file: {}", propsFile);
             try (FileInputStream is = new FileInputStream(propsFile)) {
@@ -110,8 +108,8 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
 
         addProperties(props);
 
-        for (HierarchicalConfiguration<ImmutableNode> mc : xcfg.configurationsAt("mybatis.extra-mappers.mapper")) {
-            String resource = mc.getString("resource");
+        for (var mc : xcfg.subPattern("mybatis.extra-mappers.mapper")) {
+            String resource = mc.text("resource");
             if (!StringUtils.isBlank(resource)) {
                 log.info("MyBatis registering extra mapper: '{}'", resource);
                 getExtraMappers().add(resource);
@@ -133,7 +131,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
                 pv = "********";
             }
             pb.append(System.getProperty("line.separator")).append("    ")
-              .append(k).append('=').append(pv);
+                    .append(k).append('=').append(pv);
         });
         log.info("MyBatis properties: {}", pb);
 
@@ -208,7 +206,7 @@ public class WBMyBatisModule extends MBXMLMyBatisModule {
         public void shutdown() {
             log.info("Shutting down MyBatis datasource");
             DataSource ds = dsProvider.get();
-            String shutdownSql = cfg.xcfg().getString("mybatis.shutdownSQL");
+            String shutdownSql = cfg.xcfg().text("mybatis.shutdownSQL");
             if (ds != null && !StringUtils.isBlank(shutdownSql)) {
                 log.info("Executing shutdown SQL: '{}" + '\'', shutdownSql);
                 try (Connection c = ds.getConnection()) {

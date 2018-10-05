@@ -6,7 +6,7 @@
     <parent>
         <groupId>softmotions</groupId>
         <artifactId>softmotions-weboot-testing</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-weboot-testing-jetty</artifactId>
 

@@ -9,12 +9,11 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 
 import com.softmotions.commons.ServicesConfiguration;
 import com.softmotions.commons.lifecycle.Dispose;
+import com.softmotions.xconfig.XConfig;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -53,10 +52,10 @@ public abstract class WBConfiguration extends ServicesConfiguration {
         load(location);
         normalizePrefix("site-files-root");
         normalizePrefix("app-prefix");
-        this.appPrefix = xcfg.getString("app-prefix", "");
+        this.appPrefix = xcfg.textPattern("app-prefix", "");
         this.appRoot = sctx.getContextPath() + this.appPrefix;
-        this.environmentType = xcfg.getString("environment", "production");
-        this.dbEnvironment = xcfg.getString("db-environment", "production");
+        this.environmentType = xcfg.textPattern("environment", "production");
+        this.dbEnvironment = xcfg.textPattern("db-environment", "production");
     }
 
 
@@ -64,7 +63,7 @@ public abstract class WBConfiguration extends ServicesConfiguration {
         return null;
     }
 
-    public void load(String location, HierarchicalConfiguration<ImmutableNode> xcfg, ServletContext sctx) {
+    public void load(String location, XConfig xcfg, ServletContext sctx) {
         this.servletContext = sctx;
         load(location, xcfg);
     }
@@ -79,14 +78,14 @@ public abstract class WBConfiguration extends ServicesConfiguration {
 
     @Nonnull
     public String getApplicationName() {
-        return xcfg().getString("app-name", "App");
+        return xcfg().textPattern("app-name", "App");
     }
 
     @Nullable
     public String getLogoutRedirect() {
-        String ret = xcfg().getString("logout-redirect", null);
+        String ret = xcfg().text("logout-redirect");
         if (StringUtils.isBlank(ret)) {
-            return xcfg.getString("site.root", null);
+            return xcfg.text("site.root");
         }
         return ret;
     }
@@ -143,7 +142,7 @@ public abstract class WBConfiguration extends ServicesConfiguration {
 
     @Nonnull
     public String getAbsoluteLink(HttpServletRequest req, String link) {
-        boolean preferRequestUrl = xcfg().getBoolean("site.preferRequestUrl", true);
+        boolean preferRequestUrl = xcfg().boolPattern("site.preferRequestUrl", true);
         if (preferRequestUrl) {
             //noinspection MagicNumber
             link = req.getScheme() + "://" +
@@ -151,13 +150,13 @@ public abstract class WBConfiguration extends ServicesConfiguration {
                    (req.getServerPort() != 80 && req.getServerPort() != 443 ? ":" + req.getServerPort() : "") +
                    link;
         } else {
-            link = xcfg().getString("site.root") + link;
+            link = xcfg().textPattern("site.root", "") + link;
         }
         return link;
     }
 
     private void normalizePrefix(String property) {
-        String val = xcfg().getString(property, null);
+        String val = xcfg().text(property);
         if (StringUtils.isBlank(val) || "/".equals(val)) {
             val = "";
         } else {
@@ -169,7 +168,7 @@ public abstract class WBConfiguration extends ServicesConfiguration {
                 val = val.substring(0, val.length() - 1);
             }
         }
-        xcfg().setProperty(property, val);
+        xcfg().set(property, val);
     }
 
     @Override

@@ -11,8 +11,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletRegistration;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,6 +31,7 @@ import com.softmotions.commons.lifecycle.LifeCycleModule;
 import com.softmotions.commons.lifecycle.LifeCycleService;
 import com.softmotions.web.DirResourcesFilter;
 import com.softmotions.web.JarResourcesFilter;
+import com.softmotions.xconfig.XConfig;
 
 /**
  * Weboot engine startup listener.
@@ -52,11 +51,6 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
     public static final String WEBOOT_CFG_SCTX_KEY = "com.softmotions.weboot.CFG";
 
     protected Injector injector;
-
-    @Deprecated
-    protected String getLogo() {
-        return null;
-    }
 
     protected String getLogo(WBConfiguration cfg) {
         return null;
@@ -145,14 +139,9 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
                     log.info("{} => {} ({})", m, sreg.getName(), sreg.getClassName());
                 }
             }
-
-            //noinspection deprecation
-            String logo = getLogo();
-            if (logo == null) {
-                logo = getLogo(cfg);
-                if (logo != null) {
-                    log.info(logo);
-                }
+            String logo = getLogo(cfg);
+            if (logo != null) {
+                log.info(logo);
             } else {
                 log.info(getLogo(cfg), cfg.getEnvironmentType(), cfg.getAppVersion(), Runtime.getRuntime().maxMemory());
             }
@@ -200,11 +189,10 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
     }
 
     protected void initCacheHeadersFilters(WBConfiguration env, ServletContext sctx) {
-        HierarchicalConfiguration<ImmutableNode> xcfg = env.xcfg();
-        List<HierarchicalConfiguration<ImmutableNode>> cgroups = xcfg.configurationsAt("cache-headers-groups.cache-group");
-        for (HierarchicalConfiguration cfg : cgroups) {
-            String name = cfg.getString("name", "");
-            String[] patterns = cfg.getStringArray("patterns");
+        XConfig xcfg = env.xcfg();
+        for (XConfig cfg : xcfg.subPattern("cache-headers-groups.cache-group")) {
+            String name = cfg.textPattern("name", "");
+            String[] patterns = cfg.arrPattern("patterns");
             String prefix = env.getAppPrefix();
             for (int i = 0; i < patterns.length; ++i) {
                 String p = patterns[i].trim();
@@ -218,8 +206,8 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         }
     }
 
-    protected void initCacheHeadersFilter(ServletContext sctx, String name, String[] patterns, HierarchicalConfiguration cfg) {
-        if (!cfg.getBoolean("nocache", false)) {
+    protected void initCacheHeadersFilter(ServletContext sctx, String name, String[] patterns, XConfig cfg) {
+        if (!cfg.boolPattern("nocache", false)) {
             name = "WBCacheFilter" + name;
             String fname = name;
             FilterRegistration.Dynamic reg = sctx.addFilter(fname, CacheFilter.class);
@@ -231,16 +219,16 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
                 return;
             }
             reg.setInitParameter(CacheConfigParameter.EXPIRATION.getName(),
-                                 String.valueOf(cfg.getLong(CacheConfigParameter.EXPIRATION.getName(), 60L * 60L)));
-            String val = cfg.getString(CacheConfigParameter.VARY.getName());
+                                 String.valueOf(cfg.numberPattern(CacheConfigParameter.EXPIRATION.getName(), 60L * 60L)));
+            String val = cfg.text(CacheConfigParameter.VARY.getName());
             if (!StringUtils.isBlank(val)) {
                 reg.setInitParameter(CacheConfigParameter.VARY.getName(), val.trim());
             }
-            val = cfg.getString(CacheConfigParameter.MUST_REVALIDATE.getName());
+            val = cfg.text(CacheConfigParameter.MUST_REVALIDATE.getName());
             if (!StringUtils.isBlank(val)) {
                 reg.setInitParameter(CacheConfigParameter.MUST_REVALIDATE.getName(), val.trim());
             }
-            val = cfg.getString(CacheConfigParameter.PRIVATE.getName());
+            val = cfg.text(CacheConfigParameter.PRIVATE.getName());
             if (!StringUtils.isBlank(val)) {
                 reg.setInitParameter(CacheConfigParameter.PRIVATE.getName(), val.trim());
             }
@@ -264,29 +252,26 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         }
     }
 
-
     protected void initJarResources(WBConfiguration env, ServletContext sctx) {
         FilterRegistration.Dynamic fr = sctx.addFilter("jarResourcesFilter", JarResourcesFilter.class);
         fr.addMappingForUrlPatterns(null, false, env.getAppPrefix() + "/*");
-        List<HierarchicalConfiguration<ImmutableNode>> rlist = env.xcfg().configurationsAt("jar-web-resources.resource");
-        for (HierarchicalConfiguration rcfg : rlist) {
-            String pp = rcfg.getString("path-prefix");
-            String[] opts = rcfg.getStringArray("options");
-            if (pp == null || opts.length == 0) {
-                continue;
+        env.xcfg().subPattern("jar-web-resources.resource").forEach(rcfg -> {
+            String pp = rcfg.text("path-prefix");
+            String[] opts = rcfg.arrPattern("options");
+            if (pp != null && opts.length > 0) {
+                fr.setInitParameter(pp, ArrayUtils.stringJoin(opts, ","));
             }
-            fr.setInitParameter(pp, ArrayUtils.stringJoin(opts, ","));
-        }
+        });
         fr.setInitParameter("strip-prefix", env.getAppPrefix());
     }
 
 
     protected void initDirResources(WBConfiguration env, ServletContext sctx) {
-        List<HierarchicalConfiguration<ImmutableNode>> rlist = env.xcfg().configurationsAt("dir-web-resources.resource");
+        List<XConfig> rlist = env.xcfg().subPattern("dir-web-resources.resource");
         int c = 0;
-        for (HierarchicalConfiguration rcfg : rlist) {
-            String dir = StringUtils.trimToNull(rcfg.getString("dir"));
-            String mount = StringUtils.trimToNull(rcfg.getString("mount"));
+        for (XConfig rcfg : rlist) {
+            String dir = StringUtils.trimToNull(rcfg.text("dir"));
+            String mount = StringUtils.trimToNull(rcfg.text("mount"));
             if (StringUtils.isBlank(dir) || StringUtils.isBlank(mount)) {
                 continue;
             }

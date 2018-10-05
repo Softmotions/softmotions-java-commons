@@ -2,13 +2,9 @@ package com.softmotions.weboot.liquibase;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.List;
 import java.util.Set;
 import javax.sql.DataSource;
 
-import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.apache.commons.configuration2.tree.ImmutableNode;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +45,7 @@ public class WBLiquibaseModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        if (cfg.xcfg().configurationsAt("liquibase").isEmpty()) {
+        if (!cfg.xcfg().hasPattern("liquibase")) {
             log.warn("No WBLiquibaseModule module configuration found. Skipping.");
             return;
         }
@@ -63,13 +59,8 @@ public class WBLiquibaseModule extends AbstractModule {
         public void start(DataSource ds,
                           ServicesConfiguration cfg,
                           Set<WBLiquibaseExtraConfigSupplier> extraConfigSuppliers) throws Exception {
-            HierarchicalConfiguration<ImmutableNode> xcfg = cfg.xcfg();
-            if (xcfg.configurationsAt("liquibase").isEmpty()) {
-                log.warn("No <liquibase> configuration found");
-                return;
-            }
-            HierarchicalConfiguration<ImmutableNode> lbCfg = xcfg.configurationAt("liquibase");
-            String changelogResource = lbCfg.getString("changelog");
+            var lbCfg = cfg.xcfg().subPattern("liquibase").get(0);
+            String changelogResource = lbCfg.text("changelog");
             if (changelogResource == null) {
                 throw new RuntimeException("Missing required attribute 'changelog' in <liquibase> configuration tag");
             }
@@ -77,17 +68,17 @@ public class WBLiquibaseModule extends AbstractModule {
 
             try (Connection connection = ds.getConnection()) {
                 Database database = DatabaseFactory.getInstance()
-                                                   .findCorrectDatabaseImplementation(new JdbcConnection(connection));
-                database.setDefaultSchemaName(lbCfg.getString("defaultSchema"));
+                        .findCorrectDatabaseImplementation(new JdbcConnection(connection));
+                database.setDefaultSchemaName(lbCfg.text("defaultSchema"));
                 ResourceAccessor resourceAccessor = new CompositeResourceAccessor(
                         new ClassLoaderResourceAccessor(),
                         new FileSystemResourceAccessor(),
                         new ClassLoaderResourceAccessor(Thread.currentThread()
-                                                              .getContextClassLoader())
+                                                                .getContextClassLoader())
                 );
                 ChangeLogParser parser =
                         ChangeLogParserFactory.getInstance()
-                                              .getParser(changelogResource, resourceAccessor);
+                                .getParser(changelogResource, resourceAccessor);
                 ChangeLogParameters changeLogParameters = new ChangeLogParameters(database);
                 DatabaseChangeLog changeLog = parser.parse(changelogResource, changeLogParameters, resourceAccessor);
                 for (WBLiquibaseExtraConfigSupplier ecs : extraConfigSuppliers) {
@@ -105,23 +96,22 @@ public class WBLiquibaseModule extends AbstractModule {
                                       database
                         );
 
-                List<HierarchicalConfiguration<ImmutableNode>> hcList =
-                        lbCfg.configurationsAt("liquibase.changelog-parameters.parameter");
-                for (final HierarchicalConfiguration<ImmutableNode> hc : hcList) {
-                    String name = hc.getString("name");
-                    String value = hc.getString("value");
+                var hcList = lbCfg.subPattern("liquibase.changelog-parameters.parameter");
+                for (final var hc : hcList) {
+                    String name = hc.text("name");
+                    String value = hc.text("value");
                     if (name != null) {
                         liquibase.setChangeLogParameter(name, value);
                     }
                 }
 
                 // DropAll staff
-                if (lbCfg.containsKey("update.dropAll") || lbCfg.containsKey("update.dropAll.activate")) {
-                    boolean activate = BooleanUtils.toBoolean(lbCfg.getString("update.dropAll.activate", "true"));
+                if (lbCfg.hasPattern("update.dropAll.activate")) {
+                    boolean activate = lbCfg.boolPattern("update.dropAll.activate", true);
                     if (activate) {
-                        String bsql = lbCfg.getString("update.dropAll.sql-before", null);
+                        String bsql = lbCfg.text("update.dropAll.sql-before");
                         if (bsql != null) {
-                            boolean failOnError = lbCfg.getBoolean("update.dropAll.sql-before[@failOnError]", true);
+                            boolean failOnError = lbCfg.boolPattern("update.dropAll.sql-before[@failOnError]", true);
                             log.info("Executing before dropall sql. FailOnError={}", failOnError);
                             for (String sql : bsql.split(";")) {
                                 sql = sql.trim();
@@ -149,11 +139,11 @@ public class WBLiquibaseModule extends AbstractModule {
                 }
 
                 // Update
-                if (lbCfg.containsKey("update.contexts")) {
-                    String contexts = lbCfg.getString("update.contexts");
+                if (lbCfg.hasPattern("update.contexts")) {
+                    String contexts = lbCfg.text("update.contexts");
                     log.info("Executing Liquibase update, contexts={}", contexts);
                     liquibase.update(contexts);
-                } else if (lbCfg.containsKey("update")) {
+                } else if (lbCfg.hasPattern("update")) {
                     log.info("Executing Liquibase update");
                     liquibase.update("");
                 }
