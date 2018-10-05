@@ -20,7 +20,7 @@ class TestAConfig {
         val f = Files.createTempFile(null, null).toFile()
         log.info("File: $f")
         f.deleteOnExit()
-        val cfg = AConfigBuilder(f.toURL())
+        val cfg = AConfigBuilder(f.toURI().toURL())
                 .allowWrites()
                 .autosave(true)
                 .create()
@@ -54,7 +54,7 @@ class TestAConfig {
         f.deleteOnExit()
         val masterUrl = javaClass.getResource("master-config.xml")
         Assert.assertNotNull(masterUrl)
-        val cfg = AConfigBuilder(f.toURL())
+        val cfg = AConfigBuilder(f.toURI().toURL())
                 .master(masterUrl) { AConfigBuilder.basicSubstitutor(it) }
                 .allowWrites()
                 .autosave(true)

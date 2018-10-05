@@ -18,6 +18,11 @@
         </dependency>
         <dependency>
             <groupId>softmotions</groupId>
+            <artifactId>softmotions-aconfig</artifactId>
+            <version>${softmotion.commons.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>softmotions</groupId>
             <artifactId>softmotions-utils</artifactId>
             <version>${softmotion.commons.version}</version>
         </dependency>
@@ -30,10 +35,6 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-configuration2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.javassist</groupId>

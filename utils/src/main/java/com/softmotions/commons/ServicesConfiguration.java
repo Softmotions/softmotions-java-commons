@@ -2,11 +2,8 @@ package com.softmotions.commons;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -17,7 +14,6 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +26,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.softmotions.aconfig.AConfig;
 import com.softmotions.commons.io.DirUtils;
 import com.softmotions.commons.io.Loader;
 
@@ -40,9 +37,7 @@ public class ServicesConfiguration implements Module {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected HierarchicalConfiguration<ImmutableNode> xcfg;
-
-    protected FileBasedConfigurationBuilder<XMLConfiguration> xcfgBuilder;
+    protected AConfig xcfg;
 
     protected final File tmpdir = new File(System.getProperty("java.io.tmpdir"));
 
@@ -57,8 +52,7 @@ public class ServicesConfiguration implements Module {
         load(location);
     }
 
-    public ServicesConfiguration(String location,
-                                 HierarchicalConfiguration<ImmutableNode> xcfg) {
+    public ServicesConfiguration(String location, AConfig xcfg) {
         load(location, xcfg);
     }
 
@@ -66,8 +60,7 @@ public class ServicesConfiguration implements Module {
         load(cfgUrl);
     }
 
-    public ServicesConfiguration(URL cfgUrl,
-                                 HierarchicalConfiguration<ImmutableNode> xcfg) {
+    public ServicesConfiguration(URL cfgUrl, AConfig xcfg) {
         load(cfgUrl, xcfg);
     }
 
@@ -79,7 +72,7 @@ public class ServicesConfiguration implements Module {
         load(cfgUrl);
     }
 
-    protected void load(String location, HierarchicalConfiguration<ImmutableNode> xcfg) {
+    protected void load(String location, AConfig xcfg) {
         this.xcfg = xcfg;
         URL cfgUrl = Loader.getResourceAsUrl(location, getClass());
         if (cfgUrl == null) {
@@ -88,19 +81,21 @@ public class ServicesConfiguration implements Module {
         load(cfgUrl, xcfg);
     }
 
-    protected void load(URL cfgUrl, HierarchicalConfiguration<ImmutableNode> xcfg) {
+    protected void load(URL cfgUrl, AConfig xcfg) {
         this.xcfg = xcfg;
         init(cfgUrl);
     }
 
     protected void load(URL cfgUrl) {
         log.info("Using configuration: {}", cfgUrl);
-        try (InputStream is = cfgUrl.openStream()) {
-            JVMResources.set(cfgUrl.toString(), preprocessConfigData(IOUtils.toString(is, "UTF-8")));
-            cfgUrl = new URL("jvmr:" + cfgUrl);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+
+//        try (InputStream is = cfgUrl.openStream()) {
+//            JVMResources.set(cfgUrl.toString(), preprocessConfigData(IOUtils.toString(is, "UTF-8")));
+//            cfgUrl = new URL("jvmr:" + cfgUrl);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
         Level oldLevel = null;
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
@@ -133,31 +128,6 @@ public class ServicesConfiguration implements Module {
                         .setValidating(false));
     }
 
-    private String preprocessConfigData(String cdata) {
-        Pattern p = Pattern.compile("(.)?\\{(((env|sys):)?[A-Za-z_.]+)}");
-        Matcher m = p.matcher(cdata);
-        StringBuffer sb = new StringBuffer(cdata.length());
-        while (m.find()) {
-            String mg = m.group();
-            String pc = m.group(1);
-            if ("$".equals(pc)) {
-                m.appendReplacement(sb, Matcher.quoteReplacement(mg));
-            } else {
-                String s = StringUtils.replaceEach(substituteConfigKey(m.group(2)), new String[]{"\\"}, new String[]{"\\\\"});
-                if (s != null) {
-                    if (pc != null) {
-                        m.appendReplacement(sb, Matcher.quoteReplacement(pc + s));
-                    } else {
-                        m.appendReplacement(sb, Matcher.quoteReplacement(s));
-                    }
-                } else {
-                    m.appendReplacement(sb, Matcher.quoteReplacement(mg));
-                }
-            }
-        }
-        m.appendTail(sb);
-        return sb.toString();
-    }
 
     protected String substituteConfigKey(String key) {
         switch (key) {

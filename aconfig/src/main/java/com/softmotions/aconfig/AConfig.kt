@@ -36,21 +36,31 @@ interface AConfig {
 
     fun nodesXPath(expr: String): List<Node>
 
+    fun nodesPattern(expr: String): List<Node>
+
     fun detach(expr: String, type: ACPath = ACPath.PATTERN)
 
     fun detachXPath(expr: String)
+
+    fun detachPattern(expr: String)
 
     fun text(expr: String, dval: String? = null, type: ACPath = ACPath.PATTERN): String?
 
     fun textXPath(expr: String, dval: String? = null): String?
 
-    fun bool(expr: String, dval: Boolean = false, type: ACPath = ACPath.PATTERN): Boolean
+    fun textPattern(expr: String, dval: String? = null): String?
 
-    fun boolXPath(expr: String, dval: Boolean = false): Boolean
+    fun bool(expr: String, dval: Boolean? = false, type: ACPath = ACPath.PATTERN): Boolean
+
+    fun boolXPath(expr: String, dval: Boolean? = false): Boolean
+
+    fun boolPattern(expr: String, dval: Boolean? = false): Boolean
 
     fun long(expr: String, dval: Long? = null, type: ACPath = ACPath.PATTERN): Long?
 
     fun longXPath(expr: String, dval: Long? = null): Long?
+
+    fun longPattern(expr: String, dval: Long? = null): Long?
 
     fun <T> batch(action: (cfg: AConfig) -> T): T
 

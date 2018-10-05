@@ -57,7 +57,7 @@ constructor(private val mUrl: URL) {
 
     private var mMaster: AConfigImpl? = null
 
-    fun textSubstitutor(substitutor: Function1<String, String?>): AConfigBuilder {
+    fun substitutor(substitutor: Function1<String, String?>): AConfigBuilder {
         mSubstitutor = substitutor
         return this
     }
@@ -70,7 +70,7 @@ constructor(private val mUrl: URL) {
     fun master(masterURL: URL, substitutor: Function1<String, String?>? = null): AConfigBuilder {
         val mcb = AConfigBuilder(masterURL)
         if (substitutor != null) {
-            mcb.textSubstitutor(substitutor)
+            mcb.substitutor(substitutor)
         }
         return master(mcb.create())
     }
@@ -120,7 +120,9 @@ constructor(private val mUrl: URL) {
     }
 
     inner class AConfigImpl
-    internal constructor(override val parent: AConfigImpl? = null, contextNode: Element? = null) : AConfig {
+    internal constructor(
+            override val parent: AConfigImpl? = null,
+            contextNode: Element? = null) : AConfig {
 
         private var noSave = false
 
@@ -210,7 +212,6 @@ constructor(private val mUrl: URL) {
             } ?: emptyList()
         }
 
-
         private fun nodesBy(expr: String, type: ACPath, skipMaster: Boolean): List<Node> = when (type) {
             ACPath.PATTERN -> nodesByPattern(expr, skipMaster)
             ACPath.XPATH -> nodesByXPath(expr, skipMaster)
@@ -273,8 +274,6 @@ constructor(private val mUrl: URL) {
             nodesBy(expr, type, false)
         }
 
-        override fun nodesXPath(expr: String): List<Node> = nodes(expr, ACPath.XPATH)
-
         override fun detach(expr: String, type: ACPath) = lock.write {
             val nodes = nodesBy(expr, type, true)
             if (nodes.isEmpty()) {
@@ -286,14 +285,12 @@ constructor(private val mUrl: URL) {
             }
         }
 
-        override fun detachXPath(expr: String) = detach(expr, ACPath.XPATH)
-
         override fun text(expr: String, dval: String?, type: ACPath): String? = lock.read {
             get(expr, type) ?: dval
         }
 
-        override fun bool(expr: String, dval: Boolean, type: ACPath): Boolean = lock.read {
-            BooleanUtils.toBoolean(text(expr, "false"))
+        override fun bool(expr: String, dval: Boolean?, type: ACPath): Boolean = lock.read {
+            BooleanUtils.toBoolean(text(expr, dval?.toString() ?: "false"))
         }
 
         override fun long(expr: String, dval: Long?, type: ACPath): Long? = lock.read {
@@ -306,11 +303,25 @@ constructor(private val mUrl: URL) {
                     .map { AConfigImpl(this, it as Element) }
         }
 
+        override fun nodesXPath(expr: String): List<Node> = nodes(expr, ACPath.XPATH)
+
+        override fun nodesPattern(expr: String): List<Node> = nodes(expr, ACPath.PATTERN)
+
+        override fun detachXPath(expr: String) = detach(expr, ACPath.XPATH)
+
+        override fun detachPattern(expr: String) = detach(expr, ACPath.PATTERN)
+
         override fun textXPath(expr: String, dval: String?): String? = text(expr, dval, ACPath.XPATH)
 
-        override fun boolXPath(expr: String, dval: Boolean): Boolean = bool(expr, dval, ACPath.XPATH)
+        override fun textPattern(expr: String, dval: String?): String? = text(expr, dval, ACPath.PATTERN)
+
+        override fun boolXPath(expr: String, dval: Boolean?): Boolean = bool(expr, dval, ACPath.XPATH)
+
+        override fun boolPattern(expr: String, dval: Boolean?): Boolean = bool(expr, dval, ACPath.PATTERN)
 
         override fun longXPath(expr: String, dval: Long?): Long? = long(expr, dval, ACPath.XPATH)
+
+        override fun longPattern(expr: String, dval: Long?): Long? = long(expr, dval, ACPath.PATTERN)
 
         private fun openOutputStream(): OutputStream {
             return (file?.outputStream() ?: mUrl.openConnection().getOutputStream()).buffered()
