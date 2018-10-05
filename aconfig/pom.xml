@@ -9,6 +9,12 @@
         <version>1.4-SNAPSHOT</version>
     </parent>
     <artifactId>softmotions-aconfig</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>

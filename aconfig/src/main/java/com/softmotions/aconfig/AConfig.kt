@@ -1,139 +1,58 @@
 package com.softmotions.aconfig
 
-import org.w3c.dom.*
-import org.xml.sax.InputSource
-import java.io.File
-import java.util.concurrent.locks.ReentrantLock
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.transform.OutputKeys
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.dom.DOMSource
-import javax.xml.transform.stream.StreamResult
-import javax.xml.xpath.XPathConstants
-import javax.xml.xpath.XPathFactory
-import kotlin.concurrent.withLock
-
-
-inline fun Node.firstChildElement(predicate: (n: Element) -> Boolean): Element? {
-    val cn = childNodes
-    (0 until cn.length).forEach { idx ->
-        val item = cn.item(idx)
-        if (item is Element && predicate(item)) {
-            return item
-        }
-    }
-    return null
-}
-
-fun <T> Element.set(v: T) {
-    when (v) {
-        is Attribute ->
-            if (v.value != null) {
-                this.setAttribute(v.name, v.value.toString())
-            } else {
-                this.removeAttribute(v.name)
-            }
-        is Attr ->
-            this.setAttribute(v.name, v.value)
-        is Node ->
-            this.appendChild(v)
-        is Sequence<*> -> v.forEach { this.set(it) }
-        is Iterable<*> -> v.forEach { this.set(it) }
-        else ->
-            this.textContent = v?.toString() ?: ""
-    }
-}
-
-data class Attribute(val name: String, val value: Any? = null)
-
-
-fun <T> AConfig.batch(action: () -> T): T {
-    lock.withLock {
-        val prev = autosave
-        autosave = false
-        try {
-            return action().also {
-                save()
-            }
-        } finally {
-            autosave = prev
-        }
-    }
-}
+import org.w3c.dom.Attr
+import org.w3c.dom.Document
+import org.w3c.dom.Node
+import java.net.URI
 
 /**
+ * Yet another configuration
+ *
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
-class AConfig(val file: File,
-              var autosave: Boolean = false) {
+interface AConfig {
+
+    val uri: URI
 
     val document: Document
 
-    val lock = ReentrantLock()
+    val parent: AConfig?
 
-    private val xpf = XPathFactory.newInstance()
+    operator fun get(expr: String, type: ACPath = ACPath.PATTERN): String?
 
-    init {
-        if (!file.exists()) {
-            if (file.parent != null) {
-                file.parentFile.mkdirs()
-            }
-        }
-        if (!file.exists() || file.length() < 1) {
-            file.writeText("""
-                <?xml version="1.0" encoding="UTF-8"?>
-                <configuration>
-                </configuration>
-            """.trimIndent())
-        }
-        document = DocumentBuilderFactory.newInstance().let { f ->
-            f.isNamespaceAware = true
-            file.bufferedReader().use {
-                f.newDocumentBuilder().parse(InputSource(it))
-            }
-        }
-    }
+    operator fun <T> set(expr: String, v: T)
 
-    operator fun <T> set(pattern: String, v: T) = lock.withLock {
-        var n = document.firstChildElement { true }!! // root
-        pattern.split('.').forEach { s ->
-            n = n.firstChildElement { it.nodeName == s } ?: run {
-                n.appendChild(document.createElementNS(n.namespaceURI, s)) as Element
-            }
-        }
-        n.set(v)
-        if (autosave) {
-            save()
-        }
-    }
+    fun setAttrs(expr: String, vararg pairs: Pair<String, Any>): Int
 
-    operator fun get(pattern: String): String? = lock.withLock {
-        var n = document.firstChildElement { true }!! // root
-        pattern.split('.').forEach { s ->
-            n = n.firstChildElement { it.nodeName == s } ?: return null
-        }
-        return n.textContent
-    }
+    fun setAttrsXPath(expr: String, vararg pairs: Pair<String, Any>): Int
 
-    fun string(xpath: String): String = lock.withLock {
-        return xpf.newXPath().evaluate(xpath, document.firstChildElement { true })
-    }
+    fun attr(name: String, value: String): Attr
 
-    fun nodes(xpath: String): List<Node> = lock.withLock {
-        val ns = xpf.newXPath().evaluate(xpath, document.firstChildElement { true }, XPathConstants.NODESET) as NodeList
-        val ret = ArrayList<Node>(ns.length)
-        (0 until ns.length).forEach { idx -> ret.add(ns.item(idx)) }
-        ret
-    }
+    fun sub(expr: String, type: ACPath = ACPath.PATTERN): List<AConfig>
 
-    fun save() = lock.withLock {
-        val t = TransformerFactory.newInstance().newTransformer()
-        t.setOutputProperty(OutputKeys.INDENT, "yes")
-        t.setOutputProperty(OutputKeys.ENCODING, "UTF-8")
-        t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
-        file.outputStream().buffered().use { o ->
-            t.transform(DOMSource(document), StreamResult(o))
-            o.flush()
-        }
-    }
+    fun has(expr: String, type: ACPath = ACPath.PATTERN): Boolean
+
+    fun nodes(expr: String, type: ACPath = ACPath.PATTERN): List<Node>
+
+    fun nodesXPath(expr: String): List<Node>
+
+    fun detach(expr: String, type: ACPath = ACPath.PATTERN)
+
+    fun detachXPath(expr: String)
+
+    fun text(expr: String, dval: String? = null, type: ACPath = ACPath.PATTERN): String?
+
+    fun textXPath(expr: String, dval: String? = null): String?
+
+    fun bool(expr: String, dval: Boolean = false, type: ACPath = ACPath.PATTERN): Boolean
+
+    fun boolXPath(expr: String, dval: Boolean = false): Boolean
+
+    fun long(expr: String, dval: Long? = null, type: ACPath = ACPath.PATTERN): Long?
+
+    fun longXPath(expr: String, dval: Long? = null): Long?
+
+    fun <T> batch(action: (cfg: AConfig) -> T): T
+
+    fun save()
 }
