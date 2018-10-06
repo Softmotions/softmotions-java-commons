@@ -10,7 +10,7 @@ public class ThreadUtils {
 
     static final List<ThreadLocal> locals = new CopyOnWriteArrayList<>();
 
-    static <T> ThreadLocal<T> createThreadLocal() {
+    public static <T> ThreadLocal<T> createThreadLocal() {
         ThreadLocal<T> tl = new ThreadLocal<>();
         locals.add(tl);
         return tl;
