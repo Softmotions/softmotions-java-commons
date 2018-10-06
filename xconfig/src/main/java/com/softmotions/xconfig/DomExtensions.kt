@@ -25,6 +25,18 @@ fun Node.detach(): Boolean {
     }
 }
 
+fun <T> Node.set(v: T) {
+    if (this is Element) {
+        this.set(v)
+    } else if (this is Attr) {
+        when (v) {
+            null -> detach()
+            is Attr -> value = v.value
+            else -> value = v.toString()
+        }
+    }
+}
+
 fun <T> Element.set(v: T) {
     when (v) {
         is Attr ->

@@ -255,13 +255,29 @@ constructor(private val mUrl: URL) {
             nodesBy(expr, type, false, true).firstOrNull()?.text()
         }
 
-        override operator fun <T> set(expr: String, v: T) = lock.write {
+        override operator fun <T> set(expr: String, v: T): Unit = lock.write {
+            var path = expr
+            val idx = expr.indexOf("[@")
+            val attrName = if (expr.endsWith(']') && idx != -1) {
+                path = expr.substring(0, idx)
+                expr.substring(idx + 2, expr.length - 1)
+            } else {
+                null
+            }
             var n = node
-            StringUtils.split(expr, '.').forEach { s ->
+            StringUtils.split(path, '.').forEach { s ->
                 n = n.firstChildElement { it.nodeName == s }
                         ?: n.appendChild(document.createElementNS(n.namespaceURI, s)) as Element
             }
-            n.set(v)
+            if (attrName != null) {
+                when (v) {
+                    null -> n.removeAttribute(attrName)
+                    is Attr -> n.setAttribute(attrName, v.value)
+                    else -> n.setAttribute(attrName, v.toString())
+                }
+            } else {
+                n.set(v)
+            }
             if (mAutosave) {
                 save()
             }
