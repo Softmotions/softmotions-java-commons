@@ -184,7 +184,7 @@ constructor(private val mUrl: URL) {
             return sb.toString()
         }
 
-        private fun nodesByPattern(expr: String, skipMaster: Boolean): List<Node> {
+        private fun nodesByPattern(expr: String, skipMaster: Boolean, first: Boolean): List<Node> {
             if (expr == "." || expr.isBlank()) {
                 return listOf(node)
             }
@@ -192,15 +192,17 @@ constructor(private val mUrl: URL) {
             expr.split('.').forEach { s ->
                 n = n.firstChildElement { it.nodeName == s }
                         ?: return if (parent == null && master != null && !skipMaster) {
-                    master.nodesByPattern(expr, false)
+                    master.nodesByPattern(expr, false, first)
                 } else emptyList()
             }
             return ArrayList<Node>().apply {
                 add(n)
-                var ns = n.nextSibling
-                while (ns?.nodeName == n.nodeName) {
-                    add(ns)
-                    ns = ns.nextSibling
+                if (!first) {
+                    var ns = n.nextSibling
+                    while (ns != null) {
+                        if (ns is Element && ns.nodeName == n.nodeName) add(ns)
+                        ns = ns.nextSibling
+                    }
                 }
             }
         }
@@ -217,17 +219,13 @@ constructor(private val mUrl: URL) {
             } ?: emptyList()
         }
 
-        private fun nodesBy(expr: String, type: XCPath, skipMaster: Boolean): List<Node> = when (type) {
-            XCPath.PATTERN -> nodesByPattern(expr, skipMaster)
+        private fun nodesBy(expr: String, type: XCPath, skipMaster: Boolean, first: Boolean): List<Node> = when (type) {
+            XCPath.PATTERN -> nodesByPattern(expr, skipMaster, first)
             XCPath.XPATH -> nodesByXPath(expr, skipMaster)
         }
 
         override operator fun get(expr: String, type: XCPath): String? = lock.read {
-            val nodes = nodesBy(expr, type, false)
-            if (nodes.size > 1) {
-                XConfigException.throwMatchedMoreThanOneElement()
-            }
-            nodes.firstOrNull()?.text()
+            nodesBy(expr, type, false, true).firstOrNull()?.text()
         }
 
         override operator fun <T> set(expr: String, v: T) = lock.write {
@@ -258,7 +256,7 @@ constructor(private val mUrl: URL) {
         }
 
         override fun setAttrs(expr: String, vararg pairs: Pair<String, Any>) = lock.write {
-            setNodesAttrs(nodesByPattern(expr, true), pairs)
+            setNodesAttrs(nodesByPattern(expr, true, false), pairs)
         }
 
         override fun setAttrsXPath(expr: String, vararg pairs: Pair<String, Any>) = lock.write {
@@ -272,15 +270,15 @@ constructor(private val mUrl: URL) {
         }
 
         override fun has(expr: String, type: XCPath): Boolean = lock.read {
-            !nodesBy(expr, type, false).isEmpty()
+            !nodesBy(expr, type, false, true).isEmpty()
         }
 
         override fun nodes(expr: String, type: XCPath): List<Node> = lock.read {
-            nodesBy(expr, type, false)
+            nodesBy(expr, type, false, false)
         }
 
         override fun detach(expr: String, type: XCPath) = lock.write {
-            val nodes = nodesBy(expr, type, true)
+            val nodes = nodesBy(expr, type, true, false)
             if (nodes.isEmpty()) {
                 return
             }
@@ -303,7 +301,7 @@ constructor(private val mUrl: URL) {
         }
 
         override fun sub(expr: String, type: XCPath): List<XConfig> = lock.read {
-            nodesBy(expr, type, false)
+            nodesBy(expr, type, false, false)
                     .filter { it is Element }
                     .map { AConfigImpl(this, it as Element) }
         }

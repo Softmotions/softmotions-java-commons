@@ -73,4 +73,15 @@ class TestXConfig {
 
         log.info("File: ${f.readText()}")
     }
+
+    @Test
+    fun testListConfig() {
+        val url = javaClass.getResource("list-config.xml")
+        val cfg = XConfigBuilder(url).create()
+        Assert.assertEquals(cfg.text("foo.bar"), "one")
+        val lp = cfg.listPattern("foo.bar")
+        Assert.assertEquals(lp.size, 2)
+        Assert.assertEquals(lp[0], "one")
+        Assert.assertEquals(lp[1], "two")
+    }
 }
