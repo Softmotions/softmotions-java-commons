@@ -45,6 +45,10 @@ constructor(private val mUrl: URL) {
         }
     }
 
+    constructor(file: File) : this(file.toURI())
+
+    constructor(uri: URI) : this(uri.toURL())
+
     private var mAutosave = false
 
     private var mReadOnly = true
