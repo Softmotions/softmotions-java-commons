@@ -206,7 +206,7 @@ constructor(private val mUrl: URL) {
                 }
             }
             var n = node
-            path.split('.').forEach { s ->
+            StringUtils.split(path, '.').forEach { s ->
                 n = n.firstChildElement { it.nodeName == s }
                         ?: return if (parent == null && master != null && !skipMaster) {
                     master.nodesByPattern(path, false, first)
@@ -257,7 +257,7 @@ constructor(private val mUrl: URL) {
 
         override operator fun <T> set(expr: String, v: T) = lock.write {
             var n = node
-            expr.split('.').forEach { s ->
+            StringUtils.split(expr, '.').forEach { s ->
                 n = n.firstChildElement { it.nodeName == s }
                         ?: n.appendChild(document.createElementNS(n.namespaceURI, s)) as Element
             }
