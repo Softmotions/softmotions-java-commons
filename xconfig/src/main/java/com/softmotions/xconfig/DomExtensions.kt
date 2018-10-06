@@ -1,5 +1,6 @@
 package com.softmotions.xconfig
 
+import org.apache.commons.lang3.StringUtils
 import org.w3c.dom.Attr
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -38,6 +39,6 @@ fun <T> Element.set(v: T) {
 }
 
 fun Node.text(): String? = when (this) {
-    is Element -> textContent?.trim()
-    else -> nodeValue?.trim()
+    is Element -> StringUtils.trimToNull(textContent)
+    else -> StringUtils.trimToNull(nodeValue)
 }
