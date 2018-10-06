@@ -22,6 +22,7 @@ import org.apache.velocity.runtime.log.LogChute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.softmotions.commons.ThreadUtils;
 import com.softmotions.commons.cont.CollectionUtils;
 import com.softmotions.commons.lifecycle.Start;
 import com.softmotions.weboot.i18n.I18n;
@@ -42,8 +43,7 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
 
     private String templatesBase;
 
-    private static final ThreadLocal<Boolean> SUPPRESS_NOTFOUND_ERROR = new ThreadLocal<>();
-
+    private static final ThreadLocal<Boolean> SUPPRESS_NOTFOUND_ERROR = ThreadUtils.createThreadLocal();
 
     @Inject
     public TemplateServiceImpl(I18n i18n, XConfig xcfg) {

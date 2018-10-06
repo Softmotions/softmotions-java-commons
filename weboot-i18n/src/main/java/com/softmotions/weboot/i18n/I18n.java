@@ -25,6 +25,7 @@ import org.w3c.dom.Node;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.softmotions.commons.ThreadUtils;
 import com.softmotions.xconfig.XConfig;
 
 /**
@@ -42,7 +43,7 @@ public class I18n {
 
     public static final String REQ_LOCALE_PARAM_NAME = "lang";
 
-    private static final ThreadLocal<Map<String, SimpleDateFormat>> LOCAL_SDF_CACHE = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, SimpleDateFormat>> LOCAL_SDF_CACHE = ThreadUtils.createThreadLocal();
 
     @SuppressWarnings("StaticCollection")
     private static final Map<String, String[]> LNG_MONTHS = new HashMap<>();

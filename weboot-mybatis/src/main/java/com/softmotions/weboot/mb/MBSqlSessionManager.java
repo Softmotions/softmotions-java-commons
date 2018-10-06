@@ -1,5 +1,13 @@
 package com.softmotions.weboot.mb;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.reflection.ExceptionUtil;
@@ -14,13 +22,7 @@ import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.softmotions.commons.ThreadUtils;
 
 /**
  * @author Adamansky Anton (adamansky@gmail.com)
@@ -30,8 +32,8 @@ public class MBSqlSessionManager implements SqlSessionFactory, SqlSession {
     private static final Logger log = LoggerFactory.getLogger(MBSqlSessionManager.class);
     private final SqlSessionFactory sqlSessionFactory;
     private final SqlSession sqlSessionProxy;
-    private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
-    private final ThreadLocal<ArrayList<MBSqlSessionListener>> localSqlSessionListeners = new ThreadLocal<>();
+    private final ThreadLocal<SqlSession> localSqlSession = ThreadUtils.createThreadLocal();
+    private final ThreadLocal<ArrayList<MBSqlSessionListener>> localSqlSessionListeners = ThreadUtils.createThreadLocal();
 
 
     public static MBSqlSessionManager newInstance(SqlSessionFactory sqlSessionFactory) {

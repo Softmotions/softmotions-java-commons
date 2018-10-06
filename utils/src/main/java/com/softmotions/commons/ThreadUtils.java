@@ -16,6 +16,12 @@ public class ThreadUtils {
         return tl;
     }
 
+    public static <T> ThreadLocal<T> createInheritableThreadLocal() {
+        ThreadLocal<T> tl = new InheritableThreadLocal<>();
+        locals.add(tl);
+        return tl;
+    }
+
     public static void cleanThreadLocals() {
         for (ThreadLocal tl : locals) {
             tl.remove();

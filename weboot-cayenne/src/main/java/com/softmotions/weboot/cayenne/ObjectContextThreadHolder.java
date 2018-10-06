@@ -6,6 +6,8 @@ import javax.annotation.Nullable;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 
+import com.softmotions.commons.ThreadUtils;
+
 /**
  * Placeholder for the current thread object context.
  *
@@ -13,7 +15,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
  */
 public class ObjectContextThreadHolder {
 
-    static final ThreadLocal<ObjectContext> contextStore = new InheritableThreadLocal<>();
+    static final ThreadLocal<ObjectContext> contextStore = ThreadUtils.createInheritableThreadLocal();
 
     private ObjectContextThreadHolder() {
     }
