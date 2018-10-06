@@ -7,7 +7,7 @@ class XConfigException(msg: String) : RuntimeException(msg) {
 
     companion object {
 
-        fun throwMissingRequiredConfigurationParameterer(name: String): Nothing {
+        fun throwMissingParameter(name: String): Nothing {
             throw XConfigException("Missing required configuration parameter: ${name}")
         }
 
