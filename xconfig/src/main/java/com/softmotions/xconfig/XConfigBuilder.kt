@@ -185,22 +185,45 @@ constructor(private val mUrl: URL) {
         }
 
         private fun nodesByPattern(expr: String, skipMaster: Boolean, first: Boolean): List<Node> {
-            if (expr == "." || expr.isBlank()) {
-                return listOf(node)
+            var path = expr
+            val idx = expr.indexOf("[@")
+            val attrName = if (expr.endsWith(']') && idx != -1) {
+                path = expr.substring(0, idx)
+                expr.substring(idx + 2, expr.length - 1)
+            } else {
+                null
+            }
+            if (path == "." || path.isBlank()) {
+                return if (attrName != null) {
+                    val an = node.getAttributeNode(attrName);
+                    if (an != null) listOf(an) else emptyList()
+                } else {
+                    listOf(node)
+                }
             }
             var n = node
-            expr.split('.').forEach { s ->
+            path.split('.').forEach { s ->
                 n = n.firstChildElement { it.nodeName == s }
                         ?: return if (parent == null && master != null && !skipMaster) {
-                    master.nodesByPattern(expr, false, first)
+                    master.nodesByPattern(path, false, first)
                 } else emptyList()
             }
             return ArrayList<Node>().apply {
-                add(n)
+                if (attrName != null) {
+                    n.getAttributeNode(attrName)?.also { add(it) }
+                } else {
+                    add(n)
+                }
                 if (!first) {
                     var ns = n.nextSibling
                     while (ns != null) {
-                        if (ns is Element && ns.nodeName == n.nodeName) add(ns)
+                        if (ns is Element && ns.nodeName == n.nodeName) {
+                            if (attrName != null) {
+                                ns.getAttributeNode(attrName)?.also { add(it) }
+                            } else {
+                                add(ns)
+                            }
+                        }
                         ns = ns.nextSibling
                     }
                 }

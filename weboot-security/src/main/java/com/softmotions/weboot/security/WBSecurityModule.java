@@ -167,7 +167,7 @@ public class WBSecurityModule extends AbstractModule implements WBServletInitial
                 // XMLDB
                 String xmldb = xcfg.text("security.xml-user-database");
                 if (xmldb != null) {
-                    String placeTo = xcfg.textXPath("security/xml-user-database/@placeTo", null);
+                    String placeTo = xcfg.text("security.xml-user-database[@placeTo]");
                     if (placeTo != null) {
                         File placeToFile = new File(placeTo);
                         if (placeToFile.exists()) {

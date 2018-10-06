@@ -46,8 +46,10 @@ class TestXConfig {
 
         val sub3 = cfg.sub("foo.bar").first()
         Assert.assertEquals(sub3.textXPath("@attr"), "attrval")
-
         Assert.assertEquals(sub3.text("."), "baz")
+        Assert.assertEquals(cfg.text("foo.bar[@attr]"), "attrval")
+        Assert.assertEquals(sub3.text("[@two]"), "2")
+        
         log.info("File: ${f.readText()}")
     }
 
