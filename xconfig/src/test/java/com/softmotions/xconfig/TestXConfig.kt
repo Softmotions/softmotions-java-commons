@@ -9,10 +9,10 @@ import java.nio.file.Files
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
 @Test
-class TestAConfig {
+class TestXConfig {
 
     companion object {
-        val log = LoggerFactory.getLogger(TestAConfig::class.java)
+        val log = LoggerFactory.getLogger(TestXConfig::class.java)
     }
 
     @Test
@@ -44,6 +44,9 @@ class TestAConfig {
 
         cfg.setAttrsXPath("foo/bar|foo/bar2", "one" to 1, "two" to 2)
 
+        val sub3 = cfg.sub("foo.bar").first()
+
+        Assert.assertEquals(sub3.textXPath("@attr"), "attrval")
         log.info("File: ${f.readText()}")
     }
 
