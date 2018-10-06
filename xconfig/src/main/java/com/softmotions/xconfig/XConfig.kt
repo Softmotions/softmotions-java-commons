@@ -71,11 +71,11 @@ interface XConfig {
     @Contract("_, !null -> !null")
     fun textPattern(expr: String, dval: String? = null): String?
 
-    fun arr(expr: String, type: XCPath = XCPath.PATTERN): Array<String>
+    fun list(expr: String, type: XCPath = XCPath.PATTERN): List<String>
 
-    fun arrPattern(expr: String): Array<String>
+    fun listPattern(expr: String): List<String>
 
-    fun arrXPath(expr: String): Array<String>
+    fun listXPath(expr: String): List<String>
 
     @Contract("_, !null -> !null")
     fun bool(expr: String, dval: Boolean? = null, type: XCPath = XCPath.PATTERN): Boolean

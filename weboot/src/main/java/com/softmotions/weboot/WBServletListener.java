@@ -192,7 +192,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         XConfig xcfg = env.xcfg();
         for (XConfig cfg : xcfg.subPattern("cache-headers-groups.cache-group")) {
             String name = cfg.textPattern("name", "");
-            String[] patterns = cfg.arrPattern("patterns");
+            String[] patterns = StringUtils.split(cfg.textPattern("patterns", ""), ',');
             String prefix = env.getAppPrefix();
             for (int i = 0; i < patterns.length; ++i) {
                 String p = patterns[i].trim();
@@ -257,7 +257,7 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
         fr.addMappingForUrlPatterns(null, false, env.getAppPrefix() + "/*");
         env.xcfg().subPattern("jar-web-resources.resource").forEach(rcfg -> {
             String pp = rcfg.text("path-prefix");
-            String[] opts = rcfg.arrPattern("options");
+            String[] opts = StringUtils.split(rcfg.textPattern("options", ""), ',');
             if (pp != null && opts.length > 0) {
                 fr.setInitParameter(pp, ArrayUtils.stringJoin(opts, ","));
             }

@@ -308,16 +308,18 @@ constructor(private val mUrl: URL) {
                     .map { AConfigImpl(this, it as Element) }
         }
 
-        override fun arr(expr: String, type: XCPath): Array<String> {
-            val text = text(expr, "", type)
-            return if (text.isNullOrBlank()) emptyArray() else text!!.split(',').map { it.trim() }.toTypedArray()
+        override fun list(expr: String, type: XCPath): List<String> {
+            return nodes(expr, type).asSequence()
+                    .map { it.text() }
+                    .filterNotNull()
+                    .toList()
         }
 
         override fun <T> setPattern(expr: String, v: T) = set(expr, v)
 
-        override fun arrXPath(expr: String): Array<String> = arr(expr, XCPath.XPATH)
+        override fun listXPath(expr: String): List<String> = list(expr, XCPath.XPATH)
 
-        override fun arrPattern(expr: String): Array<String> = arr(expr, XCPath.PATTERN)
+        override fun listPattern(expr: String): List<String> = list(expr, XCPath.PATTERN)
 
         override fun subXPath(expr: String): List<XConfig> = sub(expr, XCPath.XPATH)
 

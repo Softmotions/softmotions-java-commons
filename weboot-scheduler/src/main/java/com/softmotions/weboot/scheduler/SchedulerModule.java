@@ -79,8 +79,8 @@ public class SchedulerModule extends AbstractModule {
                     Map<String, String> namedTasks = new HashMap<>();
 
                     //
-                    for (String task : cfg.xcfg().arrPattern("scheduler.named-tasks")) {
-                        String[] s = task.split("=", 2);
+                    for (String task : StringUtils.split(cfg.xcfg().textPattern("scheduler.named-tasks", ""), ',')) {
+                        String[] s = task.trim().split("=", 2);
                         if (s.length != 2) {
                             log.warn("Incorrect format for a named task, skipping: {}, {}", task, s.length);
                             continue;

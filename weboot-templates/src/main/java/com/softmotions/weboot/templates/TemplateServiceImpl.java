@@ -54,10 +54,9 @@ public class TemplateServiceImpl implements TemplateService, LogChute {
         }
 
         List<String> directives =
-                Arrays.stream(xcfg.arrPattern("templates.directives"))
+                Arrays.stream(StringUtils.split(xcfg.textPattern("templates.directives", ""), ','))
                         .map(String::valueOf)
                         .collect(Collectors.toList());
-
         String loader = xcfg.text("templates.loader");
 
         ClassLoader old = Thread.currentThread().getContextClassLoader();
