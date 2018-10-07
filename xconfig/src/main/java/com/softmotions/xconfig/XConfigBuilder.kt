@@ -130,9 +130,9 @@ constructor(private val mUrl: URL) {
 
         private val xpf = XPathFactory.newInstance()
 
-        private val lock: ReentrantReadWriteLock = parent?.lock ?: ReentrantReadWriteLock()
-
         private var file: File? = if (mUrl.protocol == "file") File(mUrl.toURI()) else null
+
+        override val lock: ReentrantReadWriteLock = parent?.lock ?: ReentrantReadWriteLock()
 
         override val uri: URI = mUrl.toURI()
 

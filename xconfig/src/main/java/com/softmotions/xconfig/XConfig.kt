@@ -6,6 +6,7 @@ import org.w3c.dom.Document
 import org.w3c.dom.Node
 import java.io.Writer
 import java.net.URI
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 /**
  * Yet another configuration
@@ -19,6 +20,8 @@ interface XConfig {
     val document: Document
 
     val parent: XConfig?
+
+    val lock: ReentrantReadWriteLock
 
     /**
      * List of child configs for wich
