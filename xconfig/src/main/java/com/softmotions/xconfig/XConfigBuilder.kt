@@ -398,6 +398,14 @@ constructor(private val mUrl: URL) {
 
         override fun number(expr: String): Long? = number(expr, null, XCPath.PATTERN)
 
+        override fun int(expr: String, dval: Int?, type: XCPath): Int? = number(expr, dval?.toLong(), type)?.toInt()
+
+        override fun int(expr: String): Int? = int(expr, null, XCPath.PATTERN)
+
+        override fun intXPath(expr: String, dval: Int?): Int? = int(expr, dval, XCPath.XPATH)
+
+        override fun intPattern(expr: String, dval: Int?): Int? = int(expr, dval, XCPath.PATTERN)
+
         override fun hasPattern(expr: String): Boolean = has(expr, XCPath.PATTERN)
 
         private fun openOutputStream(): OutputStream {

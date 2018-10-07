@@ -105,6 +105,17 @@ interface XConfig {
     @Contract("_, !null -> !null")
     fun numberPattern(expr: String, dval: Long? = null): Long?
 
+    @Contract("_, !null -> !null")
+    fun int(expr: String, dval: Int? = null, type: XCPath = XCPath.PATTERN): Int?
+
+    fun int(expr: String): Int?
+
+    @Contract("_, !null -> !null")
+    fun intXPath(expr: String, dval: Int? = null): Int?
+
+    @Contract("_, !null -> !null")
+    fun intPattern(expr: String, dval: Int? = null): Int?
+
     fun <T> batch(action: (cfg: XConfig) -> T): T
 
     fun writeTo(out: Writer)
