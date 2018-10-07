@@ -49,9 +49,12 @@ class TestXConfig {
         Assert.assertEquals(sub3.text("."), "baz")
         Assert.assertEquals(cfg.text("foo.bar[@attr]"), "attrval")
         Assert.assertEquals(sub3.text("[@two]"), "2")
-
+        sub3[""] = sub3.document.createElement("subsub3").also {
+            it.textContent = "zoo"
+        }
         cfg["foo.bar[@attr]"] = "val2"
         Assert.assertEquals(cfg.text("foo.bar[@attr]"), "val2")
+        Assert.assertEquals(cfg.text("foo.bar.subsub3"), "zoo")
 
         log.info("File: ${f.readText()}")
     }
