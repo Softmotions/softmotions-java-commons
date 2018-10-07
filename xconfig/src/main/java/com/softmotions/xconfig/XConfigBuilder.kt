@@ -265,9 +265,11 @@ constructor(private val mUrl: URL) {
                 null
             }
             var n = node
-            StringUtils.split(path, '.').forEach { s ->
-                n = n.firstChildElement { it.nodeName == s }
-                        ?: n.appendChild(document.createElementNS(n.namespaceURI, s)) as Element
+            if (path != "." && !path.isBlank()) {
+                StringUtils.split(path, '.').forEach { s ->
+                    n = n.firstChildElement { it.nodeName == s }
+                            ?: n.appendChild(document.createElementNS(n.namespaceURI, s)) as Element
+                }
             }
             if (attrName != null) {
                 when (v) {
