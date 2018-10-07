@@ -3,6 +3,7 @@ package com.softmotions.xconfig
 import org.jetbrains.annotations.Contract
 import org.w3c.dom.Attr
 import org.w3c.dom.Document
+import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.io.Writer
 import java.net.URI
@@ -46,6 +47,8 @@ interface XConfig {
     fun subPattern(expr: String): List<XConfig>
 
     fun subXPath(expr: String): List<XConfig>
+
+    fun sub(el: Element): XConfig
 
     fun has(expr: String, type: XCPath = XCPath.PATTERN): Boolean
 

@@ -55,7 +55,7 @@ constructor(private val mUrl: URL) {
 
     private var mSubstitutor: Function1<String, String?>? = null
 
-    private var mMaster: AConfigImpl? = null
+    private var mMaster: XConfigImpl? = null
 
     fun substitutor(substitutor: Function1<String, String?>): XConfigBuilder {
         mSubstitutor = substitutor
@@ -63,7 +63,7 @@ constructor(private val mUrl: URL) {
     }
 
     fun master(master: XConfig): XConfigBuilder {
-        mMaster = master as AConfigImpl
+        mMaster = master as XConfigImpl
         return this
     }
 
@@ -114,14 +114,14 @@ constructor(private val mUrl: URL) {
                 mReadOnly = true
             }
         }
-        return AConfigImpl().also {
+        return XConfigImpl().also {
             mSubstitutor = null
         }
     }
 
-    internal inner class AConfigImpl
+    internal inner class XConfigImpl
     internal constructor(
-            override val parent: AConfigImpl? = null,
+            override val parent: XConfigImpl? = null,
             contextNode: Element? = null) : XConfig {
 
         private var noSave = false
@@ -346,7 +346,11 @@ constructor(private val mUrl: URL) {
         override fun sub(expr: String, type: XCPath): List<XConfig> = lock.read {
             nodesBy(expr, type, false, false)
                     .filter { it is Element }
-                    .map { AConfigImpl(this, it as Element) }
+                    .map { XConfigImpl(this, it as Element) }
+        }
+
+        override fun sub(el: Element): XConfig {
+            return XConfigImpl(this, el)
         }
 
         override fun list(expr: String, type: XCPath): List<String> {
