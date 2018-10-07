@@ -145,7 +145,8 @@ constructor(private val mUrl: URL) {
                     if (log.isDebugEnabled) {
                         log.debug("Preprocessed config:\n{}", data)
                     }
-                    f.newDocumentBuilder().parse(InputSource(StringReader(data)))
+                    f.newDocumentBuilder().parse(InputSource(StringReader(
+                            data.lineSequence().filter { l -> !l.isBlank() }.joinToString(""))))
                 }
             } else {
                 mUrl.openStream().buffered().use {
