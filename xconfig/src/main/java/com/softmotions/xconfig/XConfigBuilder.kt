@@ -145,8 +145,7 @@ constructor(private val mUrl: URL) {
                     if (log.isDebugEnabled) {
                         log.debug("Preprocessed config:\n{}", data)
                     }
-                    f.newDocumentBuilder().parse(InputSource(StringReader(
-                            data.lineSequence().filter { l -> !l.isBlank() }.joinToString(""))))
+                    f.newDocumentBuilder().parse(InputSource(StringReader(data)))
                 }
             } else {
                 mUrl.openStream().buffered().use {
@@ -430,9 +429,9 @@ constructor(private val mUrl: URL) {
 
         private fun createWriteTransformer(): Transformer {
             val t = TransformerFactory.newInstance().newTransformer()
-            t.setOutputProperty(OutputKeys.INDENT, "yes")
+            //t.setOutputProperty(OutputKeys.INDENT, "yes")
+            //t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
             t.setOutputProperty(OutputKeys.ENCODING, "UTF-8")
-            t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
             return t
         }
 
