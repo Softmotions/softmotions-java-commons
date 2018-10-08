@@ -11,6 +11,11 @@ class XConfigException(msg: String) : RuntimeException(msg) {
             throw XConfigException("Missing required configuration parameter: ${name}")
         }
 
+        fun throwMissingParameter(xcfg: XConfig, name: String): Nothing {
+            // todo
+            throw XConfigException("Missing required configuration parameter: ${name}")
+        }
+
         fun throwConfigurationSubstitutorCannotbetSetForWritableConfig(): Nothing {
             throw XConfigException("Configuration substitutor cannot be set for writable config")
         }
