@@ -255,8 +255,14 @@ constructor(private val mUrl: URL) {
             XCPath.XPATH -> nodesByXPath(expr, skipMaster)
         }
 
-        override operator fun get(expr: String, type: XCPath): String? = lock.read {
-            nodesBy(expr, type, false, true).firstOrNull()?.text()
+        override operator fun get(expr: String, require: Boolean, type: XCPath): String? = lock.read {
+            nodesBy(expr, type, false, true).firstOrNull()?.text() ?: kotlin.run {
+                if (require) {
+                    XConfigException.throwMissingParameter(expr)
+                } else {
+                    null
+                }
+            }
         }
 
         override operator fun <T> set(expr: String, v: T): Unit = lock.write {
@@ -338,7 +344,7 @@ constructor(private val mUrl: URL) {
         }
 
         override fun text(expr: String, dval: String?, type: XCPath): String? = lock.read {
-            get(expr, type) ?: dval
+            get(expr, false, type) ?: dval
         }
 
         override fun bool(expr: String, dval: Boolean?, type: XCPath): Boolean = lock.read {

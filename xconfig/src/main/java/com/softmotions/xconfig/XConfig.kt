@@ -32,7 +32,8 @@ interface XConfig {
 
     fun throwMissing(name: String): Nothing
 
-    operator fun get(expr: String, type: XCPath = XCPath.PATTERN): String?
+    @Contract("_, true -> !null")
+    operator fun get(expr: String, require: Boolean = false, type: XCPath = XCPath.PATTERN): String?
 
     operator fun <T> set(expr: String, v: T)
 
