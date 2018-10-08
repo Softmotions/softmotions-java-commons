@@ -30,7 +30,7 @@ interface XConfig {
      */
     val slaves: List<XConfig>
 
-    fun throwMissingParameter(name: String): Nothing
+    fun throwMissing(name: String): Nothing
 
     operator fun get(expr: String, type: XCPath = XCPath.PATTERN): String?
 

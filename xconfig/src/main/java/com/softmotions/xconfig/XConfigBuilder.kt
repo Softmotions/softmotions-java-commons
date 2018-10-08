@@ -156,7 +156,7 @@ constructor(private val mUrl: URL) {
 
         override val slaves = CopyOnWriteArrayList<XConfig>()
 
-        override fun throwMissingParameter(name: String): Nothing {
+        override fun throwMissing(name: String): Nothing {
             XConfigException.throwMissingParameter(this, name)
         }
 
