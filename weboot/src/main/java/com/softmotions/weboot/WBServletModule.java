@@ -83,6 +83,13 @@ public abstract class WBServletModule<C extends WBConfiguration> extends Servlet
                             log.error("", e);
                             throw new RuntimeException(e);
                         }
+                    } else if (ptypes[0].isAssignableFrom(XConfig.class)) {
+                        try {
+                            minst = c.newInstance(cfg.xcfg());
+                        } catch (InvocationTargetException e) {
+                            log.error("", e);
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
                 if (minst == null) {
