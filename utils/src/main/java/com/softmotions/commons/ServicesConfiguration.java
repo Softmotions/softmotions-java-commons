@@ -83,11 +83,9 @@ public class ServicesConfiguration implements Module {
 
     protected void load(URL cfgUrl) {
         log.info("Using configuration: {}", cfgUrl);
-        Level oldLevel = null;
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
             LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
             ch.qos.logback.classic.Logger rl = ctx.getLogger("ROOT");
-            oldLevel = rl.getLevel();
             rl.setLevel(Level.INFO);
         }
         try {
@@ -99,16 +97,10 @@ public class ServicesConfiguration implements Module {
                     .create();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            if (oldLevel != null) {
-                LoggerContext ctx = (LoggerContext) LoggerFactory.getILoggerFactory();
-                ctx.getLogger("ROOT").setLevel(oldLevel);
-            }
         }
         init(cfgUrl);
     }
-
-
+    
     @Nullable
     protected String substituteConfigKey(String key) {
         switch (key) {

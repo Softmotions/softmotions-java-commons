@@ -147,6 +147,8 @@ public abstract class WBServletListener extends GuiceServletContextListener impl
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
+            
             log.error("", e);
             throw new RuntimeException(e);
         }

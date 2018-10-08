@@ -147,6 +147,9 @@ public class WBLiquibaseModule extends AbstractModule {
                     log.info("Executing Liquibase update");
                     liquibase.update("");
                 }
+            } catch (Exception e) {
+                log.error("", e);
+                throw new RuntimeException(e);
             }
         }
     }
