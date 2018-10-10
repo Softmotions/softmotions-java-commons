@@ -114,7 +114,8 @@ class BTCTestRunner(datadir: File? = null,
     fun send(address: String, amount: Double) {
         val m = if (mode != null) "-${mode}" else ""
         with(cliRunner) {
-            cmd("bitcoin-cli ${m} -datadir=${datadir} sendtoaddress ${address} ${amount}") { line ->
+            cmd("bitcoin-cli ${m} -datadir=${datadir} sendtoaddress ${address} ${amount}",
+                failOnTimeout = true, failOnExitCode = true) { line ->
                 outputLine(line)
             }.waitFor(TimeSpec.ONE_MIN)
         }
