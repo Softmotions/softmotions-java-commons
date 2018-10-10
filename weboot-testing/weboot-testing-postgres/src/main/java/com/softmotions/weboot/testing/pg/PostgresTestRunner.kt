@@ -1,12 +1,12 @@
 package com.softmotions.weboot.testing.pg
 
 import com.softmotions.kotlin.TimeSpec
+import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toSeconds
 import com.softmotions.runner.ProcessRun
 import com.softmotions.runner.ProcessRunner
 import com.softmotions.runner.ProcessRunners
 import com.softmotions.runner.UnixSignal
-import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -14,22 +14,24 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 
 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-open class PostgresTestRunner(private val dbName: String,
-                              private val dbPort: Int = 9231,
-                              private val dbBin: String = "/usr/lib/postgresql/9.6/bin",
-                              private val dbDirPrefix: String =  "/dev/shm") : DatabaseTestRunner {
+class PostgresTestRunner(private val dbName: String,
+                         private val dbPort: Int = 9231,
+                         private val dbBin: String = "/usr/lib/postgresql/10/bin",
+                         private val dbDirPrefix: String = "/dev/shm") : DatabaseTestRunner {
 
-    private val log = LoggerFactory.getLogger(PostgresTestRunner::class.java)
+    companion object {
+        private val log = loggerFor()
+    }
 
     private val dbRunner: ProcessRunner = ProcessRunners.serial(verbose = true)
 
     private var dbDir: String? = null
 
-    protected fun outputLine(line: String): Unit {
+    private fun outputLine(line: String) {
         log.info(line)
     }
 
-    protected fun checkExitCode(pr: ProcessRun) {
+    private fun checkExitCode(pr: ProcessRun) {
         val ecode = pr.process.exitValue()
         if (ecode != 0) {
             throw RuntimeException("Process failed with exit code: $ecode command: ${pr.command}")
@@ -51,17 +53,17 @@ open class PostgresTestRunner(private val dbName: String,
         with(dbRunner) {
             cmd("mkdir -p $dbDir")
             cmd("$dbBin/initdb" +
-                    " --lc-messages=C" +
-                    " --lc-collate=$locale --lc-ctype=$locale" +
-                    " --lc-monetary=$locale --lc-numeric=$locale --lc-time=$locale" +
-                    " -D $dbDir",
-                    env = mapOf("LC_ALL" to "C")) {
+                        " --lc-messages=C" +
+                        " --lc-collate=$locale --lc-ctype=$locale" +
+                        " --lc-monetary=$locale --lc-numeric=$locale --lc-time=$locale" +
+                        " -D $dbDir",
+                env = mapOf("LC_ALL" to "C")) {
                 outputLine(it)
             }.waitFor {
                 checkExitCode(it)
             }
             cmd("$dbBin/postgres -D $dbDir -p $dbPort -o \"-c fsync=off -c synchronous_commit=off -c full_page_writes=off\"",
-                    failOnTimeout = true) {
+                failOnTimeout = true) {
                 outputLine(it)
                 if (it.trim().contains("database system is ready to accept connections")) {
                     synchronized(started) {

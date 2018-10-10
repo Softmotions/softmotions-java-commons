@@ -14,6 +14,7 @@
         <module>weboot-testing-jetty</module>
         <module>weboot-testing-tomcat</module>
         <module>weboot-testing-postgres</module>
+        <module>weboot-testing-btc</module>
     </modules>
     <build>
         <plugins>
