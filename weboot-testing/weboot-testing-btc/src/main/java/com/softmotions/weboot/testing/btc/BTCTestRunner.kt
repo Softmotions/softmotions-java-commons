@@ -6,6 +6,7 @@ import com.softmotions.runner.ProcessRunners
 import com.softmotions.runner.UnixSignal
 import org.apache.commons.io.FileUtils
 import java.io.File
+import java.io.IOException
 import java.nio.file.Paths
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * @author Adamansky Anton (adamansky@softmotions.com)
  */
-class BTCTestRunner(dataDir: File? = null,
+class BTCTestRunner(datadir: File? = null,
                     private val cleanupDataDir: Boolean = false,
                     private val extraArgs: List<String> = emptyList(),
                     private val mode: String? = "regtest") {
@@ -23,7 +24,7 @@ class BTCTestRunner(dataDir: File? = null,
         private val log = loggerFor()
     }
 
-    private val dataDir = dataDir ?: kotlin.run {
+    private val datadir = datadir ?: kotlin.run {
         Paths.get(System.getProperty("user.home"), ".bitcoin", mode).toFile()
     }
 
@@ -39,18 +40,23 @@ class BTCTestRunner(dataDir: File? = null,
         if (state.compareAndExchange(false, true)) {
             throw IllegalStateException("Already in started state")
         }
-        log.info("Using dataDir: ${dataDir}")
+        log.info("Using datadir: ${datadir}")
         try {
-            val latch = CountDownLatch(1)
             if (cleanupDataDir) {
-                if (dataDir.exists()) {
-                    FileUtils.deleteDirectory(dataDir)
+                if (datadir.exists()) {
+                    FileUtils.deleteDirectory(datadir)
                 }
             }
+            if (!datadir.isDirectory) {
+                log.info("Creating directory: ${datadir}")
+                datadir.mkdirs()
+                if (!datadir.isDirectory) {
+                    throw IOException("Cannot create directory: ${datadir}")
+                }
+            }
+            val latch = CountDownLatch(1)
             val m = if (mode != null) "-${mode}" else ""
-            runner.cmd("bitcoind ${m} ${extraArgs.joinToString(" ")}",
-                       failOnExitCode = true,
-                       failOnTimeout = true) { line ->
+            runner.cmd("bitcoind ${m} -datadir=${datadir} ${extraArgs.joinToString(" ")}") { line ->
                 outputLine(line)
                 if (line.contains("opencon thread start")) {
                     latch.countDown()
