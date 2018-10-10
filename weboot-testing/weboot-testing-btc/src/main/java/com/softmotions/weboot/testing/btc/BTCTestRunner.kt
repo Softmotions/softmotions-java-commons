@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class BTCTestRunner(datadir: File? = null,
                     private val cleanupDataDir: Boolean = false,
                     private val extraArgs: List<String> = emptyList(),
-                    private val mode: String? = "regtest") {
+                    mode: String? = "regtest") {
 
     companion object {
         private val log = loggerFor()
@@ -29,6 +29,8 @@ class BTCTestRunner(datadir: File? = null,
     private val datadir = datadir ?: kotlin.run {
         Paths.get(System.getProperty("user.home"), ".bitcoin", mode).toFile()
     }
+
+    private val mode = if (mode != null) "-${mode}" else ""
 
     private val state = AtomicBoolean(false)
 
@@ -61,8 +63,7 @@ class BTCTestRunner(datadir: File? = null,
                 }
             }
             val latch = CountDownLatch(1)
-            val m = if (mode != null) "-${mode}" else ""
-            runner.cmd("bitcoind ${m} -datadir=${datadir} ${extraArgs.joinToString(" ")}") { line ->
+            runner.cmd("bitcoind ${mode} -datadir=${datadir} ${extraArgs.joinToString(" ")}") { line ->
                 outputLine(line)
                 if (line.contains("opencon thread start")) {
                     latch.countDown()
@@ -92,12 +93,11 @@ class BTCTestRunner(datadir: File? = null,
     }
 
     fun generate(nblocks: Int, address: String? = null): JsonNode {
-        val m = if (mode != null) "-${mode}" else ""
         return with(cliRunner) {
             val exec = if (address == null) {
-                "bitcoin-cli ${m} -datadir=${datadir} generate ${nblocks}"
+                "bitcoin-cli ${mode} -datadir=${datadir} generate ${nblocks}"
             } else {
-                "bitcoin-cli ${m} -datadir=${datadir} generatetoaddress ${nblocks} ${address}"
+                "bitcoin-cli ${mode} -datadir=${datadir} generatetoaddress ${nblocks} ${address}"
             }
             val obuf = StringBuilder()
             var ret: JsonNode? = null
@@ -112,9 +112,8 @@ class BTCTestRunner(datadir: File? = null,
     }
 
     fun send(address: String, amount: Double) {
-        val m = if (mode != null) "-${mode}" else ""
         with(cliRunner) {
-            cmd("bitcoin-cli ${m} -datadir=${datadir} sendtoaddress ${address} ${amount}",
+            cmd("bitcoin-cli ${mode} -datadir=${datadir} sendtoaddress ${address} ${amount}",
                 failOnTimeout = true, failOnExitCode = true) { line ->
                 outputLine(line)
             }.waitFor(TimeSpec.ONE_MIN)
