@@ -1,5 +1,7 @@
 package com.softmotions.weboot.testing.btc
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.softmotions.kotlin.TimeSpec
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.runner.ProcessRunners
@@ -31,6 +33,10 @@ class BTCTestRunner(datadir: File? = null,
     private val state = AtomicBoolean(false)
 
     private val runner = ProcessRunners.serial(verbose = true)
+
+    private val cliRunner = ProcessRunners.serial(verbose = true)
+
+    private val mapper = ObjectMapper()
 
     private fun outputLine(line: String) {
         log.info(line)
@@ -77,10 +83,40 @@ class BTCTestRunner(datadir: File? = null,
         if (!state.compareAndExchange(true, false)) {
             throw IllegalStateException("Already in shutdown state")
         }
-        if (!runner.halt(TimeSpec.ONE_MIN, UnixSignal.SIGINT)) {
+        if (!runner.halt(TimeSpec.HALF_MIN, UnixSignal.SIGINT)) {
             val msg = "Timeout during bitcoind shutdown"
             log.error(msg)
+            runner.halt(TimeSpec.HALF_MIN, UnixSignal.SIGKILL)
             throw RuntimeException(msg)
+        }
+    }
+
+    fun generate(nblocks: Int, address: String? = null): JsonNode {
+        val m = if (mode != null) "-${mode}" else ""
+        return with(cliRunner) {
+            val exec = if (address == null) {
+                "bitcoin-cli ${m} -datadir=${datadir} generate ${nblocks}"
+            } else {
+                "bitcoin-cli ${m} -datadir=${datadir} generatetoaddress ${nblocks} ${address}"
+            }
+            val obuf = StringBuilder()
+            var ret: JsonNode? = null
+            cmd(exec, failOnTimeout = true, failOnExitCode = true) { line ->
+                obuf.append(line)
+                obuf.append('\n')
+            }.waitFor(TimeSpec.ONE_MIN) {
+                ret = mapper.readTree(obuf.toString())
+            }
+            ret!!
+        }
+    }
+
+    fun send(address: String, amount: Double) {
+        val m = if (mode != null) "-${mode}" else ""
+        with(cliRunner) {
+            cmd("bitcoin-cli ${m} -datadir=${datadir} sendtoaddress ${address} ${amount}") { line ->
+                outputLine(line)
+            }.waitFor(TimeSpec.ONE_MIN)
         }
     }
 }
