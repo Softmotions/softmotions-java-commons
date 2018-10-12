@@ -160,7 +160,7 @@ constructor(private val mUrl: URL) {
             XConfigException.throwMissingParameter(this, name)
         }
 
-        private val node = contextNode ?: document.documentElement
+        override val node: Element = contextNode ?: document.documentElement
 
         init {
             master?.slaves?.add(this)

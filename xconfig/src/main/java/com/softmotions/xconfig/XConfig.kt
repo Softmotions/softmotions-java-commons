@@ -22,6 +22,8 @@ interface XConfig {
 
     val parent: XConfig?
 
+    val node: Element
+
     val lock: ReentrantReadWriteLock
 
     /**
