@@ -1,11 +1,19 @@
 package com.softmotions.commons;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import javax.annotation.Nullable;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -100,7 +108,7 @@ public class ServicesConfiguration implements Module {
         }
         init(cfgUrl);
     }
-    
+
     @Nullable
     protected String substituteConfigKey(String key) {
         switch (key) {
@@ -119,32 +127,48 @@ public class ServicesConfiguration implements Module {
 
     protected void init(URL cfgUrl) {
         try {
-            //init logging
-            String lref = xcfg().text("logging-ref");
-            if (!StringUtils.isBlank(lref) && LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
-                String pdir = FilenameUtils.getFullPath(cfgUrl.getPath());
-                String lcfg = pdir + lref;
+            if ((xcfg.hasPattern("logging") || xcfg.hasPattern("logging-ref"))
+                && LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+
+                Object source = null;
+                if (xcfg.hasPattern("logging")) {
+                    var doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                    doc.appendChild(doc.importNode(xcfg.nodesXPath("logging/*").get(0), true));
+                    var bos = new ByteArrayOutputStream();
+                    TransformerFactory.newInstance().newTransformer().transform(new DOMSource(doc), new StreamResult(bos));
+                    source = new ByteArrayInputStream(bos.toByteArray());
+                    log.info("Logger configuration:\n{}", bos.toString(Charsets.UTF_8));
+                } else if (xcfg.hasPattern("logging-ref")) {
+                    String lcfg = FilenameUtils.getFullPath(cfgUrl.getPath()) + xcfg.text("logging-ref");
+                    source = "jvmr".equals(cfgUrl.getProtocol())
+                             ? new URL(lcfg)
+                             : new URL(cfgUrl.getProtocol(), cfgUrl.getHost(), cfgUrl.getPort(), lcfg);
+                }
+
                 LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-                String protocol = cfgUrl.getProtocol();
-                URL url = "jvmr".equals(protocol)
-                          ? new URL(lcfg)
-                          : new URL(protocol, cfgUrl.getHost(), cfgUrl.getPort(), lcfg);
+                JoranConfigurator configurator = new JoranConfigurator();
+                configurator.setContext(context);
+                context.reset();
                 try {
-                    JoranConfigurator configurator = new JoranConfigurator();
-                    configurator.setContext(context);
-                    context.reset();
-                    configurator.doConfigure(url);
+                    if (source instanceof URL) {
+                        configurator.doConfigure((URL) source);
+                    } else if (source != null) {
+                        configurator.doConfigure((InputStream) source);
+                    } else {
+                        log.error("No configuration source for logging system");
+                    }
                 } catch (Exception ignored) {
                     // StatusPrinter will handle this
                 }
                 usedCustomLoggingConfig = true;
-                log.info("Successfully configured application logging from: {}", url);
+                log.info("Successfully configured application logging");
                 StatusPrinter.printInCaseOfErrorsOrWarnings(context);
             }
+
             log.info("Using TMP dir: {}", tmpdir.getAbsolutePath());
             DirUtils.ensureDir(tmpdir, true);
 
-            if (xcfg().boolPattern("newtmp-cleanup-on-exit", true)) {
+            if (xcfg.boolPattern("newtmp-cleanup-on-exit", true)) {
                 Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -160,7 +184,7 @@ public class ServicesConfiguration implements Module {
                     }
                 }));
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
