@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
@@ -105,6 +106,30 @@ public class AbstractWS implements WSContext {
         return mapper.createObjectNode().put("key", "error").put("data", msg);
     }
 
+    @Override
+    public void tagSession(String tag, Session sess) {
+        var sw = sessions.get(sess);
+        if (sw != null) {
+            sw.tags.add(tag);
+        }
+    }
+
+    @Override
+    public void untagSession(String tag, Session sess) {
+        var sw = sessions.get(sess);
+        if (sw != null) {
+            sw.tags.remove(tag);
+        }
+    }
+
+    @Override
+    public Set<Session> getTaggedSessions(String tag) {
+        return sessions.values().stream()
+                .filter(sw -> sw.tags.contains(tag))
+                .map(AsyncSessionWrapper::getSession)
+                .collect(Collectors.toSet());
+    }
+
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
         sessions.computeIfAbsent(session, s -> new AsyncSessionWrapper(s, mapper));
@@ -196,6 +221,21 @@ public class AbstractWS implements WSContext {
         }
 
         @Override
+        public void tagSession(String tag, Session sess) {
+            AbstractWS.this.tagSession(tag, sess);
+        }
+
+        @Override
+        public void untagSession(String tag, Session sess) {
+            AbstractWS.this.untagSession(tag, sess);
+        }
+
+        @Override
+        public Set<Session> getTaggedSessions(String tag) {
+            return AbstractWS.this.getTaggedSessions(tag);
+        }
+
+        @Override
         public CompletableFuture<SendResult> sendTo(Object msg, Session sess) {
             return AbstractWS.this.sendTo(msg, sess);
         }
@@ -231,5 +271,7 @@ public class AbstractWS implements WSContext {
             this.method = method;
             this.action = action;
         }
+
+
     }
 }

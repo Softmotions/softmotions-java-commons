@@ -3,11 +3,12 @@ package com.softmotions.weboot.jaxrs.ws;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.websocket.CloseReason;
 import javax.websocket.SendResult;
 import javax.websocket.Session;
@@ -23,6 +24,8 @@ public final class AsyncSessionWrapper {
     public static final int DEFAULT_MAX_PENDING_MESSAGES = 1024;
 
     public static final int DEFAULT_MAX_PENDING_BYTES = 1048576;
+
+    public final Set<String> tags = ConcurrentHashMap.newKeySet();
 
     private final Session sess;
 
@@ -45,7 +48,11 @@ public final class AsyncSessionWrapper {
         this.mapper = mapper;
     }
 
-    @Nullable
+    public Session getSession() {
+        return this.sess;
+    }
+
+    @Nonnull
     public CompletableFuture<SendResult> close() {
         return send(new CloseWSMessage());
     }
