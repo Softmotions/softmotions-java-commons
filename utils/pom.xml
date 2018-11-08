@@ -52,10 +52,6 @@
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
