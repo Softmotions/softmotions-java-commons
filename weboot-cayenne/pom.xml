@@ -13,7 +13,7 @@
     <artifactId>softmotions-weboot-cayenne</artifactId>
 
     <properties>
-        <postgres.jdbc.version>42.2.2.jre7</postgres.jdbc.version>
+        <postgres.jdbc.version>42.2.5.jre7</postgres.jdbc.version>
     </properties>
 
     <dependencies>
