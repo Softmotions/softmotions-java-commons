@@ -80,6 +80,7 @@ public class JaxrsMethodValidator {
         registerValidator("httpUrl", new HttpUrlValidator());
         registerValidator("lengthRange", new LengthRangeValidator());
         registerValidator("uuid", new UUIDValidator());
+        registerValidator("oneOfEnum", new EnumValueValidator());
     }
 
 
@@ -404,6 +405,41 @@ public class JaxrsMethodValidator {
     ///////////////////////////////////////////////////////////
     //                      Validators                       //
     ///////////////////////////////////////////////////////////
+
+    public static class EnumValueValidator implements Validator {
+        @Override
+        public boolean validate(@Nullable Object value, String... args) {
+            if (value == null) {
+                return true;
+            }
+            if (args.length < 1) {
+                return false;
+            }
+            String cname = args[0];
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl == null) {
+                cl = getClass().getClassLoader();
+            }
+            try {
+                Class clazz = cl.loadClass(cname);
+                if (clazz.isEnum()) {
+                    try {
+                        //noinspection unchecked
+                        Enum.valueOf(clazz, value.toString());
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+                } else {
+                    log.error("Not an enum class: {}", cname);
+                    return false;
+                }
+            } catch (ClassNotFoundException e) {
+                log.error("", e);
+            }
+            return false;
+        }
+    }
 
 
     public static class UUIDValidator implements Validator {
