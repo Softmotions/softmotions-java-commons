@@ -192,71 +192,8 @@ constructor(private val mUrl: URL) {
             return sb.toString()
         }
 
-        private fun nodesByPattern(expr: String, skipMaster: Boolean, first: Boolean): List<Node> {
-            var path = expr
-            val idx = expr.indexOf("[@")
-            val attrName = if (expr.endsWith(']') && idx != -1) {
-                path = expr.substring(0, idx)
-                expr.substring(idx + 2, expr.length - 1)
-            } else {
-                null
-            }
-            if (path == "." || path.isBlank()) {
-                return if (attrName != null) {
-                    val an = node.getAttributeNode(attrName);
-                    if (an != null) listOf(an) else emptyList()
-                } else {
-                    listOf(node)
-                }
-            }
-            var n = node
-            StringUtils.split(path, '.').forEach { s ->
-                n = n.firstChildElement { it.nodeName == s }
-                        ?: return if (parent == null && master != null && !skipMaster) {
-                    master.nodesByPattern(path, false, first)
-                } else emptyList()
-            }
-            return ArrayList<Node>().apply {
-                if (attrName != null) {
-                    n.getAttributeNode(attrName)?.also { add(it) }
-                } else {
-                    add(n)
-                }
-                if (!first) {
-                    var ns = n.nextSibling
-                    while (ns != null) {
-                        if (ns is Element && ns.nodeName == n.nodeName) {
-                            if (attrName != null) {
-                                ns.getAttributeNode(attrName)?.also { add(it) }
-                            } else {
-                                add(ns)
-                            }
-                        }
-                        ns = ns.nextSibling
-                    }
-                }
-            }
-        }
-
-        private fun nodesByXPath(expr: String, skipMaster: Boolean): List<Node> {
-            return (xpf.newXPath().evaluate(expr, node, XPathConstants.NODESET) as? NodeList)?.let {
-                if (it.length < 1 && parent == null && master != null) {
-                    master.nodesByXPath(expr, skipMaster)
-                } else {
-                    ArrayList<Node>(it.length).apply {
-                        (0 until it.length).forEach { idx -> add(it.item(idx)) }
-                    }
-                }
-            } ?: emptyList()
-        }
-
-        private fun nodesBy(expr: String, type: XCPath, skipMaster: Boolean, first: Boolean): List<Node> = when (type) {
-            XCPath.PATTERN -> nodesByPattern(expr, skipMaster, first)
-            XCPath.XPATH -> nodesByXPath(expr, skipMaster)
-        }
-
         override operator fun get(expr: String, require: Boolean, type: XCPath): String? = lock.read {
-            nodesBy(expr, type, false, true).firstOrNull()?.text() ?: kotlin.run {
+            nodesBy(expr, type, false, true).firstOrNull()?.text() ?: run {
                 if (require) {
                     XConfigException.throwMissingParameter(expr)
                 } else {
@@ -348,7 +285,7 @@ constructor(private val mUrl: URL) {
         }
 
         override fun bool(expr: String, dval: Boolean?, type: XCPath): Boolean = lock.read {
-            BooleanUtils.toBoolean(text(expr, dval?.toString() ?: "false"))
+            BooleanUtils.toBoolean(text(expr, dval?.toString() ?: "false", type))
         }
 
         override fun number(expr: String, dval: Long?, type: XCPath): Long? = lock.read {
@@ -361,15 +298,12 @@ constructor(private val mUrl: URL) {
                     .map { XConfigImpl(this, it as Element) }
         }
 
-        override fun sub(el: Element): XConfig {
-            return XConfigImpl(this, el)
+        override fun sub(el: Element): XConfig = lock.read {
+            XConfigImpl(this, el)
         }
 
         override fun list(expr: String, type: XCPath): List<String> {
-            return nodes(expr, type).asSequence()
-                    .map { it.text() }
-                    .filterNotNull()
-                    .toList()
+            return nodes(expr, type).mapNotNull { it.text() }.toList()
         }
 
         override fun <T> setPattern(expr: String, v: T) = set(expr, v)
@@ -458,6 +392,71 @@ constructor(private val mUrl: URL) {
             openOutputStream().use {
                 createWriteTransformer().transform(DOMSource(document), StreamResult(it))
                 it.flush()
+            }
+        }
+
+        private fun nodesByPattern(expr: String, skipMaster: Boolean, first: Boolean): List<Node> {
+            var path = expr
+            val idx = expr.indexOf("[@")
+            val attrName = if (expr.endsWith(']') && idx != -1) {
+                path = expr.substring(0, idx)
+                expr.substring(idx + 2, expr.length - 1)
+            } else {
+                null
+            }
+            if (path == "." || path.isBlank()) {
+                return if (attrName != null) {
+                    val an = node.getAttributeNode(attrName);
+                    if (an != null) listOf(an) else emptyList()
+                } else {
+                    listOf(node)
+                }
+            }
+            var n = node
+            StringUtils.split(path, '.').forEach { s ->
+                n = n.firstChildElement { it.nodeName == s }
+                        ?: return if (parent == null && master != null && !skipMaster) {
+                    master.nodesByPattern(path, false, first)
+                } else emptyList()
+            }
+            val ret = ArrayList<Node>()
+            if (attrName != null) {
+                n.getAttributeNode(attrName)?.also { ret.add(it) }
+            } else {
+                ret.add(n)
+            }
+            if (!first) {
+                var ns = n.nextSibling
+                while (ns != null) {
+                    if (ns is Element && ns.nodeName == n.nodeName) {
+                        if (attrName != null) {
+                            ns.getAttributeNode(attrName)?.also { ret.add(it) }
+                        } else {
+                            ret.add(ns)
+                        }
+                    }
+                    ns = ns.nextSibling
+                }
+            }
+            return ret
+        }
+
+        private fun nodesByXPath(expr: String, skipMaster: Boolean): List<Node> {
+            return (xpf.newXPath().evaluate(expr, node, XPathConstants.NODESET) as? NodeList)?.let {
+                if (it.length < 1 && parent == null && master != null) {
+                    master.nodesByXPath(expr, skipMaster)
+                } else {
+                    ArrayList<Node>(it.length).apply {
+                        (0 until it.length).forEach { idx -> add(it.item(idx)) }
+                    }
+                }
+            } ?: emptyList()
+        }
+
+        private fun nodesBy(expr: String, type: XCPath, skipMaster: Boolean, first: Boolean): List<Node> {
+            return when (type) {
+                XCPath.PATTERN -> nodesByPattern(expr, skipMaster, first)
+                XCPath.XPATH -> nodesByXPath(expr, skipMaster)
             }
         }
 
