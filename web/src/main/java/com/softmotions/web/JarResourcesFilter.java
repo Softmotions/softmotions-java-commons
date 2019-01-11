@@ -33,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.softmotions.commons.cl.ClassLoaderUtils;
 import com.softmotions.commons.ctype.CTypeUtils;
 
 /**
@@ -362,12 +361,6 @@ public class JarResourcesFilter implements Filter {
         @Override
         public URL getResource(String name) {
             return findResource(name);
-        }
-
-        @Override
-        public void close() throws IOException {
-            ClassLoaderUtils.destroyClassLoader(this);
-            super.close();
         }
 
         public String toString() {
