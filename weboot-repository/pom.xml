@@ -12,7 +12,7 @@
     <dependencies>
         <dependency>
             <groupId>softmotions</groupId>
-            <artifactId>softmotions-weboot</artifactId>
+            <artifactId>softmotions-utils</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
