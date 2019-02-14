@@ -13,7 +13,9 @@ interface WBRepository {
 
     fun acceptUri(uri: URI): Boolean
 
-    fun persist(input: InputStream, fname: String? = null): URI
+    fun fetchFileName(uri: URI): String
+
+    fun persist(input: InputStream, fname: String): URI
 
     fun remove(uri: URI): Boolean
 

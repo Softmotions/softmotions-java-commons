@@ -1,22 +1,35 @@
 package com.softmotions.weboot.repository.s3
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.AnonymousAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.amazonaws.services.s3.model.Bucket
 import com.google.inject.Inject
+import com.google.inject.Singleton
 import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.weboot.repository.WBRepository
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
-import java.util.concurrent.atomic.AtomicLong
 
+// 1 понял 2 тех план 3 минимальная реализация + мин тест 4. фантики?
+
+
+//fun acceptUri(uri: URI): Boolean
+//
+//fun persist(input: InputStream, fname: String? = null): URI
+//
+//fun remove(uri: URI): Boolean
+//
+//fun transferTo(uri: URI, output: OutputStream)
+
+@Singleton
 class AWSS3Repository
 @Inject
 constructor(env: ServicesConfiguration) : WBRepository {
+    /**
+     * s3://<bucketname>/<uuid>
+     */
 
     companion object {
         private val log = loggerFor()
@@ -24,75 +37,45 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
     private var s3: AmazonS3
 
-    private var bucketName: String
+    // todo Есть ли S3 embedded server
+    // todo Mokito
 
-    private val seq = AtomicLong(0)
-
-    private val sn = "name"
+    private var bucket: Bucket // todo
 
     init {
         val xcfg = env.xcfg()
-        bucketName = xcfg["repository.s3.bucket"]!!
+        val bucketName = xcfg["repository.s3.bucket"]!!
         val region = xcfg["repository.s3.region"]!!
 
         s3 = AmazonS3ClientBuilder.standard().apply {
-            if ((xcfg["repository.s3.test.endpoint"] ?: "").isBlank()) {
-                withEndpointConfiguration(
-                        AwsClientBuilder.EndpointConfiguration(xcfg["repository.s3.test.endpoint"], region)
-                )
-                withPathStyleAccessEnabled(true)
-                withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
+            if (xcfg.hasPattern("repository.s3.test")) {
+
             } else {
                 withRegion(region)
             }
         }.build()
 
-        log.info("Connected to S3 cloud, region: {}", region)
-        if (!s3.doesBucketExistV2(bucketName)) {
-            log.warn("Bucket $bucketName doesn't exists trying to create it")
-            try {
-                s3.createBucket(bucketName)
-            } catch (e: Exception) {
-                log.error("Failed to create bucket: '$bucketName'", e)
-            }
-        }
-
-        if (!s3.doesObjectExist(bucketName, sn)) {
-            s3.putObject(bucketName, sn, seq.get().toString())
+        bucket = if (s3.doesBucketExistV2(bucketName)) {
+            Bucket(bucketName) // TODO
         } else {
-            s3.getObject(bucketName, sn).objectContent.bufferedReader().use { br ->
-                seq.set(br.readText().toLong())
-            }
+            s3.createBucket(bucketName)
         }
-    }
-
-    @Synchronized
-    private fun nextKey(): String {
-        val key = seq.incrementAndGet().toString()
-        s3.putObject(bucketName, sn, key)
-        return key
     }
 
     override fun acceptUri(uri: URI): Boolean {
-        return uri.scheme == "s3"
+        return "s3" == uri.scheme && uri.host == bucket.name
     }
 
-    override fun persist(input: InputStream, fname: String?): URI {
-        val next = nextKey().let {
-            if (fname != null) {
-                "$it/$fname"
-            } else {
-                it
-            }
-        }
+    override fun fetchFileName(uri: URI): String = uri.path
 
-        s3.putObject(bucketName, next, input, null)
-        return URI("s3", next, null)
+    override fun persist(input: InputStream, fname: String): URI {
+        s3.putObject(bucket.name, fname, input, null)
+        return URI("s3", bucket.name, fname, null)
     }
 
     override fun remove(uri: URI): Boolean {
-        return if (s3.doesObjectExist(bucketName, uri.schemeSpecificPart)) {
-            s3.deleteObject(bucketName, uri.schemeSpecificPart)
+        return if (s3.doesObjectExist(bucket.name, uri.schemeSpecificPart)) {
+            s3.deleteObject(bucket.name, uri.schemeSpecificPart)
             true
         } else {
             false
@@ -100,7 +83,7 @@ constructor(env: ServicesConfiguration) : WBRepository {
     }
 
     override fun transferTo(uri: URI, output: OutputStream) {
-        s3.getObject(bucketName, uri.schemeSpecificPart).use { s3o ->
+        s3.getObject(bucket.name, uri.schemeSpecificPart).use { s3o ->
             s3o.objectContent.transferTo(output)
         }
     }
