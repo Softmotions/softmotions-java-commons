@@ -28,6 +28,8 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
     private val seq = AtomicLong(0)
 
+    private val sn = "name"
+
     init {
         val xcfg = env.xcfg()
         bucketName = xcfg["repository.s3.bucket"]!!
@@ -55,11 +57,20 @@ constructor(env: ServicesConfiguration) : WBRepository {
             }
         }
 
-        if (!s3.doesObjectExist(bucketName, "0")) {
-            s3.putObject(bucketName, "0", seq.get().toString())
+        if (!s3.doesObjectExist(bucketName, sn)) {
+            s3.putObject(bucketName, sn, seq.get().toString())
         } else {
-            seq.set(s3.getObject(bucketName, "0").objectContent.readAllBytes().joinToString().toLong())
+            s3.getObject(bucketName, sn).objectContent.bufferedReader().use { br ->
+                seq.set(br.readText().toLong())
+            }
         }
+    }
+
+    @Synchronized
+    private fun nextKey(): String {
+        val key = seq.incrementAndGet().toString()
+        s3.putObject(bucketName, sn, key)
+        return key
     }
 
     override fun acceptUri(uri: URI): Boolean {
@@ -67,11 +78,11 @@ constructor(env: ServicesConfiguration) : WBRepository {
     }
 
     override fun persist(input: InputStream, fname: String?): URI {
-        val next = seq.incrementAndGet().let {
+        val next = nextKey().let {
             if (fname != null) {
                 "$it/$fname"
             } else {
-                "$it"
+                it
             }
         }
 
