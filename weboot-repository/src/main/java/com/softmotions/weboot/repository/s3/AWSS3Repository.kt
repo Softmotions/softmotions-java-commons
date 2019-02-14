@@ -1,5 +1,8 @@
 package com.softmotions.weboot.repository.s3
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider
+import com.amazonaws.auth.AnonymousAWSCredentials
+import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.Bucket
@@ -49,7 +52,10 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
         s3 = AmazonS3ClientBuilder.standard().apply {
             if (xcfg.hasPattern("repository.s3.test")) {
-
+                val eCfg = AwsClientBuilder.EndpointConfiguration(xcfg["repository.s3.test.endpoint"], region)
+                withPathStyleAccessEnabled(true)
+                withEndpointConfiguration(eCfg)
+                withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
             } else {
                 withRegion(region)
             }
@@ -70,7 +76,7 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
     override fun persist(input: InputStream, fname: String): URI {
         s3.putObject(bucket.name, fname, input, null)
-        return URI("s3", bucket.name, fname, null)
+        return URI("s3", "${bucket.name}/$fname", null)
     }
 
     override fun remove(uri: URI): Boolean {
