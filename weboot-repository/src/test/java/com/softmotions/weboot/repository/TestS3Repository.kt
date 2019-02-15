@@ -11,7 +11,6 @@ import org.testng.annotations.Test
 import java.io.ByteArrayOutputStream
 import java.lang.NullPointerException
 import java.net.URI
-import java.util.*
 
 @Test
 class TestS3Repository {
