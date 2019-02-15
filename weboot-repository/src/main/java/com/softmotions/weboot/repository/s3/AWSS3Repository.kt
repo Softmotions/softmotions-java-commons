@@ -10,29 +10,17 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.kotlin.loggerFor
+import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
-
-// 1 понял 2 тех план 3 минимальная реализация + мин тест 4. фантики?
-
-
-//fun acceptUri(uri: URI): Boolean
-//
-//fun persist(input: InputStream, fname: String? = null): URI
-//
-//fun remove(uri: URI): Boolean
-//
-//fun transferTo(uri: URI, output: OutputStream)
+import kotlin.NullPointerException
 
 @Singleton
 class AWSS3Repository
 @Inject
 constructor(env: ServicesConfiguration) : WBRepository {
-    /**
-     * s3://<bucketname>/<uuid>
-     */
 
     companion object {
         private val log = loggerFor()
@@ -40,10 +28,7 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
     private var s3: AmazonS3
 
-    // todo Есть ли S3 embedded server
-    // todo Mokito
-
-    private var bucket: Bucket // todo
+    private var bucket: Bucket
 
     init {
         val xcfg = env.xcfg()
@@ -62,7 +47,7 @@ constructor(env: ServicesConfiguration) : WBRepository {
         }.build()
 
         bucket = if (s3.doesBucketExistV2(bucketName)) {
-            Bucket(bucketName) // TODO
+            s3.listBuckets().last { bucket -> bucket.name == bucketName }
         } else {
             s3.createBucket(bucketName)
         }
@@ -72,16 +57,16 @@ constructor(env: ServicesConfiguration) : WBRepository {
         return "s3" == uri.scheme && uri.host == bucket.name
     }
 
-    override fun fetchFileName(uri: URI): String = uri.path
+    override fun fetchFileName(uri: URI): String = uri.path.toPath().fileName.toString()
 
     override fun persist(input: InputStream, fname: String): URI {
         s3.putObject(bucket.name, fname, input, null)
-        return URI("s3", "${bucket.name}/$fname", null)
+        return URI("s3", bucket.name, "/$fname", null)
     }
 
     override fun remove(uri: URI): Boolean {
-        return if (s3.doesObjectExist(bucket.name, uri.schemeSpecificPart)) {
-            s3.deleteObject(bucket.name, uri.schemeSpecificPart)
+        return if (s3.doesObjectExist(bucket.name, fetchFileName(uri))) {
+            s3.deleteObject(bucket.name, fetchFileName(uri))
             true
         } else {
             false
@@ -89,8 +74,13 @@ constructor(env: ServicesConfiguration) : WBRepository {
     }
 
     override fun transferTo(uri: URI, output: OutputStream) {
-        s3.getObject(bucket.name, uri.schemeSpecificPart).use { s3o ->
-            s3o.objectContent.transferTo(output)
+        val key = fetchFileName(uri)
+        if (s3.doesObjectExist(bucket.name, key)) {
+            s3.getObject(bucket.name, key).use { s3o ->
+                s3o.objectContent.transferTo(output)
+            }
+        } else {
+            throw NullPointerException("Missing repository key: '$key'")
         }
     }
 }
