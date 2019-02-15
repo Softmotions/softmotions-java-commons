@@ -49,8 +49,8 @@ class TestS3Repository {
 
         // test uri
         Assert.assertTrue(rep.acceptUri(uri))
-        Assert.assertTrue(rep.acceptUri(URI("s3", env.xcfg()["repository.s3.bucket"], null, "badobject")))
-        Assert.assertFalse(rep.acceptUri(URI("s3", "badbucket", null, "badobject")))
+        Assert.assertTrue(rep.acceptUri(URI("s3", env.xcfg()["repository.s3.bucket"], "/badobject", null)))
+        Assert.assertFalse(rep.acceptUri(URI("s3", "badbucket", "/badobject", null)))
     }
 
     @Test
