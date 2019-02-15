@@ -33,7 +33,7 @@ class TestS3Repository {
     fun test1Upload() {
         val rep = injector.getInstance(WBRepository::class.java)
         val data = "TEST TEXT"
-        val key = "key1"
+        val key = "key1.txt"
 
         val uri = data.byteInputStream().use { input ->
             rep.persist(input, key)
@@ -58,7 +58,7 @@ class TestS3Repository {
         val rep = injector.getInstance(WBRepository::class.java)
         val data1 = "TEST TEXT"
         val data2 = "TEST TEXT 2"
-        val key = "key2"
+        val key = "key2.txt"
 
         val uri1 = data1.byteInputStream().use { input ->
             rep.persist(input, key)
@@ -88,7 +88,7 @@ class TestS3Repository {
     fun test3Remove() {
         val rep = injector.getInstance(WBRepository::class.java)
         val data = "TEST TEXT"
-        val key = "key3"
+        val key = "key3.txt"
 
         val uri = data.byteInputStream().use { input ->
             rep.persist(input, key)
