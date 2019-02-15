@@ -2,6 +2,8 @@ package com.softmotions.weboot.repository
 
 import com.google.inject.AbstractModule
 import com.google.inject.Singleton
+import com.google.inject.name.Named
+import com.google.inject.name.Names
 import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.weboot.repository.fs.FileSystemFileRepository
 import com.softmotions.weboot.repository.s3.AWSS3Repository
@@ -13,9 +15,21 @@ class WBRepositoryModule(private val env: ServicesConfiguration) : AbstractModul
     override fun configure() {
         val xcfg = env.xcfg()
         if (xcfg.hasPattern("repository.fs")) {
-            bind(WBRepository::class.java).to(FileSystemFileRepository::class.java)
-        } else if (xcfg.hasPattern("repository.s3")) {
-            bind(WBRepository::class.java).to(AWSS3Repository::class.java)
+            val name = xcfg.text("repository.fs.name")
+            if (name != null) {
+                bind(WBRepository::class.java).annotatedWith(Names.named(name)).to(FileSystemFileRepository::class.java)
+            } else {
+                bind(WBRepository::class.java).to(FileSystemFileRepository::class.java)
+            }
+        }
+        if (xcfg.hasPattern("repository.s3")) {
+            val name = xcfg.text("repository.s3.name")
+            // todo
+            if (name != null) {
+                bind(WBRepository::class.java).annotatedWith(Names.named(name)).to(AWSS3Repository::class.java)
+            } else {
+                bind(WBRepository::class.java).to(AWSS3Repository::class.java)
+            }
         }
     }
 }

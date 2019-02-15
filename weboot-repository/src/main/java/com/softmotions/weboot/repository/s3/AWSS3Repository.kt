@@ -1,20 +1,25 @@
 package com.softmotions.weboot.repository.s3
 
+import com.amazonaws.AmazonServiceException
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.AnonymousAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.amazonaws.services.s3.model.Bucket
+import com.amazonaws.services.s3.model.ObjectMetadata
+import com.google.common.io.FileBackedOutputStream
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
-import java.io.InputStream
-import java.io.OutputStream
+import org.apache.commons.io.output.DeferredFileOutputStream
+import java.io.*
 import java.net.URI
+import java.nio.file.Files
 import kotlin.NullPointerException
 
 @Singleton
@@ -57,34 +62,46 @@ constructor(env: ServicesConfiguration) : WBRepository {
         return "s3" == uri.scheme && uri.host == bucket.name
     }
 
-    override fun fetchFileName(uri: URI): String = uri.path.toPath().fileName.toString()
+    override fun fetchFileName(uri: URI): String {
+        return uri.path?.toPath()?.fileName?.toString() ?: throw IOException("Invalid uri specified")
+    }
 
     override fun persist(input: InputStream, fname: String): URI {
-        s3.putObject(bucket.name, fname, input, null)
+        var tmpFile: File? = null
+        OverflowOutputStream(1024) {
+            tmpFile = File.createTempFile("ovf-", null)
+            tmpFile!!.outputStream()
+        }.use { ovf ->
+            input.transferTo(ovf)
+            ovf.flush()
+            if (tmpFile != null) {
+                s3.putObject(bucket.name, fname, tmpFile)
+            } else {
+                s3.putObject(bucket.name, fname, ovf.memoryToByteArrayInputStream(), ObjectMetadata().apply {
+                    contentLength = ovf.length
+                })
+            }
+        }
+        tmpFile.delete()
         return URI("s3", bucket.name, "/$fname", null)
     }
 
     override fun remove(uri: URI): Boolean {
         val key = fetchFileName(uri)
-        return if (s3.doesObjectExist(bucket.name, key)) {
-            s3.deleteObject(bucket.name, key)
-            true
-        } else {
-            false
-        }
+        s3.deleteObject(bucket.name, key)
+        return true
     }
 
-    /**
-     * @throws NullPointerException if repository no contains this uri
-     */
     override fun transferTo(uri: URI, output: OutputStream) {
         val key = fetchFileName(uri)
-        if (s3.doesObjectExist(bucket.name, key)) {
+        // todo read specs?
+        // todo test file not found
+        try {
             s3.getObject(bucket.name, key).use { s3o ->
                 s3o.objectContent.transferTo(output)
             }
-        } else {
-            throw NullPointerException("Missing repository key: '$key'")
+        } catch (e: AmazonServiceException) {
+            throw IOException("File not found: $key")
         }
     }
 }

@@ -3,14 +3,17 @@ package com.softmotions.weboot.repository
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Stage
+import com.softmotions.commons.io.Loader
+import com.softmotions.kotlin.toFile
 import io.findify.s3mock.S3Mock
 import org.testng.Assert
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.io.ByteArrayOutputStream
-import java.lang.NullPointerException
+import java.io.IOException
 import java.net.URI
+import java.nio.file.Files
 
 @Test
 class TestS3Repository {
@@ -22,7 +25,9 @@ class TestS3Repository {
 
     @BeforeClass
     fun before() {
-        s3Mock = S3Mock.Builder().withPort(8001).withInMemoryBackend().build()
+        s3Mock = S3Mock.Builder().withPort(8001)
+                .withInMemoryBackend()
+                .build()
         s3Mock.start()
         env = TestEnv(cfgLocation)
         injector = Guice.createInjector(Stage.PRODUCTION, env)
@@ -31,8 +36,8 @@ class TestS3Repository {
     @Test
     fun test1Upload() {
         val rep = injector.getInstance(WBRepository::class.java)
-        val data = "TEST TEXT"
-        val key = "key1.txt"
+        val data = "24a4c735b3f1"
+        val key = "7bf4"
 
         val uri = data.byteInputStream().use { input ->
             rep.persist(input, key)
@@ -50,14 +55,29 @@ class TestS3Repository {
         Assert.assertTrue(rep.acceptUri(uri))
         Assert.assertTrue(rep.acceptUri(URI("s3", env.xcfg()["repository.s3.bucket"], "/badobject", null)))
         Assert.assertFalse(rep.acceptUri(URI("s3", "badbucket", "/badobject", null)))
+
+        // test big data
+        val f = Loader.getResourceAsUrl("video/SampleVideo_1280x720_1mb.mp4", javaClass).file.toFile()
+        val uri2 = f.inputStream().use { input ->
+            rep.persist(input, "7d24")
+        }
+
+        val tf = Files.createTempFile("video", ".dat").toFile()
+        tf.outputStream().use { output ->
+            rep.transferTo(uri2, output)
+        }
+        Assert.assertEquals(tf.length(), f.length())
+        tf.delete()
     }
 
     @Test
     fun test2Replace() {
         val rep = injector.getInstance(WBRepository::class.java)
-        val data1 = "TEST TEXT"
-        val data2 = "TEST TEXT 2"
-        val key = "key2.txt"
+        // c523fa90-7bf4-480f-a1d5-24a4c735b3f1
+        // 5760e3d7-7d24-4030-a663-84955e06c7fd
+        val data1 = "24a4c735b3f1"
+        val data2 = "84955e06c7fd"
+        val key = "480f"
 
         val uri1 = data1.byteInputStream().use { input ->
             rep.persist(input, key)
@@ -86,8 +106,8 @@ class TestS3Repository {
     @Test
     fun test3Remove() {
         val rep = injector.getInstance(WBRepository::class.java)
-        val data = "TEST TEXT"
-        val key = "key3.txt"
+        val data = "24a4c735b3f1"
+        val key = "a1d5"
 
         val uri = data.byteInputStream().use { input ->
             rep.persist(input, key)
@@ -104,7 +124,7 @@ class TestS3Repository {
 
         // check data
         ByteArrayOutputStream().use { output ->
-            Assert.assertThrows(NullPointerException::class.java) {
+            Assert.assertThrows(IOException::class.java) {
                 rep.transferTo(uri, output)
             }
         }
