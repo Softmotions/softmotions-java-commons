@@ -65,14 +65,18 @@ constructor(env: ServicesConfiguration) : WBRepository {
     }
 
     override fun remove(uri: URI): Boolean {
-        return if (s3.doesObjectExist(bucket.name, fetchFileName(uri))) {
-            s3.deleteObject(bucket.name, fetchFileName(uri))
+        val key = fetchFileName(uri)
+        return if (s3.doesObjectExist(bucket.name, key)) {
+            s3.deleteObject(bucket.name, key)
             true
         } else {
             false
         }
     }
 
+    /**
+     * @throws NullPointerException if repository no contains this uri
+     */
     override fun transferTo(uri: URI, output: OutputStream) {
         val key = fetchFileName(uri)
         if (s3.doesObjectExist(bucket.name, key)) {
