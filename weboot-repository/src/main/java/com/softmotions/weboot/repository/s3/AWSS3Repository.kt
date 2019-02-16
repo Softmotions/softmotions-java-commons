@@ -94,14 +94,12 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
     override fun transferTo(uri: URI, output: OutputStream) {
         val key = fetchFileName(uri)
-        // todo read specs?
-        // todo test file not found
         try {
             s3.getObject(bucket.name, key).use { s3o ->
                 s3o.objectContent.transferTo(output)
             }
         } catch (e: AmazonServiceException) {
-            throw IOException("File not found: $key")
+            throw IOException("Request error: ${e.errorCode}")
         }
     }
 }

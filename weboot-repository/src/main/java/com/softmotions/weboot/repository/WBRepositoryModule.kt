@@ -24,7 +24,6 @@ class WBRepositoryModule(private val env: ServicesConfiguration) : AbstractModul
         }
         if (xcfg.hasPattern("repository.s3")) {
             val name = xcfg.text("repository.s3.name")
-            // todo
             if (name != null) {
                 bind(WBRepository::class.java).annotatedWith(Names.named(name)).to(AWSS3Repository::class.java)
             } else {

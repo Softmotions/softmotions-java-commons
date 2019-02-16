@@ -23,7 +23,6 @@ class TestS3Repository {
     @BeforeClass
     fun before() {
         s3Mock = S3Mock.Builder().withPort(8001)
-                .withFileBackend("/tmp/s3")
                 .withInMemoryBackend()
                 .build()
         s3Mock.start()
@@ -53,19 +52,6 @@ class TestS3Repository {
         Assert.assertTrue(rep.acceptUri(uri))
         Assert.assertTrue(rep.acceptUri(URI("s3", env.xcfg()["repository.s3.bucket"], "/badobject", null)))
         Assert.assertFalse(rep.acceptUri(URI("s3", "badbucket", "/badobject", null)))
-
-//        // test big data
-//        val f = File(System.getProperty("user.home") + "/Downloads/test.mp4")
-//        val uri2 = f.inputStream().use { input ->
-//            rep.persist(input, "7d24")
-//        }
-//
-//        val tf = Files.createTempFile("video", ".dat").toFile()
-//        tf.outputStream().use { output ->
-//            rep.transferTo(uri2, output)
-//        }
-//        Assert.assertEquals(tf.length(), f.length())
-//        tf.delete()
     }
 
     @Test
