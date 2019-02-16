@@ -82,7 +82,7 @@ constructor(env: ServicesConfiguration) : WBRepository {
                 })
             }
         }
-        tmpFile.delete()
+        tmpFile?.delete()
         return URI("s3", bucket.name, "/$fname", null)
     }
 

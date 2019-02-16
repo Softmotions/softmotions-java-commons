@@ -3,8 +3,6 @@ package com.softmotions.weboot.repository
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Stage
-import com.softmotions.commons.io.Loader
-import com.softmotions.kotlin.toFile
 import io.findify.s3mock.S3Mock
 import org.testng.Assert
 import org.testng.annotations.AfterClass
@@ -13,7 +11,6 @@ import org.testng.annotations.Test
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.URI
-import java.nio.file.Files
 
 @Test
 class TestS3Repository {
@@ -26,6 +23,7 @@ class TestS3Repository {
     @BeforeClass
     fun before() {
         s3Mock = S3Mock.Builder().withPort(8001)
+                .withFileBackend("/tmp/s3")
                 .withInMemoryBackend()
                 .build()
         s3Mock.start()
@@ -56,18 +54,18 @@ class TestS3Repository {
         Assert.assertTrue(rep.acceptUri(URI("s3", env.xcfg()["repository.s3.bucket"], "/badobject", null)))
         Assert.assertFalse(rep.acceptUri(URI("s3", "badbucket", "/badobject", null)))
 
-        // test big data
-        val f = Loader.getResourceAsUrl("video/SampleVideo_1280x720_1mb.mp4", javaClass).file.toFile()
-        val uri2 = f.inputStream().use { input ->
-            rep.persist(input, "7d24")
-        }
-
-        val tf = Files.createTempFile("video", ".dat").toFile()
-        tf.outputStream().use { output ->
-            rep.transferTo(uri2, output)
-        }
-        Assert.assertEquals(tf.length(), f.length())
-        tf.delete()
+//        // test big data
+//        val f = File(System.getProperty("user.home") + "/Downloads/test.mp4")
+//        val uri2 = f.inputStream().use { input ->
+//            rep.persist(input, "7d24")
+//        }
+//
+//        val tf = Files.createTempFile("video", ".dat").toFile()
+//        tf.outputStream().use { output ->
+//            rep.transferTo(uri2, output)
+//        }
+//        Assert.assertEquals(tf.length(), f.length())
+//        tf.delete()
     }
 
     @Test

@@ -37,8 +37,8 @@ class OverflowOutputStream(
         os.write(memoryOutput.buffer, 0, memoryOutput.length)
     }
 
-    fun memoryToByteArrayInputStream: ByteArrayInputStream {
-        return ByteArrayInputStream(memoryOutput.buffer, memoryOutput.length)
+    fun memoryToByteArrayInputStream(): ByteArrayInputStream {
+        return ByteArrayInputStream(memoryOutput.buffer, 0, memoryOutput.length)
     }
 
 
@@ -68,7 +68,7 @@ class OverflowOutputStream(
 
     private class MemoryOutput : ByteArrayOutputStream() {
         internal val buffer: ByteArray get() = buf
-        internal val length: Int get = count
+        internal val length: Int get() = count
         override fun reset() {
             super.reset()
             buf = ByteArray(0)
