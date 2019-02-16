@@ -1,8 +1,6 @@
 package com.softmotions.weboot.repository
 
 import com.google.inject.AbstractModule
-import com.google.inject.Singleton
-import com.google.inject.name.Named
 import com.google.inject.name.Names
 import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.weboot.repository.fs.FileSystemFileRepository

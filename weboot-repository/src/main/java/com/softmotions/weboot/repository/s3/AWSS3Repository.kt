@@ -6,21 +6,16 @@ import com.amazonaws.auth.AnonymousAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.amazonaws.services.s3.model.AmazonS3Exception
 import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.ObjectMetadata
-import com.google.common.io.FileBackedOutputStream
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
-import org.apache.commons.io.output.DeferredFileOutputStream
 import java.io.*
 import java.net.URI
-import java.nio.file.Files
-import kotlin.NullPointerException
 
 @Singleton
 class AWSS3Repository
