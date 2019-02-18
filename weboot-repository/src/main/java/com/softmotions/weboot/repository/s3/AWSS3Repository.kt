@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.softmotions.commons.ServicesConfiguration
+import com.softmotions.commons.io.OverflowOutputStream
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository

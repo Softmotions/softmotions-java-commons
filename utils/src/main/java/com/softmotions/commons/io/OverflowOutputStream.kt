@@ -1,4 +1,4 @@
-package com.softmotions.weboot.repository.s3
+package com.softmotions.commons.io
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
