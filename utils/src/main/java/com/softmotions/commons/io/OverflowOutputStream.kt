@@ -15,6 +15,10 @@ class OverflowOutputStream(
 
     private var overflowOutput: OutputStream? = null
 
+    /**
+     * memory output used before threshold is exceeded
+     * if threshold is exceeded used overflowOutput
+     */
     private val out: OutputStream
         get() {
             if (overflowOutput == null && counter > threshold) {
@@ -32,11 +36,18 @@ class OverflowOutputStream(
 
     val inMemory: Boolean = overflowOutput == null
 
+    /**
+     * write memory buffer to OutputStream
+     * @throws IllegalStateException if threshold is exceeded
+     */
     fun copyMemoryBytes(os: OutputStream) {
         if (!inMemory) throw IllegalStateException("Overflow stream created")
         os.write(memoryOutput.buffer, 0, memoryOutput.length)
     }
 
+    /**
+     * creates ByteArrayInputStream from memory buffer
+     */
     fun memoryToByteArrayInputStream(): ByteArrayInputStream {
         return ByteArrayInputStream(memoryOutput.buffer, 0, memoryOutput.length)
     }

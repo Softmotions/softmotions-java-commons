@@ -31,6 +31,13 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
     private var bucket: Bucket
 
+    /**
+     * init s3 client and bucket
+     *
+     * require config params:
+     *      repository.s3.bucket
+     *      repository.s3.region
+     */
     init {
         val xcfg = env.xcfg()
         val bucketName = xcfg["repository.s3.bucket"]!!
@@ -58,10 +65,24 @@ constructor(env: ServicesConfiguration) : WBRepository {
         return "s3" == uri.scheme && uri.host == bucket.name
     }
 
+    /**
+     * get filename from uri
+     *
+     * @throws IOException if specification is invalid
+     */
     override fun fetchFileName(uri: URI): String {
         return uri.path?.toPath()?.fileName?.toString() ?: throw IOException("Invalid uri specified")
     }
 
+    /**
+     * send input stream to s3 for persist in bucket
+     *
+     * @return uri
+     * uri.scheme - s3
+     * uri.host - bucket name
+     * uri.path - fname is object key
+     * "s3://<bucket name>/<object key>"
+     */
     override fun persist(input: InputStream, fname: String): URI {
         var tmpFile: File? = null
         OverflowOutputStream(1024) {
@@ -82,12 +103,26 @@ constructor(env: ServicesConfiguration) : WBRepository {
         return URI("s3", bucket.name, "/$fname", null)
     }
 
+    /**
+     * remove object by uri from bucket
+     *
+     * @param uri s3://<bucket name>/<object key>
+     */
     override fun remove(uri: URI): Boolean {
         val key = fetchFileName(uri)
-        s3.deleteObject(bucket.name, key)
+        try {
+            s3.deleteObject(bucket.name, key)
+        } catch (e: AmazonServiceException) {
+            log.error("Error removing key $key", e)
+        }
         return true
     }
 
+    /**
+     * request object from bucket and transfer stream to output
+     *
+     * @param uri s3://<bucket name>/<object key>
+     */
     override fun transferTo(uri: URI, output: OutputStream) {
         val key = fetchFileName(uri)
         try {
