@@ -12,6 +12,7 @@ import java.io.OutputStream
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicLong
 
 @Singleton
@@ -37,6 +38,8 @@ constructor(env: ServicesConfiguration) : WBRepository {
         Files.createDirectories(root)
         if (!sf.exists()) {
             sf.writeText(seq.get().toString())
+        } else if (sf.length() < 64) { // Avoid memory DOS attack
+            seq.set(sf.readText().toLong())
         }
     }
 
@@ -58,14 +61,12 @@ constructor(env: ServicesConfiguration) : WBRepository {
         return uri.scheme == "fs"
     }
 
-    override fun persist(input: InputStream, fname: String?): URI {
-        val next = nextPath().let {
-            if (fname != null) {
-                "$it/$fname"
-            } else {
-                it
-            }
-        }
+    override fun fetchFileName(uri: URI): String {
+        return Paths.get(uri.path).toString()
+    }
+
+    override fun persist(input: InputStream, fname: String): URI {
+        val next = "${nextPath()}/$fname"
         val file = root.resolve(next).toFile()
         file.parentFile?.mkdirs()
         FileOutputStream(file).use {
