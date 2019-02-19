@@ -16,7 +16,7 @@ import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicLong
 
 @Singleton
-class FileSystemFileRepository
+class FSRepository
 @Inject
 constructor(env: ServicesConfiguration) : WBRepository {
 

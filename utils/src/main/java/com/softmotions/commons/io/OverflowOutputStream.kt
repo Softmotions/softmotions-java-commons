@@ -33,14 +33,15 @@ class OverflowOutputStream(
     val length: Long
         get() = counter
 
-    val inMemory: Boolean = overflowOutput == null
+    val isInMemory: Boolean
+        get() = (overflowOutput == null)
 
     /**
      * write memory buffer to OutputStream
      * @throws IllegalStateException if memoryThreshold is exceeded
      */
     fun copyMemoryBytes(os: OutputStream) {
-        if (!inMemory) throw IllegalStateException("Overflow stream created")
+        if (!isInMemory) throw IllegalStateException("Overflow stream created")
         os.write(memoryOutput.buffer, 0, memoryOutput.length)
     }
 

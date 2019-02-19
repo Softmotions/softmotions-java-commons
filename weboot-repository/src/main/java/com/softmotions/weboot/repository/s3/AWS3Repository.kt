@@ -22,7 +22,7 @@ import java.io.OutputStream
 import java.net.URI
 
 @Singleton
-class AWSS3Repository
+class AWS3Repository
 @Inject
 constructor(env: ServicesConfiguration) : WBRepository {
 
