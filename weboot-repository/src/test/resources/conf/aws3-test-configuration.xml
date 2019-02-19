@@ -2,6 +2,7 @@
 <configuration>
     <repository>
         <s3>
+            <name>aws3</name>
             <bucket>testbucket</bucket>
             <region>us-west-2</region>
             <test>

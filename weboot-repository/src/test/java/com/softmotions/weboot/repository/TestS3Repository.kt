@@ -1,7 +1,6 @@
 package com.softmotions.weboot.repository
 
 import com.google.inject.Guice
-import com.google.inject.Injector
 import com.google.inject.Stage
 import io.findify.s3mock.S3Mock
 import org.testng.Assert
@@ -13,11 +12,9 @@ import java.io.IOException
 import java.net.URI
 
 @Test
-class TestS3Repository {
+class TestS3Repository : BaseTest() {
 
-    private val cfgLocation: String = "conf/repository-test-configuration.xml"
-    private lateinit var injector: Injector
-    private lateinit var env: TestEnv
+    private val cfgLocation: String = "conf/aws3-test-configuration.xml"
     private lateinit var s3Mock: S3Mock
 
     @BeforeClass
@@ -30,9 +27,14 @@ class TestS3Repository {
         injector = Guice.createInjector(Stage.PRODUCTION, env)
     }
 
+    @AfterClass
+    fun after() {
+        s3Mock.stop()
+    }
+
     @Test
     fun test1Upload() {
-        val rep = injector.getInstance(WBRepository::class.java)
+        val rep = getRepositoryByName("aws3")
         val data = "24a4c735b3f1"
         val key = "7bf4"
 
@@ -56,7 +58,7 @@ class TestS3Repository {
 
     @Test
     fun test2Replace() {
-        val rep = injector.getInstance(WBRepository::class.java)
+        val rep = getRepositoryByName("aws3")
         // c523fa90-7bf4-480f-a1d5-24a4c735b3f1
         // 5760e3d7-7d24-4030-a663-84955e06c7fd
         val data1 = "24a4c735b3f1"
@@ -89,7 +91,7 @@ class TestS3Repository {
 
     @Test
     fun test3Remove() {
-        val rep = injector.getInstance(WBRepository::class.java)
+        val rep = getRepositoryByName("aws3")
         val data = "24a4c735b3f1"
         val key = "a1d5"
 
@@ -112,10 +114,5 @@ class TestS3Repository {
                 rep.transferTo(uri, output)
             }
         }
-    }
-
-    @AfterClass
-    fun after() {
-        s3Mock.stop()
     }
 }

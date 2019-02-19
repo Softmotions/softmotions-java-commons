@@ -7,6 +7,7 @@ import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
@@ -62,7 +63,7 @@ constructor(env: ServicesConfiguration) : WBRepository {
     }
 
     override fun fetchFileName(uri: URI): String {
-        return Paths.get(uri.path).toString()
+        return uri.schemeSpecificPart?.toPath()?.fileName?.toString() ?: throw IOException("Invalid uri specified")
     }
 
     override fun persist(input: InputStream, fname: String): URI {
