@@ -1,11 +1,9 @@
 package com.softmotions.weboot.repository.fs
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
-import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
+import com.softmotions.xconfig.XConfig
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -15,23 +13,21 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.atomic.AtomicLong
 
-@Singleton
 class FSRepository
-@Inject
-constructor(env: ServicesConfiguration) : WBRepository {
+constructor(cfg: XConfig) : WBRepository {
 
     companion object {
         private val log = loggerFor()
     }
 
-    private val root: Path = env.xcfg().textPattern("repository.fs.root", ".")!!.toPath()
+    private val root: Path = cfg.textPattern("root", ".")!!.toPath()
 
     private val seq = AtomicLong(0)
 
     private val sf = root.resolve("next.txt").toFile()
 
     init {
-        if (env.xcfg().boolPattern("repository.fs.cleanup", false)) {
+        if (cfg.boolPattern("cleanup", false)) {
             log.warn("Deleting fs repository: ${root}")
             root.toFile().deleteRecursively()
         }

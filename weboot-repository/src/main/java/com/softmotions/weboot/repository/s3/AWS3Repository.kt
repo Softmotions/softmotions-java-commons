@@ -8,23 +8,19 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.ObjectMetadata
-import com.google.inject.Inject
-import com.google.inject.Singleton
-import com.softmotions.commons.ServicesConfiguration
 import com.softmotions.commons.io.OverflowOutputStream
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
+import com.softmotions.xconfig.XConfig
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
 
-@Singleton
 class AWS3Repository
-@Inject
-constructor(env: ServicesConfiguration) : WBRepository {
+constructor(cfg: XConfig) : WBRepository {
 
     companion object {
         private val log = loggerFor()
@@ -34,7 +30,7 @@ constructor(env: ServicesConfiguration) : WBRepository {
 
     private var bucket: Bucket
 
-    private val bufferSize = env.xcfg().number("repository.s3.persist-buffer-size", 1024)!!
+    private val bufferSize = cfg.number("persist-buffer-size", 1024)!!
 
 
     /**
@@ -45,12 +41,12 @@ constructor(env: ServicesConfiguration) : WBRepository {
      *      repository.s3.region
      */
     init {
-        val xcfg = env.xcfg()
-        val bucketName = xcfg["repository.s3.bucket"] ?: throw Exception("Missing required 'repository.s3.bucket' configuration parameter")
-        val region = xcfg["repository.s3.region"] ?: throw Exception("Missing required 'repository.s3.region' configuration parameter")
+        val bucketName = cfg["bucket"]
+                ?: throw Exception("Missing required 'repository.s3.bucket' configuration parameter")
+        val region = cfg["region"] ?: throw Exception("Missing required 'repository.s3.region' configuration parameter")
         s3 = AmazonS3ClientBuilder.standard().apply {
-            if (xcfg.hasPattern("repository.s3.test")) {
-                val eCfg = AwsClientBuilder.EndpointConfiguration(xcfg["repository.s3.test.endpoint"], region)
+            if (cfg.hasPattern("test")) {
+                val eCfg = AwsClientBuilder.EndpointConfiguration(cfg["test.endpoint"], region)
                 withPathStyleAccessEnabled(true)
                 withEndpointConfiguration(eCfg)
                 withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
