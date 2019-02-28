@@ -46,9 +46,8 @@ constructor(env: ServicesConfiguration) : WBRepository {
      */
     init {
         val xcfg = env.xcfg()
-        val bucketName = xcfg["repository.s3.bucket"]!!
-        val region = xcfg["repository.s3.region"]!!
-
+        val bucketName = xcfg["repository.s3.bucket"] ?: throw Exception("Missing required 'repository.s3.bucket' configuration parameter")
+        val region = xcfg["repository.s3.region"] ?: throw Exception("Missing required 'repository.s3.region' configuration parameter")
         s3 = AmazonS3ClientBuilder.standard().apply {
             if (xcfg.hasPattern("repository.s3.test")) {
                 val eCfg = AwsClientBuilder.EndpointConfiguration(xcfg["repository.s3.test.endpoint"], region)
