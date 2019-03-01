@@ -13,10 +13,7 @@ import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
 import com.softmotions.xconfig.XConfig
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.net.URI
 
 class AWS3Repository
@@ -132,8 +129,11 @@ constructor(cfg: XConfig) : WBRepository {
         try {
             s3.getObject(bucket.name, key)?.use { s3o ->
                 s3o.objectContent.transferTo(output)
-            } ?: throw IOException("Not found: $uri")
+            } ?: throw FileNotFoundException(uri.toString())
         } catch (e: AmazonServiceException) {
+            if (e.errorCode == "NoSuchKey") {
+                throw FileNotFoundException(uri.toString())
+            }
             throw IOException("Request error: ${e.errorCode}")
         }
     }

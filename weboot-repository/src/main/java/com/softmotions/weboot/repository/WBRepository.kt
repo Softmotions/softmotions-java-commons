@@ -1,5 +1,6 @@
 package com.softmotions.weboot.repository
 
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
@@ -19,5 +20,6 @@ interface WBRepository {
 
     fun remove(uri: URI): Boolean
 
+    @Throws(FileNotFoundException::class)
     fun transferTo(uri: URI, output: OutputStream)
 }
