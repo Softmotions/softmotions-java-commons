@@ -130,9 +130,9 @@ constructor(cfg: XConfig) : WBRepository {
     override fun transferTo(uri: URI, output: OutputStream) {
         val key = fetchFileName(uri)
         try {
-            s3.getObject(bucket.name, key).use { s3o ->
+            s3.getObject(bucket.name, key)?.use { s3o ->
                 s3o.objectContent.transferTo(output)
-            }
+            } ?: throw IOException("Not found: $uri")
         } catch (e: AmazonServiceException) {
             throw IOException("Request error: ${e.errorCode}")
         }
