@@ -3,6 +3,7 @@ package com.softmotions.weboot.repository.s3
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.AnonymousAWSCredentials
+import com.amazonaws.auth.PropertiesCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
@@ -10,6 +11,7 @@ import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.softmotions.commons.io.OverflowOutputStream
 import com.softmotions.kotlin.loggerFor
+import com.softmotions.kotlin.toFile
 import com.softmotions.kotlin.toPath
 import com.softmotions.weboot.repository.WBRepository
 import com.softmotions.xconfig.XConfig
@@ -49,6 +51,13 @@ constructor(cfg: XConfig) : WBRepository {
                 withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
             } else {
                 withRegion(region)
+                val pathToProps = cfg.text("propertiesFile")
+                        ?: throw Exception("Missing required 'repository.s3.propertiesFile' configuration parameter")
+                val prop = pathToProps.toFile()
+                if (!prop.exists()) {
+                    throw Exception("Missing file with S3 credentials")
+                }
+                withCredentials(AWSStaticCredentialsProvider(PropertiesCredentials(prop)))
             }
         }.build()
 
