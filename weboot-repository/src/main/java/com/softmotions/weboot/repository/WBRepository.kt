@@ -21,5 +21,5 @@ interface WBRepository {
     fun remove(uri: URI): Boolean
 
     @Throws(FileNotFoundException::class)
-    fun transferTo(uri: URI, output: OutputStream)
+    fun transferTo(uri: URI, output: OutputStream, closeOutput: Boolean = false)
 }

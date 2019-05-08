@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.Bucket
 import com.amazonaws.services.s3.model.ObjectMetadata
+import com.amazonaws.services.s3.model.S3ObjectInputStream
 import com.softmotions.commons.io.OverflowOutputStream
 import com.softmotions.kotlin.loggerFor
 import com.softmotions.kotlin.toFile
@@ -133,17 +134,25 @@ constructor(cfg: XConfig) : WBRepository {
      *
      * @param uri s3://<bucket name>/<object key>
      */
-    override fun transferTo(uri: URI, output: OutputStream) {
+    override fun transferTo(uri: URI, output: OutputStream, closeOutput: Boolean) {
         val key = fetchFileName(uri)
+        var s3s: S3ObjectInputStream? = null
         try {
-            s3.getObject(bucket.name, key)?.use { s3o ->
-                s3o.objectContent.transferTo(output)
-            } ?: throw FileNotFoundException(uri.toString())
+            s3s = s3.getObject(bucket.name, key)?.objectContent ?: throw FileNotFoundException(uri.toString())
+            s3s.transferTo(output)
         } catch (e: AmazonServiceException) {
             if (e.errorCode == "NoSuchKey") {
                 throw FileNotFoundException(uri.toString())
             }
             throw IOException("Request error: ${e.errorCode}")
+        } finally {
+            try {
+                s3s?.close()
+            } catch (ignored: Exception) {
+            }
+            if (closeOutput) {
+                output.close()
+            }
         }
     }
 }

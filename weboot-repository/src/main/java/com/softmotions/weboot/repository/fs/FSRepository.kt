@@ -82,10 +82,16 @@ constructor(cfg: XConfig) : WBRepository {
         }
     }
 
-    override fun transferTo(uri: URI, output: OutputStream) {
+    override fun transferTo(uri: URI, output: OutputStream, closeOutput: Boolean) {
         val file = root.resolve(uri.schemeSpecificPart).toFile()
-        file.inputStream().use {
-            it.transferTo(output)
+        try {
+            file.inputStream().use {
+                it.transferTo(output)
+            }
+        } finally {
+            if (closeOutput) {
+                output.close()
+            }
         }
     }
 }
