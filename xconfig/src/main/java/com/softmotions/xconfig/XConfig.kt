@@ -120,6 +120,10 @@ interface XConfig {
     fun writeTo(out: Writer)
 
     fun save()
+
+    fun nodes(expr: String, type: XCPath = XCPath.PATTERN): List<Node>
+
     fun nodesXPath(expr: String): List<Node>
+
     fun nodesPattern(expr: String): List<Node>
 }

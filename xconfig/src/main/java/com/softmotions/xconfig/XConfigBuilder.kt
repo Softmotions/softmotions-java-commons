@@ -347,7 +347,7 @@ constructor(private val mUrl: URL) {
 
         override fun nodesPattern(expr: String): List<Node> = nodes(expr, XCPath.PATTERN)
 
-        private fun nodes(expr: String, type: XCPath): List<Node> = lock.withLock {
+        override fun nodes(expr: String, type: XCPath): List<Node> = lock.withLock {
             nodesBy(expr, type, false, false)
         }
 
