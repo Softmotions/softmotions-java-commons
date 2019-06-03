@@ -343,13 +343,13 @@ constructor(private val mUrl: URL) {
 
         override fun hasPattern(expr: String): Boolean = has(expr, XCPath.PATTERN)
 
+        override fun nodesXPath(expr: String): List<Node> = nodes(expr, XCPath.XPATH)
+
+        override fun nodesPattern(expr: String): List<Node> = nodes(expr, XCPath.PATTERN)
+
         private fun nodes(expr: String, type: XCPath): List<Node> = lock.withLock {
             nodesBy(expr, type, false, false)
         }
-
-        private fun nodesXPath(expr: String): List<Node> = nodes(expr, XCPath.XPATH)
-
-        private fun nodesPattern(expr: String): List<Node> = nodes(expr, XCPath.PATTERN)
 
         private fun openOutputStream(): OutputStream {
             return (file?.outputStream() ?: mUrl.openConnection().getOutputStream()).buffered()

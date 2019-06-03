@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract
 import org.w3c.dom.Attr
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import org.w3c.dom.Node
 import java.io.Writer
 import java.net.URI
 import java.util.concurrent.locks.ReentrantLock
@@ -119,4 +120,6 @@ interface XConfig {
     fun writeTo(out: Writer)
 
     fun save()
+    fun nodesXPath(expr: String): List<Node>
+    fun nodesPattern(expr: String): List<Node>
 }
