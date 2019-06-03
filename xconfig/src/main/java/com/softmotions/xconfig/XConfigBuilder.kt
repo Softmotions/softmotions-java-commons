@@ -9,7 +9,7 @@ import java.io.*
 import java.net.URI
 import java.net.URL
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.locks.ReentrantLock
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.xml.parsers.DocumentBuilderFactory
@@ -20,8 +20,7 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
-import kotlin.concurrent.read
-import kotlin.concurrent.write
+import kotlin.concurrent.withLock
 
 
 /**
@@ -132,7 +131,7 @@ constructor(private val mUrl: URL) {
 
         private var file: File? = if (mUrl.protocol == "file") File(mUrl.toURI()) else null
 
-        override val lock: ReentrantReadWriteLock = parent?.lock ?: ReentrantReadWriteLock()
+        override val lock: ReentrantLock = parent?.lock ?: ReentrantLock()
 
         override val uri: URI = mUrl.toURI()
 
@@ -192,7 +191,7 @@ constructor(private val mUrl: URL) {
             return sb.toString()
         }
 
-        override operator fun get(expr: String, require: Boolean, type: XCPath): String? = lock.read {
+        override operator fun get(expr: String, require: Boolean, type: XCPath): String? = lock.withLock {
             nodesBy(expr, type, false, true).firstOrNull()?.text() ?: run {
                 if (require) {
                     XConfigException.throwMissingParameter(expr)
@@ -202,7 +201,7 @@ constructor(private val mUrl: URL) {
             }
         }
 
-        override operator fun <T> set(expr: String, v: T): Unit = lock.write {
+        override operator fun <T> set(expr: String, v: T): Unit = lock.withLock {
             var path = expr
             val idx = expr.indexOf("[@")
             val attrName = if (expr.endsWith(']') && idx != -1) {
@@ -247,11 +246,11 @@ constructor(private val mUrl: URL) {
             return c
         }
 
-        override fun setAttrs(expr: String, vararg pairs: Pair<String, Any>) = lock.write {
+        override fun setAttrs(expr: String, vararg pairs: Pair<String, Any>) = lock.withLock {
             setNodesAttrs(nodesByPattern(expr, true, false), pairs)
         }
 
-        override fun setAttrsXPath(expr: String, vararg pairs: Pair<String, Any>) = lock.write {
+        override fun setAttrsXPath(expr: String, vararg pairs: Pair<String, Any>) = lock.withLock {
             setNodesAttrs(nodesByXPath(expr, true), pairs)
         }
 
@@ -261,15 +260,11 @@ constructor(private val mUrl: URL) {
             }
         }
 
-        override fun has(expr: String, type: XCPath): Boolean = lock.read {
+        override fun has(expr: String, type: XCPath): Boolean = lock.withLock {
             !nodesBy(expr, type, false, true).isEmpty()
         }
 
-        override fun nodes(expr: String, type: XCPath): List<Node> = lock.read {
-            nodesBy(expr, type, false, false)
-        }
-
-        override fun detach(expr: String, type: XCPath) = lock.write {
+        override fun detach(expr: String, type: XCPath) = lock.withLock {
             val nodes = nodesBy(expr, type, true, false)
             if (nodes.isEmpty()) {
                 return
@@ -280,25 +275,25 @@ constructor(private val mUrl: URL) {
             }
         }
 
-        override fun text(expr: String, dval: String?, type: XCPath): String? = lock.read {
+        override fun text(expr: String, dval: String?, type: XCPath): String? = lock.withLock {
             get(expr, false, type) ?: dval
         }
 
-        override fun bool(expr: String, dval: Boolean?, type: XCPath): Boolean = lock.read {
+        override fun bool(expr: String, dval: Boolean?, type: XCPath): Boolean = lock.withLock {
             BooleanUtils.toBoolean(text(expr, dval?.toString() ?: "false", type))
         }
 
-        override fun number(expr: String, dval: Long?, type: XCPath): Long? = lock.read {
+        override fun number(expr: String, dval: Long?, type: XCPath): Long? = lock.withLock {
             text(expr, null, type)?.toLongOrNull() ?: dval
         }
 
-        override fun sub(expr: String, type: XCPath): List<XConfig> = lock.read {
+        override fun sub(expr: String, type: XCPath): List<XConfig> = lock.withLock {
             nodesBy(expr, type, false, false)
                     .filter { it is Element }
                     .map { XConfigImpl(this, it as Element) }
         }
 
-        override fun sub(el: Element): XConfig = lock.read {
+        override fun sub(el: Element): XConfig = lock.withLock {
             XConfigImpl(this, el)
         }
 
@@ -315,10 +310,6 @@ constructor(private val mUrl: URL) {
         override fun subXPath(expr: String): List<XConfig> = sub(expr, XCPath.XPATH)
 
         override fun subPattern(expr: String): List<XConfig> = sub(expr, XCPath.PATTERN)
-
-        override fun nodesXPath(expr: String): List<Node> = nodes(expr, XCPath.XPATH)
-
-        override fun nodesPattern(expr: String): List<Node> = nodes(expr, XCPath.PATTERN)
 
         override fun detachXPath(expr: String) = detach(expr, XCPath.XPATH)
 
@@ -352,12 +343,20 @@ constructor(private val mUrl: URL) {
 
         override fun hasPattern(expr: String): Boolean = has(expr, XCPath.PATTERN)
 
+        private fun nodes(expr: String, type: XCPath): List<Node> = lock.withLock {
+            nodesBy(expr, type, false, false)
+        }
+
+        private fun nodesXPath(expr: String): List<Node> = nodes(expr, XCPath.XPATH)
+
+        private fun nodesPattern(expr: String): List<Node> = nodes(expr, XCPath.PATTERN)
+
         private fun openOutputStream(): OutputStream {
             return (file?.outputStream() ?: mUrl.openConnection().getOutputStream()).buffered()
         }
 
         override fun <T> batch(action: (cfg: XConfig) -> T): T {
-            val ret = lock.read {
+            val ret = lock.withLock {
                 noSave = true
                 try {
                     action(this)
@@ -380,13 +379,13 @@ constructor(private val mUrl: URL) {
         }
 
         override fun writeTo(out: Writer) {
-            lock.write {
+            lock.withLock {
                 createWriteTransformer().transform(DOMSource(document), StreamResult(out))
             }
             out.flush()
         }
 
-        override fun save() = lock.write {
+        override fun save() = lock.withLock {
             if (noSave) return
             if (mReadOnly) XConfigException.throwReadOnlyConfiguration()
             openOutputStream().use {
@@ -416,8 +415,8 @@ constructor(private val mUrl: URL) {
             StringUtils.split(path, '.').forEach { s ->
                 n = n.firstChildElement { it.nodeName == s }
                         ?: return if (parent == null && master != null && !skipMaster) {
-                    master.nodesByPattern(path, false, first)
-                } else emptyList()
+                            master.nodesByPattern(path, false, first)
+                        } else emptyList()
             }
             val ret = ArrayList<Node>()
             if (attrName != null) {

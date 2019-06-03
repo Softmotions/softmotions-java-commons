@@ -4,10 +4,9 @@ import org.jetbrains.annotations.Contract
 import org.w3c.dom.Attr
 import org.w3c.dom.Document
 import org.w3c.dom.Element
-import org.w3c.dom.Node
 import java.io.Writer
 import java.net.URI
-import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Yet another configuration
@@ -24,7 +23,7 @@ interface XConfig {
 
     val node: Element
 
-    val lock: ReentrantReadWriteLock
+    val lock: ReentrantLock
 
     /**
      * List of child configs for wich
@@ -58,12 +57,6 @@ interface XConfig {
     fun has(expr: String, type: XCPath = XCPath.PATTERN): Boolean
 
     fun hasPattern(expr: String): Boolean
-
-    fun nodes(expr: String, type: XCPath = XCPath.PATTERN): List<Node>
-
-    fun nodesXPath(expr: String): List<Node>
-
-    fun nodesPattern(expr: String): List<Node>
 
     fun detach(expr: String, type: XCPath = XCPath.PATTERN)
 
