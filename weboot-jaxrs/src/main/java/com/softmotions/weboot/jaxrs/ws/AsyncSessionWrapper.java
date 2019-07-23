@@ -58,6 +58,11 @@ public final class AsyncSessionWrapper {
     }
 
     @Nonnull
+    public CompletableFuture<SendResult> ping(ByteBuffer data) {
+        return send(new PingWSMessage(data));
+    }
+
+    @Nonnull
     public CompletableFuture<SendResult> send(Object msg) {
         synchronized (queue) {
             if (!sess.isOpen() || isClosing) {

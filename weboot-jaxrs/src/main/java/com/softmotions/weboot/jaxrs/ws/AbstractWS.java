@@ -2,6 +2,7 @@ package com.softmotions.weboot.jaxrs.ws;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,12 +11,14 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.websocket.PongMessage;
 import javax.websocket.SendResult;
 import javax.websocket.Session;
 
@@ -43,6 +46,8 @@ public class AbstractWS implements WSContext {
 
     protected final ObjectMapper mapper;
 
+    private static final String PING_DATA = "ping message";
+
     protected AbstractWS(ObjectMapper mapper, Set<WSHandler> hset) {
         this.mapper = mapper;
         for (WSHandler h : hset) {
@@ -58,6 +63,16 @@ public class AbstractWS implements WSContext {
                         handlers.computeIfAbsent(annotation.value(), s -> new ArrayList<>())
                                 .add(new WSHNode(annotation, h, m));
                     });
+        }
+    }
+
+    @OnMessage
+    public void handleMessage(Session session, PongMessage message) {
+        ByteBuffer data = message.getApplicationData();
+        if (log.isDebugEnabled()) {
+            log.debug("Session id: {}, Ping response: {}",
+                      session.getId(),
+                      new String(data.array(), StandardCharsets.UTF_8));
         }
     }
 
@@ -165,6 +180,26 @@ public class AbstractWS implements WSContext {
         }
     }
 
+    @Override
+    public CompletableFuture<Void> pingAll(ByteBuffer msg) {
+        return sendToAll(new PingWSMessage(msg));
+    }
+
+    @Override
+    public CompletableFuture<SendResult> ping(ByteBuffer msg, Session sess) {
+        return sendTo(new PingWSMessage(msg), sess);
+    }
+
+    @Override
+    public CompletableFuture<Void> pingAll() {
+        return pingAll(getPingData());
+    }
+
+    @Override
+    public CompletableFuture<SendResult> ping(Session sess) {
+        return ping(getPingData(), sess);
+    }
+
     protected CompletableFuture<Void> sendToAll(Object msg, Set<Session> sess) {
         if (!(msg instanceof WSMessage)
             && !(msg instanceof String)
@@ -192,6 +227,11 @@ public class AbstractWS implements WSContext {
         } else {
             return CompletableFuture.completedFuture(null);
         }
+    }
+
+    @Nonnull
+    private ByteBuffer getPingData() {
+        return ByteBuffer.wrap(PING_DATA.getBytes());
     }
 
     private class WSRequestContextImpl implements WSRequestContext {
@@ -238,6 +278,36 @@ public class AbstractWS implements WSContext {
         @Override
         public CompletableFuture<SendResult> sendTo(Object msg, Session sess) {
             return AbstractWS.this.sendTo(msg, sess);
+        }
+
+        @Override
+        public CompletableFuture<Void> pingAll(ByteBuffer msg) {
+            return AbstractWS.this.pingAll(msg);
+        }
+
+        @Override
+        public CompletableFuture<SendResult> ping(ByteBuffer msg, Session sess) {
+            return AbstractWS.this.ping(msg, sess);
+        }
+
+        @Override
+        public CompletableFuture<Void> pingAll() {
+            return pingAll(getPingData());
+        }
+
+        @Override
+        public CompletableFuture<SendResult> ping(Session sess) {
+            return ping(getPingData(), sess);
+        }
+
+        @Override
+        public void ping(ByteBuffer msg) {
+            ping(msg, session);
+        }
+
+        @Override
+        public void ping() {
+            ping(session);
         }
 
         @Override

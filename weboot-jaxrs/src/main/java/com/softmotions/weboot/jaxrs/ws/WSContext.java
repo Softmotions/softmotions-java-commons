@@ -1,6 +1,6 @@
 package com.softmotions.weboot.jaxrs.ws;
 
-import java.util.Collection;
+import java.nio.ByteBuffer;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.websocket.SendResult;
@@ -15,9 +15,17 @@ public interface WSContext {
 
     Set<Session> getAllSessions();
 
-    CompletableFuture<Void>  sendToAll(Object msg);
+    CompletableFuture<Void> sendToAll(Object msg);
 
     CompletableFuture<SendResult> sendTo(Object msg, Session sess);
+
+    CompletableFuture<Void> pingAll(ByteBuffer msg);
+
+    CompletableFuture<SendResult> ping(ByteBuffer msg, Session sess);
+
+    CompletableFuture<Void> pingAll();
+
+    CompletableFuture<SendResult> ping(Session sess);
 
     void tagSession(String tag, Session sess);
 
