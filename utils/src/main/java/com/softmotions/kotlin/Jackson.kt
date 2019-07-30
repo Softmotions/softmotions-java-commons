@@ -26,22 +26,22 @@ fun ObjectNode.long(path: String, default: Long = 0): Long {
     return this.path(path).asLong(default)
 }
 
-fun ObjectMapper.obj(block: ObjectNode.() -> Unit): ObjectNode {
+inline fun ObjectMapper.obj(block: ObjectNode.() -> Unit): ObjectNode {
     val n = createObjectNode()
     block(n)
     return n
 }
 
-fun ObjectMapper.arr(block: ArrayNode.() -> Unit): ArrayNode {
+inline fun ObjectMapper.arr(block: ArrayNode.() -> Unit): ArrayNode {
     val n = createArrayNode()
     block(n)
     return n
 }
 
-fun ObjectMapper.objString(block: ObjectNode.() -> Unit): String {
+inline fun ObjectMapper.objString(block: ObjectNode.() -> Unit): String {
     return writeValueAsString(obj(block))
 }
 
-fun ObjectMapper.arrString(block: ArrayNode.() -> Unit): String {
+inline fun ObjectMapper.arrString(block: ArrayNode.() -> Unit): String {
     return writeValueAsString(arr(block))
 }
