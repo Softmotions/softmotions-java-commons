@@ -37,3 +37,11 @@ fun ObjectMapper.arr(block: ArrayNode.() -> Unit): ArrayNode {
     block(n)
     return n
 }
+
+fun ObjectMapper.objString(block: ObjectNode.() -> Unit): String {
+    return writeValueAsString(obj(block))
+}
+
+fun ObjectMapper.arrString(block: ArrayNode.() -> Unit): String {
+    return writeValueAsString(arr(block))
+}
