@@ -33,7 +33,7 @@ fun ObjectMapper.obj(block: ObjectNode.() -> Unit): ObjectNode {
 }
 
 fun ObjectMapper.arr(block: ArrayNode.() -> Unit): ArrayNode {
-    val n = createArrayNode().also(block)
+    val n = createArrayNode()
     block(n)
     return n
 }
