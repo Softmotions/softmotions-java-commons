@@ -86,9 +86,9 @@ public abstract class DataObject extends CayenneDataObject {
         }
         if (src instanceof Map) {
             //noinspection unchecked
-            copyNotNullMap(this, (Map<String, Object>) src, false, false);
+            copyNotNullMap(this, (Map<String, Object>) src, true, false);
         } else {
-            copyNotNullProperties(this, src, false, false);
+            copyNotNullProperties(this, src, true, false);
         }
     }
 
