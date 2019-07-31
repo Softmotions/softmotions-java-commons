@@ -33,12 +33,12 @@ import com.softmotions.commons.lifecycle.Start;
  *
  * @author Adamansky Anton (adamansky@gmail.com)
  */
-@SuppressWarnings({"UnnecessaryFullyQualifiedName", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public class WBCayenneModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(WBCayenneModule.class);
 
-    private static final AbstractMatcher<Method> DECLARED_BY_OBJECT = new AbstractMatcher<Method>() {
+    private static final AbstractMatcher<Method> DECLARED_BY_OBJECT = new AbstractMatcher<>() {
         @Override
         public boolean matches(Method method) {
             //noinspection ObjectEquality
@@ -83,7 +83,6 @@ public class WBCayenneModule extends AbstractModule {
     }
 
 
-    @SuppressWarnings("UnnecessaryFullyQualifiedName")
     public static class CayenneWrapper {
 
         private final String cfgLocation;
@@ -170,7 +169,7 @@ public class WBCayenneModule extends AbstractModule {
             log.info("WBCayenneModule cayenne runtime configured");
         }
 
-        void shutdown() throws Exception {
+        void shutdown() {
             if (runtime != null) {
                 synchronized (CayenneWrapper.class) {
                     runtime.shutdown();

@@ -163,7 +163,6 @@ public final class TransactionalInterceptor implements MethodInterceptor {
                 if (log.isDebugEnabled()) {
                     log.debug("Throw exception occurred during commit or rollback: {}", thrown2.toString());
                 }
-                //noinspection ThrowFromFinallyBlock
                 throw thrown2;
             }
         }

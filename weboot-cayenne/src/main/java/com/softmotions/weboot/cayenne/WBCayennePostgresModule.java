@@ -70,6 +70,7 @@ public class WBCayennePostgresModule implements Module {
             }
         }
 
+        @Nullable
         @Override
         public Duration materializeObject(ResultSet rs, int index, int type) throws Exception {
             Object v = rs.getObject(index);
@@ -163,22 +164,12 @@ public class WBCayennePostgresModule implements Module {
 
         @Override
         public BigDecimal materializeObject(ResultSet rs, int index, int type) throws Exception {
-            BigDecimal val = rs.getBigDecimal(index);
-            if (val == null) {
-                return null;
-            } else {
-                return val;
-            }
+            return rs.getBigDecimal(index);
         }
 
         @Override
         public BigDecimal materializeObject(CallableStatement rs, int index, int type) throws Exception {
-            BigDecimal val = rs.getBigDecimal(index);
-            if (val == null) {
-                return null;
-            } else {
-                return val;
-            }
+            return rs.getBigDecimal(index);
         }
 
         @Override

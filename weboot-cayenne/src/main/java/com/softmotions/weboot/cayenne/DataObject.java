@@ -107,7 +107,7 @@ public abstract class DataObject extends CayenneDataObject {
         }
     }
 
-    private Object preprocessPropValue(Object value, Class<?> destType) throws Exception {
+    private Object preprocessPropValue(Object value, Class<?> destType) {
         if (destType != null) {
             if (destType == Date.class || Date.class.isAssignableFrom(destType)) {
                 if (value instanceof String) {
