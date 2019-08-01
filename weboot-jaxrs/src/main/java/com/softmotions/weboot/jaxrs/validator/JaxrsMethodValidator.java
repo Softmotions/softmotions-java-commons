@@ -10,6 +10,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.softmotions.weboot.i18n.I18n;
@@ -81,6 +83,9 @@ public class JaxrsMethodValidator {
         registerValidator("lengthRange", new LengthRangeValidator());
         registerValidator("uuid", new UUIDValidator());
         registerValidator("oneOfEnum", new EnumValueValidator());
+
+        registerValidator("array", new ArrayValidator());
+
     }
 
 
@@ -351,7 +356,11 @@ public class JaxrsMethodValidator {
                         JsonNode at = jsonBody.at((field.charAt(0) != '/') ? '/' + field : field);
                         validatedValues.put(rawField, at);
                         if (!at.isMissingNode() && !at.isNull()) {
-                            value = at.asText();
+                            if (at.isArray() || at.isObject()) { // container
+                                value = at;
+                            } else {
+                                value = at.asText();
+                            }
                         } else {
                             value = null;
                         }
@@ -405,6 +414,42 @@ public class JaxrsMethodValidator {
     ///////////////////////////////////////////////////////////
     //                      Validators                       //
     ///////////////////////////////////////////////////////////
+
+    public static class ArrayValidator implements Validator {
+
+        @Override
+        public boolean validate(@Nullable Object value, String... args) {
+            if (value == null) {
+                return true;
+            }
+            if (!(value instanceof ArrayNode)) {
+                return false;
+            }
+            ArrayNode an = (ArrayNode) value;
+            Iterator<JsonNode> iterator = an.iterator();
+            boolean valid = !iterator.hasNext();
+            while (!valid && iterator.hasNext()) {
+                JsonNode n = iterator.next();
+                for (String vt : args) {
+                    switch (vt) {
+                        case "string":
+                            valid = n.isTextual();
+                            break;
+                        case "number":
+                            valid = n.isNumber();
+                            break;
+                        case "null":
+                            valid = n.isNull();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            return valid;
+        }
+    }
+
 
     public static class EnumValueValidator implements Validator {
         @Override
