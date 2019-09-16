@@ -144,10 +144,16 @@ public abstract class WBConfiguration extends ServicesConfiguration {
     public String getAbsoluteLink(HttpServletRequest req, String link) {
         boolean preferRequestUrl = xcfg().boolPattern("site.preferRequestUrl", true);
         if (preferRequestUrl) {
+            String scheme = (req.getHeader("X-Forwarded-Proto") != null) ?
+                            req.getHeader("X-Forwarded-Proto") : req.getScheme();
+            String serverName = (req.getHeader("X-Forwarded-Host") != null) ?
+                            req.getHeader("X-Forwarded-Host") : req.getServerName();
+            int serverPort = (req.getHeader("X-Forwarded-Port") != null) ?
+                             Integer.parseInt(req.getHeader("X-Forwarded-Port")) : req.getServerPort();
             //noinspection MagicNumber
-            link = req.getScheme() + "://" +
-                   req.getServerName() +
-                   (req.getServerPort() != 80 && req.getServerPort() != 443 ? ":" + req.getServerPort() : "") +
+            link = scheme + "://" +
+                   serverName +
+                   (serverPort != 80 && serverPort != 443 ? ":" + serverPort : "") +
                    link;
         } else {
             link = xcfg().textPattern("site.root", "") + link;
