@@ -372,7 +372,7 @@ public class JaxrsMethodValidator {
                     break;
             }
             try {
-                valid = validator.validate(value, validatorArgs.toArray(new String[validatorArgs.size()]));
+                valid = validator.validate(value, validatorArgs.toArray(new String[0]));
             } catch (Exception e) {
                 valid = false;
                 log.error("Validator: {} thrown exception", validator, e);
@@ -593,7 +593,7 @@ public class JaxrsMethodValidator {
             if (value == null) {
                 return true;
             }
-            int min = 0;
+            int min;
             int max = Integer.MAX_VALUE;
             if (args.length > 0) {
                 min = Integer.parseInt(args[0]);

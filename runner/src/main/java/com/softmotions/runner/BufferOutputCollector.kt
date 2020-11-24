@@ -38,9 +38,9 @@ class BufferOutputCollector(val maxBufSize: Int = 0,
 
     private fun append(line: String) {
         if (lineTransform != null) {
-            sb.appendln(lineTransform.invoke(line))
+            sb.appendLine(lineTransform.invoke(line))
         } else {
-            sb.appendln(line)
+            sb.appendLine(line)
         }
     }
 }
