@@ -27,7 +27,7 @@
         <testng.version>6.14.3</testng.version>
         <shiro.version>1.7.0</shiro.version>
         <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
-        <aws-java-sdk.version>1.11.592</aws-java-sdk.version>
+        <aws-java-sdk.version>1.12.261</aws-java-sdk.version>
         <s3mock_2.version>0.2.6</s3mock_2.version>
     </properties>
 
